@@ -12,7 +12,16 @@ func main() {
 	if len(os.Args) > 1 {
 		args = os.Args[1:]
 	}
-	var command = strings.Join(args, " ")
-	var interpreter = interpreter.NewInterpreter()
-	interpreter.Execute(command)
+  var sb = strings.Builder{}
+  for _, arg := range args {
+    if strings.Contains(arg, " ") {
+      sb.WriteString("\"")
+      sb.WriteString(arg)
+      sb.WriteString("\"")
+    }
+    sb.WriteString(arg)
+  }
+  var command = sb.String()
+	var interpreter = interpreter.NewInterpreter(command)
+	interpreter.Execute()
 }

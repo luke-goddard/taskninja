@@ -13,7 +13,6 @@ const MAX_DEPTH_DEFAULT = 1000
 // Used to represent the end of the input
 const EOF = -1
 
-
 // A lexer is used to tokenize a string into a series of tokens
 type Lexer struct {
 	Items       chan *Token // channel of scanned items
