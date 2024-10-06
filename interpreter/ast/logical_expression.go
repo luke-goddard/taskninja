@@ -15,3 +15,7 @@ type LogicalExpression struct {
 	Operator LogicalOperator
 	Right    Node
 }
+
+func (l *LogicalExpression) Type() NodeType {
+  return NodeTypeLogicalExpression
+}

@@ -11,6 +11,10 @@ const (
 // Example (string): "buy dog"
 // Example (number): 5
 type Literal struct {
-	Value string
-	Type  LiteralType
+	Value       string
+	LiteralType LiteralType
+}
+
+func (l *Literal) Type() NodeType {
+	return NodeTypeLiteral
 }

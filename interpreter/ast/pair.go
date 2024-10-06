@@ -7,3 +7,8 @@ type Pair struct {
 	Key   string               // e.g. priority
 	Value *ExpressionStatement // e.g. high
 }
+
+func (p *Pair) Type() NodeType {
+  return NodeTypePair
+}
+

@@ -14,3 +14,7 @@ type Tag struct {
 	Operator TagOperator // e.g. + or -
 	Value    string      // e.g. HOME
 }
+
+func (t *Tag) Type() NodeType {
+  return NodeTypeTag
+}

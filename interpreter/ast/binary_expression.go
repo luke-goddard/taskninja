@@ -26,3 +26,8 @@ type BinaryExpression struct {
 	Operator BinaryOperator
 	Right    *Node
 }
+
+func (b *BinaryExpression) Type() NodeType {
+  return NodeTypeBinaryExpression
+}
+

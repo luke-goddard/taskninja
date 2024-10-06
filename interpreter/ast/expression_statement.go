@@ -10,3 +10,7 @@ package ast
 type ExpressionStatement struct {
 	Expression *Node // binary, logical, tag, pair, literal
 }
+
+func (e *ExpressionStatement) Type() NodeType {
+  return NodeTypeExpressionStatement
+}
