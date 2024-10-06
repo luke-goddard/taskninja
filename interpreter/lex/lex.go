@@ -4,24 +4,30 @@ import (
 	"unicode/utf8"
 )
 
+// A lexer is a function that processes the input and returns the next state
 type StateFn func(*Lexer) StateFn
 
+// Maximum depth of the lexer, if reached, the lexer will stop processing
 const MAX_DEPTH_DEFAULT = 1000
 
+// Used to represent the end of the input
+const EOF = -1
+
+
+// A lexer is used to tokenize a string into a series of tokens
 type Lexer struct {
 	Items       chan *Token // channel of scanned items
 	input       string      // the string being scanned
 	line        int         // current line number
 	start       Pos         // start position of this item
 	position    Pos         // current position in the input
-	initalState StateFn
-	tokens      []Token
-	depth       int
-	maxDepth    int
+	initalState StateFn     // initial state of the lexer
+	tokens      []Token     // list of tokens
+	depth       int         // current depth of the lexer
+	maxDepth    int         // maximum depth of the lexer
 }
 
-const EOF = -1
-
+// Create a new lexer that will tokenize the given input
 func NewLexer(input string) *Lexer {
 	return &Lexer{
 		Items:       make(chan *Token, 200),
@@ -41,13 +47,14 @@ func (l *Lexer) SetInitialState(state StateFn) {
 	l.initalState = state
 }
 
+// Tokenize the input string and return the tokens
 func (l *Lexer) Tokenize() []Token {
 	for state := l.initalState; state != nil; {
-    l.depth ++
-    if l.depth >= l.maxDepth {
-      l.emitError("Max depth reached while parsing input")
-      break
-    }
+		l.depth++
+		if l.depth >= l.maxDepth {
+			l.emitError("Max depth reached while parsing input")
+			break
+		}
 		state = state(l)
 	}
 	close(l.Items)

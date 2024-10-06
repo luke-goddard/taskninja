@@ -1,18 +1,19 @@
 package lex
 
+// Represent different types of commands e.g add
 type Command string
 
 const (
-	CommandAdd    Command = "add"
-	CommandAll    Command = "all"
-	CommandDelete Command = "delete"
-	CommandDone   Command = "done"
-	CommandList   Command = "list"
-	CommandModify Command = "modify"
-	CommandReady  Command = "ready"
-	CommandStart  Command = "start"
-	CommandStop   Command = "stop"
-	CommandTags   Command = "tags"
+	CommandAdd    Command = "add" // Add a new task
+	CommandAll    Command = "all" // List all tasks
+	CommandDelete Command = "delete" // Delete a task
+	CommandDone   Command = "done" // Mark a task as done
+	CommandList   Command = "list" // List tasks
+	CommandModify Command = "modify" // Modify a task
+	CommandReady  Command = "ready" // Mark a task as ready
+	CommandStart  Command = "start" // Start a task
+	CommandStop   Command = "stop" // Stop a task
+	CommandTags   Command = "tags" // List all tags
 )
 
 func lexCommand(l *Lexer) StateFn {

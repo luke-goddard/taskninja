@@ -5,22 +5,27 @@ import (
 	"unicode/utf8"
 )
 
+// Returns true if the rune is a new line character
 func IsNewLine(r rune) bool {
 	return r == '\n' || r == '\r'
 }
 
+// Returns true if the rune is a whitespace character or a new line character
 func IsWhitespace(r rune) bool {
 	return r == ' ' || r == '\t' || IsNewLine(r)
 }
 
+// Returns true if the rune is a letter
 func IsAlphabet(r rune) bool {
 	return unicode.IsLetter(r)
 }
 
+// Returns true if the rune is a letter or a number
 func IsAlphaNumeric(r rune) bool {
-  return unicode.IsLetter(r) || unicode.IsNumber(r)
+	return unicode.IsLetter(r) || unicode.IsNumber(r)
 }
 
+// Returns true if the rune is a number
 func IsNumber(r rune) bool {
 	return unicode.IsNumber(r)
 }
@@ -102,10 +107,12 @@ func (l *Lexer) readUntil(predicate func(rune) bool) rune {
 	}
 }
 
+// Carry on scanning until we reach a whitespace character including new lines
 func (l *Lexer) readUntilWhitespace() {
 	l.readUntil(IsWhitespace)
 }
 
+// Get the previous rune in the input
 func (l *Lexer) prev() rune {
 	if l.position <= 0 {
 		return EOF
