@@ -28,6 +28,5 @@ type BinaryExpression struct {
 }
 
 func (b *BinaryExpression) Type() NodeType {
-  return NodeTypeBinaryExpression
+	return NodeTypeBinaryExpression
 }
-

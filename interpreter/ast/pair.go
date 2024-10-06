@@ -9,6 +9,5 @@ type Pair struct {
 }
 
 func (p *Pair) Type() NodeType {
-  return NodeTypePair
+	return NodeTypePair
 }
-

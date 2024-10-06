@@ -10,5 +10,5 @@ type Command struct {
 }
 
 func (c *Command) Type() NodeType {
-  return NodeTypeCommand
+	return NodeTypeCommand
 }

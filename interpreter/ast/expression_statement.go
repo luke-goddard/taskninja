@@ -12,5 +12,5 @@ type ExpressionStatement struct {
 }
 
 func (e *ExpressionStatement) Type() NodeType {
-  return NodeTypeExpressionStatement
+	return NodeTypeExpressionStatement
 }

@@ -5,5 +5,5 @@ type Program struct {
 }
 
 func (p *Program) Type() NodeType {
-  return NodeTypeProgram
+	return NodeTypeProgram
 }

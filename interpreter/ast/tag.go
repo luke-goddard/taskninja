@@ -16,5 +16,5 @@ type Tag struct {
 }
 
 func (t *Tag) Type() NodeType {
-  return NodeTypeTag
+	return NodeTypeTag
 }

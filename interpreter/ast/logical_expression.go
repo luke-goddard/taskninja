@@ -17,5 +17,5 @@ type LogicalExpression struct {
 }
 
 func (l *LogicalExpression) Type() NodeType {
-  return NodeTypeLogicalExpression
+	return NodeTypeLogicalExpression
 }

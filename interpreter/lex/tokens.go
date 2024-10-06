@@ -47,10 +47,10 @@ func (t *Token) String() string {
 		return fmt.Sprint("Error: ", t.Value)
 	case TokenString:
 		return fmt.Sprint("String: ", t.Value)
-  case TokenPair:
-    return fmt.Sprint("Pair: ", t.Value)
-  case TokenTag:
-    return fmt.Sprint("Tag: ", t.Value)
+	case TokenPair:
+		return fmt.Sprint("Pair: ", t.Value)
+	case TokenTag:
+		return fmt.Sprint("Tag: ", t.Value)
 	case TokenNumber:
 		return fmt.Sprint("Number: ", t.Value)
 	case TokenOperator:
