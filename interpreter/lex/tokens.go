@@ -32,6 +32,7 @@ const (
 	TokenTag        TokenType = iota // +HOME, -HOME
 	TokenWord       TokenType = iota // hello
 	TokenCommand    TokenType = iota // add, modify, etc.
+	TokenLT         TokenType = iota // <
 )
 
 // Create a new token of a given type
@@ -77,8 +78,10 @@ func (t *Token) String() string {
 		return fmt.Sprint("LeftParen: ", t.Value)
 	case TokenRightParen:
 		return fmt.Sprint("RightParen: ", t.Value)
+  case TokenLT:
+    return fmt.Sprint("LT: ", t.Value)
 	default:
-    var err = fmt.Errorf("Unknown token type: %d", t.Type)
+		var err = fmt.Errorf("Unknown token type: %d", t.Type)
 		panic(err)
 	}
 }

@@ -33,6 +33,8 @@ func getOperator(opp rune) TokenType {
 		return TokenStar
 	case '/':
 		return TokenSlash
+	case '<':
+		return TokenLT
 	}
 	var e = fmt.Errorf("Unknown operator: %d", opp)
 	panic(e)

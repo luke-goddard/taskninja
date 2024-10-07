@@ -27,6 +27,12 @@ func lexStart(l *Lexer) StateFn {
 		return lexStart
 	}
 
+  if peek == '<' {
+    l.next()
+    l.emit(TokenLT)
+    return lexStart
+  }
+
 	if peek == '"' || peek == '\'' {
 		return lexString
 	}

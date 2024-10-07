@@ -41,6 +41,7 @@ func TestLexStart(t *testing.T) {
 		{`:home`, TokenColon, ":"},
 		{`(`, TokenLeftParen, "("},
 		{`)`, TokenRightParen, ")"},
+		{`<`, TokenLT, "<"},
 	}
 
 	for _, c := range tc {
