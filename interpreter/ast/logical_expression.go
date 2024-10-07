@@ -14,6 +14,7 @@ type LogicalExpression struct {
 	Left     Node
 	Operator LogicalOperator
 	Right    Node
+  NodePosition
 }
 
 func (l *LogicalExpression) Type() NodeType {

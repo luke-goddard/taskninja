@@ -17,11 +17,25 @@ const (
 	NodeTypeTag                                 // NodeTypeTag represents a tag. e.g +tag
 )
 
+type NodePosition struct {
+	startColumn Column // StartColumn returns the starting column of the node.
+	endColumn   Column // EndColumn returns the ending column of the node.
+	startLine   Line   // StartLine returns the starting line of the node.
+	endLine     Line   // EndLine returns the ending line of the node.
+}
+
 // Node represents a node in the AST.
 type Node interface {
-	Type() NodeType      // Type returns the type of the node.
-	StartColumn() Column // StartColumn returns the starting column of the node.
-	EndColumn() Column   // EndColumn returns the ending column of the node.
-	StartLine() Line     // StartLine returns the starting line of the node.
-	EndLine() Line       // EndLine returns the ending line of the node.
+	Type() NodeType
+	StartColumn() Column
+	EndColumn() Column
+	StartLine() Line
+	EndLine() Line
 }
+
+
+// Emulate the Node interface with embedded struct.
+func (n *NodePosition) StartColumn() Column { return n.startColumn }
+func (n *NodePosition) EndColumn() Column   { return n.endColumn }
+func (n *NodePosition) StartLine() Line     { return n.startLine }
+func (n *NodePosition) EndLine() Line       { return n.endLine }

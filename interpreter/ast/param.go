@@ -13,6 +13,7 @@ const (
 type Param struct {
 	ParamType ParamType // e.g TaskId, Description
 	Value     string    // e.g 1, "buy dog"
+  NodePosition
 }
 
 func (p *Param) Type() NodeType {

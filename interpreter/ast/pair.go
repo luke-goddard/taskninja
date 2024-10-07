@@ -6,6 +6,7 @@ package ast
 type Pair struct {
 	Key   string               // e.g. priority
 	Value *ExpressionStatement // e.g. high
+  NodePosition
 }
 
 func (p *Pair) Type() NodeType {

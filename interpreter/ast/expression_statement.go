@@ -9,6 +9,7 @@ package ast
 // Example (Tag):       +HOME
 type ExpressionStatement struct {
 	Expression *Node // binary, logical, tag, pair, literal
+  NodePosition
 }
 
 func (e *ExpressionStatement) Type() NodeType {

@@ -13,6 +13,7 @@ const (
 type Literal struct {
 	Value       string
 	LiteralType LiteralType
+  NodePosition
 }
 
 func (l *Literal) Type() NodeType {

@@ -13,6 +13,7 @@ const (
 type Tag struct {
 	Operator TagOperator // e.g. + or -
 	Value    string      // e.g. HOME
+  NodePosition
 }
 
 func (t *Tag) Type() NodeType {
