@@ -33,9 +33,18 @@ type Node interface {
 	EndLine() Line
 }
 
-
 // Emulate the Node interface with embedded struct.
 func (n *NodePosition) StartColumn() Column { return n.startColumn }
 func (n *NodePosition) EndColumn() Column   { return n.endColumn }
 func (n *NodePosition) StartLine() Line     { return n.startLine }
 func (n *NodePosition) EndLine() Line       { return n.endLine }
+
+type Expression interface {
+	Expression()
+  Type() NodeType
+}
+
+type Statement interface {
+	Statement()
+  Type() NodeType
+}

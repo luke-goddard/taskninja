@@ -13,9 +13,11 @@ const (
 type Tag struct {
 	Operator TagOperator // e.g. + or -
 	Value    string      // e.g. HOME
-  NodePosition
+	NodePosition
 }
 
 func (t *Tag) Type() NodeType {
 	return NodeTypeTag
 }
+
+func (t *Tag) Expression() {}

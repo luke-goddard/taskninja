@@ -23,6 +23,11 @@ func lexCommand(l *Lexer) StateFn {
 	if last == ':' {
 		return lexPair
 	}
+
+	if l.seenCommand {
+		return lexWord
+	}
+
 	var lexeme = l.current()
 
 	if lexeme == string(CommandAdd) ||
@@ -36,6 +41,7 @@ func lexCommand(l *Lexer) StateFn {
 		lexeme == string(CommandStop) ||
 		lexeme == string(CommandTags) {
 
+		l.seenCommand = true
 		l.emit(TokenCommand)
 		return lexStart
 	}

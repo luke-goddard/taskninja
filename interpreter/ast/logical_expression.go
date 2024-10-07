@@ -14,9 +14,11 @@ type LogicalExpression struct {
 	Left     Node
 	Operator LogicalOperator
 	Right    Node
-  NodePosition
+	NodePosition
 }
 
 func (l *LogicalExpression) Type() NodeType {
 	return NodeTypeLogicalExpression
 }
+
+func (l *LogicalExpression) Expression() {}

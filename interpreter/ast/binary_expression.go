@@ -25,9 +25,11 @@ type BinaryExpression struct {
 	Left     *Node
 	Operator BinaryOperator
 	Right    *Node
-  NodePosition
+	NodePosition
 }
 
+func (b *BinaryExpression) Expression() {}
 func (b *BinaryExpression) Type() NodeType {
 	return NodeTypeBinaryExpression
 }
+

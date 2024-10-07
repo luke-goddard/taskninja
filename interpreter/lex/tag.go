@@ -6,6 +6,7 @@ func lexTag(l *Lexer) StateFn {
 	var peek = l.peek()
 
 	if peek == EOF || IsWhitespace(peek) {
+    l.backup()
 		return lexOperator
 	}
 

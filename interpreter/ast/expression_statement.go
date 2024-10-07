@@ -8,10 +8,12 @@ package ast
 // Example (Literal):   "high"
 // Example (Tag):       +HOME
 type ExpressionStatement struct {
-	Expression *Node // binary, logical, tag, pair, literal
-  NodePosition
+	Expression Expression // binary, logical, tag, pair, literal
+	NodePosition
 }
 
 func (e *ExpressionStatement) Type() NodeType {
 	return NodeTypeExpressionStatement
 }
+
+func (c *ExpressionStatement) Statement() {}

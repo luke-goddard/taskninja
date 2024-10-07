@@ -4,7 +4,6 @@ func lexPair(l *Lexer) StateFn {
 	if l.peek() != ':' {
 		panic("lexPair called without a colon")
 	}
-	l.readUntilWhitespace()
-	l.emit(TokenPair)
+	l.emit(TokenKey)
 	return lexStart
 }

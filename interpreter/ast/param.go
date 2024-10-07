@@ -11,11 +11,13 @@ const (
 // Some command require parameters like `task 1 modify`
 // Here the parameter is 1
 type Param struct {
-	ParamType ParamType // e.g TaskId, Description
+	Kind ParamType // e.g TaskId, Description
 	Value     string    // e.g 1, "buy dog"
-  NodePosition
+	NodePosition
 }
 
 func (p *Param) Type() NodeType {
 	return NodeTypeParam
 }
+
+func (p *Param) Expression() {}
