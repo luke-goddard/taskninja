@@ -78,7 +78,7 @@ func (t *Token) String() string {
 	case TokenRightParen:
 		return fmt.Sprint("RightParen: ", t.Value)
 	default:
-		fmt.Println(t.Type)
-		panic("Unknown token type")
+    var err = fmt.Errorf("Unknown token type: %d", t.Type)
+		panic(err)
 	}
 }

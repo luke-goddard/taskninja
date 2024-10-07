@@ -49,6 +49,29 @@ func TestParser(t *testing.T) {
 				},
 			},
 		},
+		{
+			input: `add "do the dishes" project:home`,
+			expected: ast.Command{
+				Kind: ast.CommandKindAdd,
+				Param: ast.Param{
+					Kind:  ast.ParamTypeDescription,
+					Value: "do the dishes",
+				},
+				Options: []ast.ExpressionStatement{
+					ast.ExpressionStatement{
+						Expression: &ast.Pair{
+							Key: "project",
+							Value: ast.ExpressionStatement{
+								Expression: &ast.Literal{
+									Kind:  ast.LiteralKindString,
+									Value: "home",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	for _, test := range tc {

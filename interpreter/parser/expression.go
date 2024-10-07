@@ -19,13 +19,20 @@ func parsePrimaryExpression(p *Parser) ast.Expression {
 			Kind:  ast.LiteralKindNumber,
 			Value: p.consume().Value,
 		}
+  case lex.TokenWord:
+    return &ast.Literal{
+      Kind:  ast.LiteralKindString,
+      Value: p.consume().Value,
+    }
 	case lex.TokenTag:
 		return parseTag(p)
 
 	case lex.TokenKey:
 		return parsePair(p)
 	}
-	panic("Unknown primary expression")
+	var current = p.current()
+	var err = fmt.Errorf("Unknown primary expression: %s", current.String())
+	panic(err)
 }
 
 func parseExpression(p *Parser, bp BindingPower) ast.Expression {
@@ -33,7 +40,7 @@ func parseExpression(p *Parser, bp BindingPower) ast.Expression {
 	var nudHandler, exists = NudTable[tokenKind]
 	if !exists {
 		var current = p.current()
-		var err = fmt.Errorf("Unknown token: %s", current.String())
+		var err = fmt.Errorf("Nud handler does not exist for token: %s", current.String())
 		panic(err)
 	}
 
@@ -89,8 +96,13 @@ func parseTag(p *Parser) ast.Expression {
 }
 
 func parsePair(p *Parser) ast.Expression {
+	var key = p.consume().Value
+	if p.current().Type != lex.TokenColon {
+		panic("Expected colon")
+	}
+	p.consume()
 	return &ast.Pair{
-		Key:   p.consume().Value,
+		Key:   key,
 		Value: parseExpressionStatement(p),
 	}
 }

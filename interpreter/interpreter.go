@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/luke-goddard/taskninja/interpreter/lex"
+	"github.com/luke-goddard/taskninja/interpreter/parser"
+	"github.com/sanity-io/litter"
 )
 
 type Interpreter struct {
@@ -21,4 +23,7 @@ func (i *Interpreter) Execute() {
 	for _, token := range tokens {
 		fmt.Println(token.String())
 	}
+  var parser = parser.NewParser(tokens)
+  var command = parser.Parse()
+  litter.Dump(command)
 }
