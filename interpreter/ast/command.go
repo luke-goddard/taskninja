@@ -11,8 +11,8 @@ const (
 // -----------------------^^^^^^^^^^^^^ options
 // -------------^^^^^^^^^ parameter
 type Command struct {
-	Kind   CommandKind           // Kind represents the type of command. e.g add
-	Param  Param                 // Param represents a parameter in the command. e.g "buy dog"
+	Kind    CommandKind           // Kind represents the type of command. e.g add
+	Param   Param                 // Param represents a parameter in the command. e.g "buy dog"
 	Options []ExpressionStatement // Option represents an option in the command. e.g priority:high
 	NodePosition
 }

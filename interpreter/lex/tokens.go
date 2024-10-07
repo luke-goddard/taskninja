@@ -71,12 +71,12 @@ func (t *Token) String() string {
 		return fmt.Sprint("Command: ", t.Value)
 	case TokenWord:
 		return fmt.Sprint("Word: ", t.Value)
-  case TokenColon:
-    return fmt.Sprint("Colon: ", t.Value)
-  case TokenLeftParen:
-    return fmt.Sprint("LeftParen: ", t.Value)
-  case TokenRightParen:
-    return fmt.Sprint("RightParen: ", t.Value)
+	case TokenColon:
+		return fmt.Sprint("Colon: ", t.Value)
+	case TokenLeftParen:
+		return fmt.Sprint("LeftParen: ", t.Value)
+	case TokenRightParen:
+		return fmt.Sprint("RightParen: ", t.Value)
 	default:
 		fmt.Println(t.Type)
 		panic("Unknown token type")

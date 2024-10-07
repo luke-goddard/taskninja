@@ -39,8 +39,8 @@ func parseExpression(p *Parser, bp BindingPower) ast.Expression {
 
 	var left = nudHandler(p)
 
-  // We don't have a semicolon in the language,
-  // so we have to check if the expression is a tag
+	// We don't have a semicolon in the language,
+	// so we have to check if the expression is a tag
 	if left.Type() == ast.NodeTypeTag {
 		return left
 	}

@@ -24,7 +24,7 @@ type Lexer struct {
 	tokens      []Token     // list of tokens
 	depth       int         // current depth of the lexer
 	maxDepth    int         // maximum depth of the lexer
-  seenCommand bool        // whether a command has been seen
+	seenCommand bool        // whether a command has been seen
 }
 
 // Create a new lexer that will tokenize the given input
@@ -39,7 +39,7 @@ func NewLexer(input string) *Lexer {
 		tokens:      []Token{},
 		depth:       0,
 		maxDepth:    MAX_DEPTH_DEFAULT,
-    seenCommand: false,
+		seenCommand: false,
 	}
 }
 

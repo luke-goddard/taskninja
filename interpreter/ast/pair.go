@@ -4,7 +4,7 @@ package ast
 // Example: priority:high
 // Example: priority:<high
 type Pair struct {
-	Key   string               // e.g. priority
+	Key   string              // e.g. priority
 	Value ExpressionStatement // e.g. high
 	NodePosition
 }

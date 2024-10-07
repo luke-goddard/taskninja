@@ -18,8 +18,8 @@ func parseCommand(p *Parser) *ast.Command {
 func parseAddCommand(p *Parser) *ast.Command {
 	p.consume()
 	return &ast.Command{
-		Kind:   ast.CommandKindAdd,
-		Param:  parseParam(p),
+		Kind:    ast.CommandKindAdd,
+		Param:   parseParam(p),
 		Options: parseExpressionStatements(p),
 	}
 }

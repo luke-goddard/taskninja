@@ -11,8 +11,8 @@ const (
 // Some command require parameters like `task 1 modify`
 // Here the parameter is 1
 type Param struct {
-	Kind ParamType // e.g TaskId, Description
-	Value     string    // e.g 1, "buy dog"
+	Kind  ParamType // e.g TaskId, Description
+	Value string    // e.g 1, "buy dog"
 	NodePosition
 }
 

@@ -15,17 +15,17 @@ func lexStart(l *Lexer) StateFn {
 		return lexStart
 	}
 
-  if peek == '(' {
-    l.next()
-    l.emit(TokenLeftParen)
-    return lexStart
-  }
+	if peek == '(' {
+		l.next()
+		l.emit(TokenLeftParen)
+		return lexStart
+	}
 
-  if peek == ')' {
-    l.next()
-    l.emit(TokenRightParen)
-    return lexStart
-  }
+	if peek == ')' {
+		l.next()
+		l.emit(TokenRightParen)
+		return lexStart
+	}
 
 	if peek == '"' || peek == '\'' {
 		return lexString

@@ -32,4 +32,3 @@ func (b *BinaryExpression) Expression() {}
 func (b *BinaryExpression) Type() NodeType {
 	return NodeTypeBinaryExpression
 }
-

@@ -58,7 +58,7 @@ func createLookupTable() {
 	// Literal
 	nud(lex.TokenString, BP_PRIMARY, parsePrimaryExpression)
 	nud(lex.TokenNumber, BP_PRIMARY, parsePrimaryExpression)
-  nud(lex.TokenTag, BP_PRIMARY, parsePrimaryExpression)
+	nud(lex.TokenTag, BP_PRIMARY, parsePrimaryExpression)
 
 	// Additive
 	led(lex.TokenPlus, BP_ADDITIVE, parseBinaryExpression)
