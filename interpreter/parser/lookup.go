@@ -21,7 +21,7 @@ const (
 	BP_PRIMARY
 )
 
-type StatementHandler func(*Parser) ast.ExpressionStatement
+type StatementHandler func(*Parser) ast.Statement
 type NudHandler func(*Parser) ast.Expression
 type LedHandler func(*Parser, ast.Expression, BindingPower) ast.Expression
 
@@ -50,10 +50,6 @@ func stmt(kind lex.TokenType, handler StatementHandler) {
 	BindingPowerTable[kind] = BP_DEFAULT
 }
 
-// TODO
-func parseBinaryExpression(p *Parser, left ast.Expression, bp BindingPower) ast.Expression {
-	return left
-}
 func createLookupTable() {
 	// Literal
 	nud(lex.TokenString, BP_PRIMARY, parsePrimaryExpression)
@@ -61,6 +57,15 @@ func createLookupTable() {
 	nud(lex.TokenNumber, BP_PRIMARY, parsePrimaryExpression)
 	nud(lex.TokenTag, BP_PRIMARY, parsePrimaryExpression)
 	nud(lex.TokenKey, BP_PRIMARY, parsePrimaryExpression)
+	nud(lex.TokenLeftParen, BP_PRIMARY, parseGroupedExpression)
+
+	// Logical
+	led(lex.TokenOr, BP_LOGICAL, parseBinaryExpression)
+	led(lex.TokenAnd, BP_LOGICAL, parseBinaryExpression)
+
+	// Relational
+	led(lex.TokenEQ, BP_RELATIONAL, parseBinaryExpression)
+	led(lex.TokenLT, BP_RELATIONAL, parseBinaryExpression)
 
 	// Additive
 	led(lex.TokenPlus, BP_ADDITIVE, parseBinaryExpression)
@@ -69,4 +74,6 @@ func createLookupTable() {
 	// Multiplicative
 	led(lex.TokenSlash, BP_MULTIPLICATIVE, parseBinaryExpression)
 	led(lex.TokenStar, BP_MULTIPLICATIVE, parseBinaryExpression)
+
+	stmt(lex.TokenTag, parseTagDecStatement)
 }

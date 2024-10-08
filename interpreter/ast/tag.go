@@ -20,4 +20,4 @@ func (t *Tag) Type() NodeType {
 	return NodeTypeTag
 }
 
-func (t *Tag) Expression() {}
+func (t *Tag) Statement() {}

@@ -40,11 +40,13 @@ func (n *NodePosition) StartLine() Line     { return n.startLine }
 func (n *NodePosition) EndLine() Line       { return n.endLine }
 
 type Expression interface {
+  Node
 	Expression()
 	Type() NodeType
 }
 
 type Statement interface {
+  Node
 	Statement()
 	Type() NodeType
 }

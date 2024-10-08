@@ -22,9 +22,9 @@ const (
 // Operator: +
 // Right: 2
 type BinaryExpression struct {
-	Left     *Node
+	Left     Node
 	Operator BinaryOperator
-	Right    *Node
+	Right    Node
 	NodePosition
 }
 

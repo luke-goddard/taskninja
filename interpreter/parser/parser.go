@@ -29,6 +29,8 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/luke-goddard/taskninja/interpreter/ast"
 	"github.com/luke-goddard/taskninja/interpreter/lex"
 )
@@ -44,11 +46,12 @@ func NewParser(tokens []lex.Token) *Parser {
 }
 
 func (p *Parser) Parse() *ast.Command {
+	fmt.Printf("parsing\n")
 	return parseCommand(p)
 }
 
-func (p *Parser) current() lex.Token {
-	return p.tokens[p.position]
+func (p *Parser) current() *lex.Token {
+	return &p.tokens[p.position]
 }
 
 func (p *Parser) consume() lex.Token {

@@ -14,14 +14,7 @@ func main() {
 	}
 	var sb = strings.Builder{}
 	for _, arg := range args {
-    sb.WriteString(" ")
-		if strings.Contains(arg, " ") {
-			sb.WriteString("\"")
-			sb.WriteString(arg)
-			sb.WriteString("\"")
-		} else {
-      sb.WriteString(arg)
-    }
+		sb.WriteString(arg)
 	}
 	var command = sb.String()
 	var interpreter = interpreter.NewInterpreter(command)

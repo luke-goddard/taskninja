@@ -1,6 +1,7 @@
 package lex
 
 import (
+	"fmt"
 	"unicode/utf8"
 )
 
@@ -80,6 +81,7 @@ func (l *Lexer) next() rune {
 // Emit a token with the given type and value
 func (l *Lexer) emit(tokenType TokenType) {
 	var token = l.toToken(tokenType)
+  fmt.Printf("token %s\n", token.String())
 	l.Items <- token
 	l.start = l.position
 	l.tokens = append(l.tokens, *token)

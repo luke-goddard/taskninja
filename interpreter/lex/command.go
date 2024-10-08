@@ -1,5 +1,10 @@
 package lex
 
+import (
+	"fmt"
+	"strings"
+)
+
 // Represent different types of commands e.g add
 type Command string
 
@@ -18,14 +23,11 @@ const (
 
 func lexCommand(l *Lexer) StateFn {
 	var last = l.readUntil(func(r rune) bool {
-		return IsWhitespace(r) || r == EOF || r == ':'
+		return !IsAlphabet(r)
 	})
+	fmt.Printf("last command %c : current: %s\n", last, l.current())
 	if last == ':' {
 		return lexPair
-	}
-
-	if l.seenCommand {
-		return lexWord
 	}
 
 	var lexeme = l.current()
@@ -40,9 +42,22 @@ func lexCommand(l *Lexer) StateFn {
 		lexeme == string(CommandStart) ||
 		lexeme == string(CommandStop) ||
 		lexeme == string(CommandTags) {
+		if !l.seenCommand {
+			l.seenCommand = true
+			l.emit(TokenCommand)
+			return lexStart
+		}
+	}
 
-		l.seenCommand = true
-		l.emit(TokenCommand)
+	fmt.Printf("lexeme: %s\n", lexeme)
+
+	if strings.ToLower(lexeme) == "or" {
+		l.emit(TokenOr)
+		return lexStart
+	}
+
+	if strings.ToLower(lexeme) == "and" {
+		l.emit(TokenAnd)
 		return lexStart
 	}
 

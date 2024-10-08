@@ -9,16 +9,19 @@ import (
 )
 
 type Interpreter struct {
+  input string
 	lexer *lex.Lexer
 }
 
 func NewInterpreter(input string) *Interpreter {
 	return &Interpreter{
+    input: input,
 		lexer: lex.NewLexer(input),
 	}
 }
 
 func (i *Interpreter) Execute() {
+  fmt.Printf("executing: %s\n", i.input)
 	var tokens = i.lexer.Tokenize()
 	for _, token := range tokens {
 		fmt.Println(token.String())

@@ -35,13 +35,13 @@ func TestParser(t *testing.T) {
 				},
 				Options: []ast.ExpressionStatement{
 					ast.ExpressionStatement{
-						Expression: &ast.Tag{
+						Expr: &ast.Tag{
 							Operator: ast.TagOperatorPlus,
 							Value:    "Home",
 						},
 					},
 					ast.ExpressionStatement{
-						Expression: &ast.Tag{
+						Expr: &ast.Tag{
 							Operator: ast.TagOperatorMinus,
 							Value:    "Kitchen",
 						},
@@ -59,12 +59,35 @@ func TestParser(t *testing.T) {
 				},
 				Options: []ast.ExpressionStatement{
 					ast.ExpressionStatement{
-						Expression: &ast.Pair{
+						Expr: &ast.Key{
 							Key: "project",
 							Value: ast.ExpressionStatement{
-								Expression: &ast.Literal{
+								Expr: &ast.Literal{
 									Kind:  ast.LiteralKindString,
 									Value: "home",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			input: `add "do the dishes" priority:HIGH`,
+			expected: ast.Command{
+				Kind: ast.CommandKindAdd,
+				Param: ast.Param{
+					Kind:  ast.ParamTypeDescription,
+					Value: "do the dishes",
+				},
+				Options: []ast.ExpressionStatement{
+					ast.ExpressionStatement{
+						Expr: &ast.Key{
+							Key: "priority",
+							Value: ast.ExpressionStatement{
+								Expr: &ast.Literal{
+									Kind:  ast.LiteralKindString,
+									Value: "HIGH",
 								},
 							},
 						},

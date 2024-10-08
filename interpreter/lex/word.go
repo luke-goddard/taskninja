@@ -1,5 +1,6 @@
 package lex
 
+
 // This is the default if everything else failse
 func lexWord(l *Lexer) StateFn {
 	for {
@@ -7,7 +8,7 @@ func lexWord(l *Lexer) StateFn {
 		if r == EOF {
 			break
 		}
-		if IsWhitespace(r) {
+		if IsWhitespace(r) || !IsAlphaNumeric(r) {
 			l.backup()
 			break
 		}
