@@ -35,9 +35,21 @@ import (
 	"github.com/luke-goddard/taskninja/interpreter/lex"
 )
 
+type ParseError struct {
+	message error
+	token   lex.Token
+}
+
+type ParseErrorList []ParseError
+
+func (e *ParseErrorList) add(message error, token lex.Token) {
+	*e = append(*e, ParseError{message, token})
+}
+
 type Parser struct {
 	tokens   []lex.Token
 	position int
+	errors   ParseErrorList
 }
 
 func NewParser(tokens []lex.Token) *Parser {
@@ -45,9 +57,13 @@ func NewParser(tokens []lex.Token) *Parser {
 	return &Parser{tokens: tokens, position: 0}
 }
 
-func (p *Parser) Parse() *ast.Command {
+func (p *Parser) Parse() (*ast.Command, ParseErrorList) {
+	if p.tokens == nil || len(p.tokens) == 0{
+		p.errors.add(fmt.Errorf("no tokens to parse"), lex.Token{})
+		return nil, p.errors
+	}
 	fmt.Printf("parsing\n")
-	return parseCommand(p)
+	return parseCommand(p), p.errors
 }
 
 func (p *Parser) current() *lex.Token {

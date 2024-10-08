@@ -81,7 +81,6 @@ func (l *Lexer) next() rune {
 // Emit a token with the given type and value
 func (l *Lexer) emit(tokenType TokenType) {
 	var token = l.toToken(tokenType)
-	fmt.Printf("Token: '%v'\n", token)
 	l.Items <- token
 	l.start = l.position
 	l.tokens = append(l.tokens, *token)

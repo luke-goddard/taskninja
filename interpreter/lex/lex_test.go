@@ -13,8 +13,7 @@ func TestLexStart(t *testing.T) {
 		value     string
 	}{
 		{"", TokenEOF, ""},
-		{"hello", TokenWord, "hello"},
-		{"hello hello", TokenWord, "hello"},
+		{"hello hello", TokenString, "hello"},
 		{"add hello", TokenCommand, "add"},
 		{"all", TokenCommand, "all"},
 		{"delete", TokenCommand, "delete"},
@@ -31,6 +30,7 @@ func TestLexStart(t *testing.T) {
 		{"+", TokenPlus, "+"},
 		{"-", TokenMinus, "-"},
 		{"/", TokenSlash, "/"},
+		{"/2", TokenSlash, "/"},
 		{"*", TokenStar, "*"},
 		{`"string"`, TokenString, "string"},
 		{`'string'`, TokenString, "string"},
@@ -71,7 +71,6 @@ func TestLexStart(t *testing.T) {
 func FuzzLex(f *testing.F) {
 	f.Add(`add "do" project:home +Home`)
 	f.Fuzz(func(t *testing.T, input string) {
-		t.Logf("Fuzzing: %s", input)
 		var lexer = NewLexer(input)
 		go lexer.Tokenize()
 		for {
@@ -79,7 +78,6 @@ func FuzzLex(f *testing.F) {
 			if token == nil {
 				break
 			}
-			t.Logf("Token: '%v'", token.String())
 			if token.Type == TokenError || token.Type == TokenEOF {
 				break
 			}

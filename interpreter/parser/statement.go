@@ -14,7 +14,8 @@ func parseCommand(p *Parser) *ast.Command {
 		strings.ToLower(p.current().Value) == "add" {
 		return parseAddCommand(p)
 	}
-	return nil
+  p.errors.add(fmt.Errorf("Unknown command"), *p.current())
+  return nil
 }
 
 func parseAddCommand(p *Parser) *ast.Command {

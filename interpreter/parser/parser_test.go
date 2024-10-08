@@ -15,101 +15,86 @@ func TestParser(t *testing.T) {
 		input    string
 		expected ast.Command
 	}{
-		// 	{
-		// 		input: `add "do the dishes"`,
-		// 		expected: ast.Command{
-		// 			Kind: ast.CommandKindAdd,
-		// 			Param: ast.Param{
-		// 				Kind:  ast.ParamTypeDescription,
-		// 				Value: "do the dishes",
-		// 			},
-		// 		},
-		// 	},
-		// 	{
-		// 		input: `add "do the dishes" +Home -Kitchen`,
-		// 		expected: ast.Command{
-		// 			Kind: ast.CommandKindAdd,
-		// 			Param: ast.Param{
-		// 				Kind:  ast.ParamTypeDescription,
-		// 				Value: "do the dishes",
-		// 			},
-		// 			Options: []ast.ExpressionStatement{
-		// 				ast.ExpressionStatement{
-		// 					Expr: &ast.Tag{
-		// 						Operator: ast.TagOperatorPlus,
-		// 						Value:    "Home",
-		// 					},
-		// 				},
-		// 				ast.ExpressionStatement{
-		// 					Expr: &ast.Tag{
-		// 						Operator: ast.TagOperatorMinus,
-		// 						Value:    "Kitchen",
-		// 					},
-		// 				},
-		// 			},
-		// 		},
-		// 	},
-		// 	{
-		// 		input: `add "do the dishes" project:home`,
-		// 		expected: ast.Command{
-		// 			Kind: ast.CommandKindAdd,
-		// 			Param: ast.Param{
-		// 				Kind:  ast.ParamTypeDescription,
-		// 				Value: "do the dishes",
-		// 			},
-		// 			Options: []ast.ExpressionStatement{
-		// 				ast.ExpressionStatement{
-		// 					Expr: &ast.Key{
-		// 						Key: "project",
-		// 						Value: ast.ExpressionStatement{
-		// 							Expr: &ast.Literal{
-		// 								Kind:  ast.LiteralKindString,
-		// 								Value: "home",
-		// 							},
-		// 						},
-		// 					},
-		// 				},
-		// 			},
-		// 		},
-		// 	},
-		// 	{
-		// 		input: `add "do the dishes" priority:HIGH`,
-		// 		expected: ast.Command{
-		// 			Kind: ast.CommandKindAdd,
-		// 			Param: ast.Param{
-		// 				Kind:  ast.ParamTypeDescription,
-		// 				Value: "do the dishes",
-		// 			},
-		// 			Options: []ast.ExpressionStatement{
-		// 				ast.ExpressionStatement{
-		// 					Expr: &ast.Key{
-		// 						Key: "priority",
-		// 						Value: ast.ExpressionStatement{
-		// 							Expr: &ast.Literal{
-		// 								Kind:  ast.LiteralKindString,
-		// 								Value: "HIGH",
-		// 							},
-		// 						},
-		// 					},
-		// 				},
-		// 			},
-		// 		},
-		// 	},
+		{
+			input: `add "do the dishes"`,
+			expected: ast.Command{
+				Kind:  ast.CommandKindAdd,
+				Param: ast.Param{Kind: ast.ParamTypeDescription, Value: "do the dishes"},
+			},
+		},
+		{
+			input: `add "do the dishes" +Home -Kitchen`,
+			expected: ast.Command{
+				Kind:  ast.CommandKindAdd,
+				Param: ast.Param{Kind: ast.ParamTypeDescription, Value: "do the dishes"},
+				Options: []ast.Statement{
+					&ast.Tag{Operator: ast.TagOperatorPlus, Value: "Home"},
+					&ast.Tag{Operator: ast.TagOperatorMinus, Value: "Kitchen"},
+				},
+			},
+		},
+		{
+			input: `add "do the dishes" project:=home`,
+			expected: ast.Command{
+				Kind: ast.CommandKindAdd,
+				Param: ast.Param{
+					Kind:  ast.ParamTypeDescription,
+					Value: "do the dishes",
+				},
+				Options: []ast.Statement{
+					&ast.ExpressionStatement{
+						Expr: &ast.BinaryExpression{
+							Left:     &ast.Key{Key: "project"},
+							Operator: ast.BinaryOperatorEq,
+							Right:    &ast.Literal{Value: "home"},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	for _, test := range tc {
 		t.Run(test.input, func(t *testing.T) {
 			var lexer = lex.NewLexer(test.input)
-			var tokens = lexer.Tokenize()
+			go lexer.Tokenize()
 
-			for _, token := range tokens {
-				t.Logf("Token: %v", token.String())
+			var tokens = make([]lex.Token, 0)
+
+			for {
+				var token = <-lexer.Items
+				if token == nil {
+					break
+				}
+				tokens = append(tokens, *token)
+				if token.Type == lex.TokenEOF || token.Type == lex.TokenError {
+					break
+				}
 			}
 
 			var parser = NewParser(tokens)
-			var tree = parser.Parse()
+			var tree, _ = parser.Parse()
 			litter.Dump(tree)
 			assert.Equal(t, &test.expected, tree)
 		})
 	}
+}
+
+func FuzzParser(f *testing.F) {
+	f.Fuzz(func(t *testing.T, input []byte) {
+		t.Logf("Fuzzing: %s", input)
+		var tokens = make([]lex.Token, 0)
+		for i, b := range input {
+			if b > 18 {
+				t.Skip()
+			}
+			var token = lex.Token{
+				Type:  lex.TokenType(b),
+				Value: string(input[i:]),
+			}
+			tokens = append(tokens, token)
+		}
+		var parser = NewParser(tokens)
+		parser.Parse()
+	})
 }

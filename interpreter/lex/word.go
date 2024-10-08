@@ -12,6 +12,6 @@ func lexWord(l *Lexer) StateFn {
 			break
 		}
 	}
-	l.emit(TokenWord)
+	l.emit(TokenString)
 	return lexStart
 }
