@@ -1,7 +1,6 @@
 package lex
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -25,7 +24,6 @@ func lexCommand(l *Lexer) StateFn {
 	var last = l.readUntil(func(r rune) bool {
 		return !IsAlphabet(r)
 	})
-	fmt.Printf("last command %c : current: %s\n", last, l.current())
 	if last == ':' {
 		return lexPair
 	}
@@ -48,8 +46,6 @@ func lexCommand(l *Lexer) StateFn {
 			return lexStart
 		}
 	}
-
-	fmt.Printf("lexeme: %s\n", lexeme)
 
 	if strings.ToLower(lexeme) == "or" {
 		l.emit(TokenOr)

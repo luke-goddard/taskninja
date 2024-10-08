@@ -31,7 +31,7 @@ type Lexer struct {
 // Create a new lexer that will tokenize the given input
 func NewLexer(input string) *Lexer {
 	return &Lexer{
-		Items:       make(chan *Token, 200),
+		Items:       make(chan *Token, 2),
 		input:       input,
 		line:        1,
 		start:       0,
@@ -81,7 +81,7 @@ func (l *Lexer) next() rune {
 // Emit a token with the given type and value
 func (l *Lexer) emit(tokenType TokenType) {
 	var token = l.toToken(tokenType)
-  fmt.Printf("token %s\n", token.String())
+	fmt.Printf("Token: '%v'\n", token)
 	l.Items <- token
 	l.start = l.position
 	l.tokens = append(l.tokens, *token)
@@ -106,6 +106,17 @@ func (l *Lexer) emitError(error string) StateFn {
 		l.position,
 		l.line,
 		error,
+	)
+	return nil
+}
+
+func (l *Lexer) errorf(format string, args ...interface{}) StateFn {
+	l.Items <- NewToken(
+		TokenError,
+		l.start,
+		l.position,
+		l.line,
+		fmt.Sprintf(format, args...),
 	)
 	return nil
 }

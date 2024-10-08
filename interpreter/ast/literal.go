@@ -23,11 +23,11 @@ func (l *Literal) Type() NodeType {
 func (l *Literal) Expression() {}
 
 func (l *LiteralKind) String() string {
-  switch *l {
-  case LiteralKindString:
-    return "String"
-  case LiteralKindNumber:
-    return "Number"
-  }
-  return "Unknown"
+	switch *l {
+	case LiteralKindString:
+		return "String"
+	case LiteralKindNumber:
+		return "Number"
+	}
+	return "Unknown"
 }

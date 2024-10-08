@@ -1,7 +1,5 @@
 package lex
 
-import "fmt"
-
 func lexStart(l *Lexer) StateFn {
 	l.skipWhitespace()
 
@@ -10,8 +8,6 @@ func lexStart(l *Lexer) StateFn {
 		l.emit(TokenEOF)
 		return nil
 	}
-
-	fmt.Printf("inital peek: %c\n", peek)
 
 	if peek == ':' {
 		l.next()
@@ -59,5 +55,9 @@ func lexStart(l *Lexer) StateFn {
 		return lexNumber
 	}
 
-	return lexCommand
+	if IsAlphaNumeric(peek) {
+		return lexCommand
+	}
+
+	return l.errorf("Unknown character: %c", peek)
 }

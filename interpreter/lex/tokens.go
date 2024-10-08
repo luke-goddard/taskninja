@@ -87,8 +87,8 @@ func (t *Token) String() string {
 		return fmt.Sprint("EQ: ", t.Value)
 	case TokenOr:
 		return fmt.Sprint("Or: ", t.Value)
-  case TokenAnd:
-    return fmt.Sprint("And: ", t.Value)
+	case TokenAnd:
+		return fmt.Sprint("And: ", t.Value)
 	default:
 		var err = fmt.Errorf("Unknown token type: %d", t.Type)
 		panic(err)

@@ -6,6 +6,7 @@ func lexOperator(l *Lexer) StateFn {
 	var opp = l.next()
 	var peek = l.peek()
 	if peek == EOF {
+		fmt.Printf("lexOperator: %c peek: %c\n", opp, peek)
 		l.emit(getOperator(opp))
 		return nil
 	}
@@ -34,6 +35,6 @@ func getOperator(opp rune) TokenType {
 	case '/':
 		return TokenSlash
 	}
-	var e = fmt.Errorf("Unknown operator: %d", opp)
+	var e = fmt.Errorf("Unknown operator: %c", opp)
 	panic(e)
 }

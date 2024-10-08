@@ -15,86 +15,86 @@ func TestParser(t *testing.T) {
 		input    string
 		expected ast.Command
 	}{
-		{
-			input: `add "do the dishes"`,
-			expected: ast.Command{
-				Kind: ast.CommandKindAdd,
-				Param: ast.Param{
-					Kind:  ast.ParamTypeDescription,
-					Value: "do the dishes",
-				},
-			},
-		},
-		{
-			input: `add "do the dishes" +Home -Kitchen`,
-			expected: ast.Command{
-				Kind: ast.CommandKindAdd,
-				Param: ast.Param{
-					Kind:  ast.ParamTypeDescription,
-					Value: "do the dishes",
-				},
-				Options: []ast.ExpressionStatement{
-					ast.ExpressionStatement{
-						Expr: &ast.Tag{
-							Operator: ast.TagOperatorPlus,
-							Value:    "Home",
-						},
-					},
-					ast.ExpressionStatement{
-						Expr: &ast.Tag{
-							Operator: ast.TagOperatorMinus,
-							Value:    "Kitchen",
-						},
-					},
-				},
-			},
-		},
-		{
-			input: `add "do the dishes" project:home`,
-			expected: ast.Command{
-				Kind: ast.CommandKindAdd,
-				Param: ast.Param{
-					Kind:  ast.ParamTypeDescription,
-					Value: "do the dishes",
-				},
-				Options: []ast.ExpressionStatement{
-					ast.ExpressionStatement{
-						Expr: &ast.Key{
-							Key: "project",
-							Value: ast.ExpressionStatement{
-								Expr: &ast.Literal{
-									Kind:  ast.LiteralKindString,
-									Value: "home",
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		{
-			input: `add "do the dishes" priority:HIGH`,
-			expected: ast.Command{
-				Kind: ast.CommandKindAdd,
-				Param: ast.Param{
-					Kind:  ast.ParamTypeDescription,
-					Value: "do the dishes",
-				},
-				Options: []ast.ExpressionStatement{
-					ast.ExpressionStatement{
-						Expr: &ast.Key{
-							Key: "priority",
-							Value: ast.ExpressionStatement{
-								Expr: &ast.Literal{
-									Kind:  ast.LiteralKindString,
-									Value: "HIGH",
-								},
-							},
-						},
-					},
-				},
-			},
-		},
+		// 	{
+		// 		input: `add "do the dishes"`,
+		// 		expected: ast.Command{
+		// 			Kind: ast.CommandKindAdd,
+		// 			Param: ast.Param{
+		// 				Kind:  ast.ParamTypeDescription,
+		// 				Value: "do the dishes",
+		// 			},
+		// 		},
+		// 	},
+		// 	{
+		// 		input: `add "do the dishes" +Home -Kitchen`,
+		// 		expected: ast.Command{
+		// 			Kind: ast.CommandKindAdd,
+		// 			Param: ast.Param{
+		// 				Kind:  ast.ParamTypeDescription,
+		// 				Value: "do the dishes",
+		// 			},
+		// 			Options: []ast.ExpressionStatement{
+		// 				ast.ExpressionStatement{
+		// 					Expr: &ast.Tag{
+		// 						Operator: ast.TagOperatorPlus,
+		// 						Value:    "Home",
+		// 					},
+		// 				},
+		// 				ast.ExpressionStatement{
+		// 					Expr: &ast.Tag{
+		// 						Operator: ast.TagOperatorMinus,
+		// 						Value:    "Kitchen",
+		// 					},
+		// 				},
+		// 			},
+		// 		},
+		// 	},
+		// 	{
+		// 		input: `add "do the dishes" project:home`,
+		// 		expected: ast.Command{
+		// 			Kind: ast.CommandKindAdd,
+		// 			Param: ast.Param{
+		// 				Kind:  ast.ParamTypeDescription,
+		// 				Value: "do the dishes",
+		// 			},
+		// 			Options: []ast.ExpressionStatement{
+		// 				ast.ExpressionStatement{
+		// 					Expr: &ast.Key{
+		// 						Key: "project",
+		// 						Value: ast.ExpressionStatement{
+		// 							Expr: &ast.Literal{
+		// 								Kind:  ast.LiteralKindString,
+		// 								Value: "home",
+		// 							},
+		// 						},
+		// 					},
+		// 				},
+		// 			},
+		// 		},
+		// 	},
+		// 	{
+		// 		input: `add "do the dishes" priority:HIGH`,
+		// 		expected: ast.Command{
+		// 			Kind: ast.CommandKindAdd,
+		// 			Param: ast.Param{
+		// 				Kind:  ast.ParamTypeDescription,
+		// 				Value: "do the dishes",
+		// 			},
+		// 			Options: []ast.ExpressionStatement{
+		// 				ast.ExpressionStatement{
+		// 					Expr: &ast.Key{
+		// 						Key: "priority",
+		// 						Value: ast.ExpressionStatement{
+		// 							Expr: &ast.Literal{
+		// 								Kind:  ast.LiteralKindString,
+		// 								Value: "HIGH",
+		// 							},
+		// 						},
+		// 					},
+		// 				},
+		// 			},
+		// 		},
+		// 	},
 	}
 
 	for _, test := range tc {

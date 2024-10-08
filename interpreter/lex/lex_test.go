@@ -47,13 +47,42 @@ func TestLexStart(t *testing.T) {
 	for _, c := range tc {
 		t.Run(c.input, func(t *testing.T) {
 			var lexer = NewLexer(c.input)
-			var tokens = lexer.Tokenize()
-			for _, token := range tokens {
-				t.Logf("Token: %v", token.String())
+			go lexer.Tokenize()
+			var tokens = make([]Token, 0)
+			for {
+				var token = <-lexer.Items
+				if token == nil {
+					break
+				}
+				tokens = append(tokens, *token)
+				t.Logf("Token: '%v'", token.String())
+
+				if token.Type == TokenEOF || token.Type == TokenError {
+					break
+				}
 			}
 			assert.True(t, len(tokens) != 0, "Expected to recive a token")
 			assert.Equal(t, c.tokenType, tokens[0].Type)
 			assert.Equal(t, c.value, tokens[0].Value)
 		})
 	}
+}
+
+func FuzzLex(f *testing.F) {
+	f.Add(`add "do" project:home +Home`)
+	f.Fuzz(func(t *testing.T, input string) {
+		t.Logf("Fuzzing: %s", input)
+		var lexer = NewLexer(input)
+		go lexer.Tokenize()
+		for {
+			var token = <-lexer.Items
+			if token == nil {
+				break
+			}
+			t.Logf("Token: '%v'", token.String())
+			if token.Type == TokenError || token.Type == TokenEOF {
+				break
+			}
+		}
+	})
 }
