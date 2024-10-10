@@ -19,14 +19,14 @@ func TestParser(t *testing.T) {
 			input: `add "do the dishes"`,
 			expected: ast.Command{
 				Kind:  ast.CommandKindAdd,
-				Param: ast.Param{Kind: ast.ParamTypeDescription, Value: "do the dishes"},
+				Param: &ast.Param{Kind: ast.ParamTypeDescription, Value: "do the dishes"},
 			},
 		},
 		{
 			input: `add "do the dishes" +Home -Kitchen`,
 			expected: ast.Command{
 				Kind:  ast.CommandKindAdd,
-				Param: ast.Param{Kind: ast.ParamTypeDescription, Value: "do the dishes"},
+				Param: &ast.Param{Kind: ast.ParamTypeDescription, Value: "do the dishes"},
 				Options: []ast.Statement{
 					&ast.Tag{Operator: ast.TagOperatorPlus, Value: "Home"},
 					&ast.Tag{Operator: ast.TagOperatorMinus, Value: "Kitchen"},
@@ -36,11 +36,8 @@ func TestParser(t *testing.T) {
 		{
 			input: `add "do the dishes" project:=home`,
 			expected: ast.Command{
-				Kind: ast.CommandKindAdd,
-				Param: ast.Param{
-					Kind:  ast.ParamTypeDescription,
-					Value: "do the dishes",
-				},
+				Kind:  ast.CommandKindAdd,
+				Param: &ast.Param{Kind: ast.ParamTypeDescription, Value: "do the dishes"},
 				Options: []ast.Statement{
 					&ast.ExpressionStatement{
 						Expr: &ast.BinaryExpression{
@@ -73,7 +70,13 @@ func TestParser(t *testing.T) {
 			}
 
 			var parser = NewParser(tokens)
-			var tree, _ = parser.Parse()
+			var tree, errs = parser.Parse()
+			if !assert.Empty(t, errs) {
+				for _, err := range errs {
+					t.Logf("Error: %v", err)
+				}
+				t.Skip()
+			}
 			litter.Dump(tree)
 			assert.Equal(t, &test.expected, tree)
 		})
@@ -84,8 +87,9 @@ func FuzzParser(f *testing.F) {
 	f.Fuzz(func(t *testing.T, input []byte) {
 		t.Logf("Fuzzing: %s", input)
 		var tokens = make([]lex.Token, 0)
+		tokens = append(tokens, lex.Token{Type: lex.TokenCommand, Value: "add"})
 		for i, b := range input {
-			if b > 18 {
+			if b >= 18 {
 				t.Skip()
 			}
 			var token = lex.Token{
@@ -94,6 +98,10 @@ func FuzzParser(f *testing.F) {
 			}
 			tokens = append(tokens, token)
 		}
+		for _, token := range tokens {
+			t.Logf("Token: %v", token.Type.String())
+		}
+		tokens = append(tokens, lex.Token{Type: lex.TokenEOF, Value: ""})
 		var parser = NewParser(tokens)
 		parser.Parse()
 	})

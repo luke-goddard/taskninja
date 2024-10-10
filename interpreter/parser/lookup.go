@@ -53,7 +53,6 @@ func stmt(kind lex.TokenType, handler StatementHandler) {
 func createLookupTable() {
 	// Literal
 	nud(lex.TokenString, BP_PRIMARY, parsePrimaryExpression)
-	nud(lex.TokenWord, BP_PRIMARY, parsePrimaryExpression)
 	nud(lex.TokenNumber, BP_PRIMARY, parsePrimaryExpression)
 	nud(lex.TokenTag, BP_PRIMARY, parsePrimaryExpression)
 	nud(lex.TokenKey, BP_PRIMARY, parsePrimaryExpression)

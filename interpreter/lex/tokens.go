@@ -30,7 +30,6 @@ const (
 	TokenLeftParen  TokenType = iota // (
 	TokenRightParen TokenType = iota // )
 	TokenTag        TokenType = iota // +HOME, -HOME
-	TokenWord       TokenType = iota // hello
 	TokenCommand    TokenType = iota // add, modify, etc.
 	TokenLT         TokenType = iota // <
 	TokenEQ         TokenType = iota // =
@@ -73,8 +72,6 @@ func (t *Token) String() string {
 		return fmt.Sprint("Slash: ", t.Value)
 	case TokenCommand:
 		return fmt.Sprint("Command: ", t.Value)
-	case TokenWord:
-		return fmt.Sprint("Word: ", t.Value)
 	case TokenColon:
 		return fmt.Sprint("Colon: ", t.Value)
 	case TokenLeftParen:
@@ -91,6 +88,50 @@ func (t *Token) String() string {
 		return fmt.Sprint("And: ", t.Value)
 	default:
 		var err = fmt.Errorf("Unknown token type: %d", t.Type)
+		panic(err)
+	}
+}
+
+func (t *TokenType) String() string {
+	switch *t {
+	case TokenEOF:
+		return "EOF"
+	case TokenError:
+		return "Error"
+	case TokenString:
+		return "String"
+	case TokenKey:
+		return "Key"
+	case TokenTag:
+		return "Tag"
+	case TokenNumber:
+		return "Number"
+	case TokenPlus:
+		return "Plus"
+	case TokenMinus:
+		return "Minus"
+	case TokenStar:
+		return "Star"
+	case TokenSlash:
+		return "Slash"
+	case TokenCommand:
+		return "Command"
+	case TokenColon:
+		return "Colon"
+	case TokenLeftParen:
+		return "LeftParen"
+	case TokenRightParen:
+		return "RightParen"
+	case TokenLT:
+		return "LT"
+	case TokenEQ:
+		return "EQ"
+	case TokenOr:
+		return "Or"
+	case TokenAnd:
+		return "And"
+	default:
+    var err = fmt.Errorf("Unknown token type: %d", *t)
 		panic(err)
 	}
 }
