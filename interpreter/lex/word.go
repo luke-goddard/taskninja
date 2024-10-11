@@ -1,5 +1,7 @@
 package lex
 
+import "github.com/luke-goddard/taskninja/interpreter/token"
+
 // This is the default if everything else failse
 func lexWord(l *Lexer) StateFn {
 	for {
@@ -12,6 +14,6 @@ func lexWord(l *Lexer) StateFn {
 			break
 		}
 	}
-	l.emit(TokenString)
+	l.emit(token.String)
 	return lexStart
 }

@@ -3,6 +3,9 @@ package lex
 import (
 	"fmt"
 	"unicode/utf8"
+
+	"github.com/luke-goddard/taskninja/interpreter/manager"
+	"github.com/luke-goddard/taskninja/interpreter/token"
 )
 
 // A lexer is a function that processes the input and returns the next state
@@ -16,28 +19,27 @@ const EOF = -1
 
 // A lexer is used to tokenize a string into a series of tokens
 type Lexer struct {
-	Items       chan *Token // channel of scanned items
-	input       string      // the string being scanned
-	line        int         // current line number
-	start       Pos         // start position of this item
-	position    Pos         // current position in the input
-	initalState StateFn     // initial state of the lexer
-	tokens      []Token     // list of tokens
-	depth       int         // current depth of the lexer
-	maxDepth    int         // maximum depth of the lexer
-	seenCommand bool        // whether a command has been seen
+	manager     *manager.ErrorManager
+	input       string        // the string being scanned
+	line        int           // current line number
+	start       token.Pos     // start position of this item
+	position    token.Pos     // current position in the input
+	initalState StateFn       // initial state of the lexer
+	tokens      []token.Token // list of tokens
+	depth       int           // current depth of the lexer
+	maxDepth    int           // maximum depth of the lexer
+	seenCommand bool          // whether a command has been seen
 }
 
 // Create a new lexer that will tokenize the given input
-func NewLexer(input string) *Lexer {
+func NewLexer(manager *manager.ErrorManager) *Lexer {
 	return &Lexer{
-		Items:       make(chan *Token, 2),
-		input:       input,
+		manager:     manager,
 		line:        1,
 		start:       0,
 		position:    0,
 		initalState: lexStart,
-		tokens:      []Token{},
+		tokens:      []token.Token{},
 		depth:       0,
 		maxDepth:    MAX_DEPTH_DEFAULT,
 		seenCommand: false,
@@ -49,8 +51,23 @@ func (l *Lexer) SetInitialState(state StateFn) {
 	l.initalState = state
 }
 
+func (l *Lexer) SetInput(input string) *Lexer {
+	l.input = input
+	return l
+}
+
+func (l *Lexer) Reset() *Lexer {
+	l.line = 1
+	l.start = 0
+	l.position = 0
+	l.tokens = []token.Token{}
+	l.depth = 0
+	l.seenCommand = false
+	return l
+}
+
 // Tokenize the input string and return the tokens
-func (l *Lexer) Tokenize() []Token {
+func (l *Lexer) Tokenize() []token.Token {
 	for state := l.initalState; state != nil; {
 		l.depth++
 		if l.depth >= l.maxDepth {
@@ -59,7 +76,6 @@ func (l *Lexer) Tokenize() []Token {
 		}
 		state = state(l)
 	}
-	close(l.Items)
 	return l.tokens
 }
 
@@ -71,7 +87,7 @@ func (l *Lexer) next() rune {
 		return EOF
 	}
 	var rune, size = utf8.DecodeRuneInString(l.input[l.position:])
-	l.position += Pos(size)
+	l.position += token.Pos(size)
 	if IsNewLine(rune) {
 		l.line++
 	}
@@ -79,16 +95,15 @@ func (l *Lexer) next() rune {
 }
 
 // Emit a token with the given type and value
-func (l *Lexer) emit(tokenType TokenType) {
+func (l *Lexer) emit(tokenType token.TokenType) {
 	var token = l.toToken(tokenType)
-	l.Items <- token
 	l.start = l.position
 	l.tokens = append(l.tokens, *token)
 }
 
 // Convert the current input into a token with the given type
-func (l *Lexer) toToken(tokenType TokenType) *Token {
-	return NewToken(
+func (l *Lexer) toToken(tokenType token.TokenType) *token.Token {
+	return token.NewToken(
 		tokenType,
 		l.start,
 		l.position,
@@ -98,25 +113,20 @@ func (l *Lexer) toToken(tokenType TokenType) *Token {
 }
 
 // Emit an error token with the given message
-func (l *Lexer) emitError(error string) StateFn {
-	l.Items <- NewToken(
-		TokenError,
+func (l *Lexer) emitError(message string) StateFn {
+	var token = token.NewToken(
+		token.Error,
 		l.start,
 		l.position,
 		l.line,
-		error,
+		message,
 	)
+	l.manager.EmitLex(message, token)
 	return nil
 }
 
 // Returns nill, indicating that the lexer should stop processing
 func (l *Lexer) errorf(format string, args ...interface{}) StateFn {
-	l.Items <- NewToken(
-		TokenError,
-		l.start,
-		l.position,
-		l.line,
-		fmt.Sprintf(format, args...),
-	)
-	return nil
+	var message = fmt.Sprintf(format, args...)
+	return l.emitError(message)
 }

@@ -3,6 +3,8 @@ package lex
 import (
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/luke-goddard/taskninja/interpreter/token"
 )
 
 // Returns true if the rune is a new line character
@@ -54,7 +56,7 @@ func (l *Lexer) backup() {
 		return
 	}
 	var r, size = utf8.DecodeLastRuneInString(l.input[:l.position])
-	l.position -= Pos(size)
+	l.position -= token.Pos(size)
 	if IsNewLine(r) {
 		l.line--
 	}

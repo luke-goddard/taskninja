@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/luke-goddard/taskninja/interpreter/ast"
-	"github.com/luke-goddard/taskninja/interpreter/lex"
+	"github.com/luke-goddard/taskninja/interpreter/token"
 )
 
 type ErrorTranspilerVariant string  // What part of the pipeline the error occurred in
@@ -28,7 +28,7 @@ type ErrorTranspiler struct {
 	Variant  ErrorTranspilerVariant
 	Severity ErrorTranspilerSeverity
 	Message  string
-	Token    *lex.Token
+	Token    *token.Token
 	Node     *ast.Node
 }
 
@@ -47,12 +47,13 @@ func NewErrorTranspiler(
 func (e *ErrorTranspiler) Error() string {
 	var baseMessage = fmt.Sprintf("(%s) %s: %s", e.Severity, e.Variant, e.Message)
 	if e.hasToken() {
-		baseMessage = fmt.Sprintf("%s at %s", baseMessage, e.Token.Position.String())
+		// TODO: Add position information
+		// baseMessage = fmt.Sprintf("%s at %s", baseMessage, e.Token.Position.String())
 	}
 	return baseMessage
 }
 
-func (e *ErrorTranspiler) SetToken(token *lex.Token) *ErrorTranspiler {
+func (e *ErrorTranspiler) SetToken(token *token.Token) *ErrorTranspiler {
 	e.Token = token
 	return e
 }

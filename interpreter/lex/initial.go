@@ -1,41 +1,43 @@
 package lex
 
+import "github.com/luke-goddard/taskninja/interpreter/token"
+
 func lexStart(l *Lexer) StateFn {
 	l.skipWhitespace()
 
 	var peek = l.peek()
 	if peek == EOF {
-		l.emit(TokenEOF)
+		l.emit(token.Eof)
 		return nil
 	}
 
 	if peek == ':' {
 		l.next()
-		l.emit(TokenColon)
+		l.emit(token.Colon)
 		return lexStart
 	}
 
 	if peek == '=' {
 		l.next()
-		l.emit(TokenEQ)
+		l.emit(token.Equal)
 		return lexStart
 	}
 
 	if peek == '(' {
 		l.next()
-		l.emit(TokenLeftParen)
+		l.emit(token.LeftParen)
 		return lexStart
 	}
 
 	if peek == ')' {
 		l.next()
-		l.emit(TokenRightParen)
+		l.emit(token.RightParen)
 		return lexStart
 	}
 
 	if peek == '<' {
 		l.next()
-		l.emit(TokenLT)
+		l.emit(token.LessThan)
 		return lexStart
 	}
 

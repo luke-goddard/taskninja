@@ -17,6 +17,6 @@ func main() {
 		sb.WriteString(arg)
 	}
 	var command = sb.String()
-	var interpreter = interpreter.NewInterpreter(command)
-	interpreter.Execute()
+	var interpreter = interpreter.NewInterpreter()
+	interpreter.Execute(command)
 }

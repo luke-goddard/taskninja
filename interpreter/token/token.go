@@ -1,4 +1,4 @@
-package lex
+package token
 
 import "fmt"
 
@@ -15,26 +15,26 @@ type Token struct {
 
 const (
 	// SIGNALS
-	TokenEOF   TokenType = iota // Raised when the end of the input is reached
-	TokenError TokenType = iota // Raised when an error occurs
+	Eof   TokenType = iota // Raised when the end of the input is reached
+	Error TokenType = iota // Raised when an error occurs
 
 	// TOKENS
-	TokenNumber     TokenType = iota // 1
-	TokenString     TokenType = iota // "Helllo World"
-	TokenPlus       TokenType = iota // +
-	TokenMinus      TokenType = iota // -
-	TokenStar       TokenType = iota // *
-	TokenSlash      TokenType = iota // /
-	TokenColon      TokenType = iota // :
-	TokenKey        TokenType = iota // thisbit:<expression>
-	TokenLeftParen  TokenType = iota // (
-	TokenRightParen TokenType = iota // )
-	TokenTag        TokenType = iota // +HOME, -HOME
-	TokenCommand    TokenType = iota // add, modify, etc.
-	TokenLT         TokenType = iota // <
-	TokenEQ         TokenType = iota // =
-	TokenOr         TokenType = iota // or
-	TokenAnd        TokenType = iota // and
+	Number     TokenType = iota // 1
+	String     TokenType = iota // "Helllo World"
+	Plus       TokenType = iota // +
+	Minus      TokenType = iota // -
+	Star       TokenType = iota // *
+	Slash      TokenType = iota // /
+	Colon      TokenType = iota // :
+	Key        TokenType = iota // thisbit:<expression>
+	LeftParen  TokenType = iota // (
+	RightParen TokenType = iota // )
+	Tag        TokenType = iota // +HOME, -HOME
+	Command    TokenType = iota // add, modify, etc.
+	LessThan         TokenType = iota // <
+	Equal         TokenType = iota // =
+	Or         TokenType = iota // or
+	And        TokenType = iota // and
 )
 
 // Create a new token of a given type
@@ -50,41 +50,41 @@ func NewToken(tokenType TokenType, startPosition Pos, endPosition Pos, lineNumbe
 
 func (t *Token) String() string {
 	switch t.Type {
-	case TokenEOF:
+	case Eof:
 		return "EOF"
-	case TokenError:
+	case Error:
 		return fmt.Sprint("Error: ", t.Value)
-	case TokenString:
+	case String:
 		return fmt.Sprint("String: ", t.Value)
-	case TokenKey:
+	case Key:
 		return fmt.Sprint("Key: ", t.Value)
-	case TokenTag:
+	case Tag:
 		return fmt.Sprint("Tag: ", t.Value)
-	case TokenNumber:
+	case Number:
 		return fmt.Sprint("Number: ", t.Value)
-	case TokenPlus:
+	case Plus:
 		return fmt.Sprint("Plus: ", t.Value)
-	case TokenMinus:
+	case Minus:
 		return fmt.Sprint("Minus: ", t.Value)
-	case TokenStar:
+	case Star:
 		return fmt.Sprint("Star: ", t.Value)
-	case TokenSlash:
+	case Slash:
 		return fmt.Sprint("Slash: ", t.Value)
-	case TokenCommand:
+	case Command:
 		return fmt.Sprint("Command: ", t.Value)
-	case TokenColon:
+	case Colon:
 		return fmt.Sprint("Colon: ", t.Value)
-	case TokenLeftParen:
+	case LeftParen:
 		return fmt.Sprint("LeftParen: ", t.Value)
-	case TokenRightParen:
+	case RightParen:
 		return fmt.Sprint("RightParen: ", t.Value)
-	case TokenLT:
+	case LessThan:
 		return fmt.Sprint("LT: ", t.Value)
-	case TokenEQ:
+	case Equal:
 		return fmt.Sprint("EQ: ", t.Value)
-	case TokenOr:
+	case Or:
 		return fmt.Sprint("Or: ", t.Value)
-	case TokenAnd:
+	case And:
 		return fmt.Sprint("And: ", t.Value)
 	default:
 		var err = fmt.Errorf("Unknown token type: %d", t.Type)
@@ -94,44 +94,44 @@ func (t *Token) String() string {
 
 func (t *TokenType) String() string {
 	switch *t {
-	case TokenEOF:
+	case Eof:
 		return "EOF"
-	case TokenError:
+	case Error:
 		return "Error"
-	case TokenString:
+	case String:
 		return "String"
-	case TokenKey:
+	case Key:
 		return "Key"
-	case TokenTag:
+	case Tag:
 		return "Tag"
-	case TokenNumber:
+	case Number:
 		return "Number"
-	case TokenPlus:
+	case Plus:
 		return "Plus"
-	case TokenMinus:
+	case Minus:
 		return "Minus"
-	case TokenStar:
+	case Star:
 		return "Star"
-	case TokenSlash:
+	case Slash:
 		return "Slash"
-	case TokenCommand:
+	case Command:
 		return "Command"
-	case TokenColon:
+	case Colon:
 		return "Colon"
-	case TokenLeftParen:
+	case LeftParen:
 		return "LeftParen"
-	case TokenRightParen:
+	case RightParen:
 		return "RightParen"
-	case TokenLT:
+	case LessThan:
 		return "LT"
-	case TokenEQ:
+	case Equal:
 		return "EQ"
-	case TokenOr:
+	case Or:
 		return "Or"
-	case TokenAnd:
+	case And:
 		return "And"
 	default:
-    var err = fmt.Errorf("Unknown token type: %d", *t)
+		var err = fmt.Errorf("Unknown token type: %d", *t)
 		panic(err)
 	}
 }

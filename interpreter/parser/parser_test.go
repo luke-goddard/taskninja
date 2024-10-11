@@ -5,6 +5,8 @@ import (
 
 	"github.com/luke-goddard/taskninja/interpreter/ast"
 	"github.com/luke-goddard/taskninja/interpreter/lex"
+	"github.com/luke-goddard/taskninja/interpreter/manager"
+	"github.com/luke-goddard/taskninja/interpreter/token"
 	"github.com/sanity-io/litter"
 	"github.com/stretchr/testify/assert"
 )
@@ -53,22 +55,8 @@ func TestParser(t *testing.T) {
 
 	for _, test := range tc {
 		t.Run(test.input, func(t *testing.T) {
-			var lexer = lex.NewLexer(test.input)
-			go lexer.Tokenize()
-
-			var tokens = make([]lex.Token, 0)
-
-			for {
-				var token = <-lexer.Items
-				if token == nil {
-					break
-				}
-				tokens = append(tokens, *token)
-				if token.Type == lex.TokenEOF || token.Type == lex.TokenError {
-					break
-				}
-			}
-
+			var errManager = manager.NewErrorManager()
+			var tokens = lex.NewLexer(errManager).SetInput(test.input).Tokenize()
 			var parser = NewParser(tokens)
 			var tree, errs = parser.Parse()
 			if !assert.Empty(t, errs) {
@@ -86,14 +74,14 @@ func TestParser(t *testing.T) {
 func FuzzParser(f *testing.F) {
 	f.Fuzz(func(t *testing.T, input []byte) {
 		t.Logf("Fuzzing: %s", input)
-		var tokens = make([]lex.Token, 0)
-		tokens = append(tokens, lex.Token{Type: lex.TokenCommand, Value: "add"})
+		var tokens = make([]token.Token, 0)
+		tokens = append(tokens, token.Token{Type: token.Command, Value: "add"})
 		for i, b := range input {
 			if b >= 18 {
 				t.Skip()
 			}
-			var token = lex.Token{
-				Type:  lex.TokenType(b),
+			var token = token.Token{
+				Type:  token.TokenType(b),
 				Value: string(input[i:]),
 			}
 			tokens = append(tokens, token)
@@ -101,7 +89,7 @@ func FuzzParser(f *testing.F) {
 		for _, token := range tokens {
 			t.Logf("Token: %v", token.Type.String())
 		}
-		tokens = append(tokens, lex.Token{Type: lex.TokenEOF, Value: ""})
+		tokens = append(tokens, token.Token{Type: token.Eof, Value: ""})
 		var parser = NewParser(tokens)
 		parser.Parse()
 	})

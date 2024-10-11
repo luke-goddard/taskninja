@@ -1,12 +1,9 @@
 package interpreter
 
 import (
-	"fmt"
-
-	"github.com/luke-goddard/taskninja/interpreter/errorManager"
 	"github.com/luke-goddard/taskninja/interpreter/lex"
+	"github.com/luke-goddard/taskninja/interpreter/manager"
 	"github.com/luke-goddard/taskninja/interpreter/parser"
-	"github.com/sanity-io/litter"
 )
 
 type Interpreter struct {
@@ -16,25 +13,20 @@ type Interpreter struct {
 	errs   *manager.ErrorManager
 }
 
-func NewInterpreter(input string) *Interpreter {
+func NewInterpreter() *Interpreter {
+	var manager = manager.NewErrorManager()
 	return &Interpreter{
-		input: input,
-		lexer: lex.NewLexer(input),
+		lexer: lex.NewLexer(manager),
 	}
 }
 
-func (i *Interpreter) Execute() {
-	fmt.Printf("executing: %s\n", i.input)
-	var tokens = make([]lex.Token, 0)
-	go i.lexer.Tokenize()
-	for {
-		var token = <-i.lexer.Items
-		tokens = append(tokens, *token)
-		if token == nil || token.Type == lex.TokenEOF || token.Type == lex.TokenError {
-			break
-		}
-	}
-	var parser = parser.NewParser(tokens)
-	var command, _ = parser.Parse()
-	litter.Dump(command)
+func (interpreter *Interpreter) Execute(input string) {
+	interpreter.input = input
+	var tokens = interpreter.lexer.
+		Reset().
+		SetInput(input).
+		Tokenize()
+
+	interpreter.parser.Parse(tokens)
 }
+

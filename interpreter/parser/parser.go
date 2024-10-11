@@ -35,17 +35,17 @@ import (
 	"time"
 
 	"github.com/luke-goddard/taskninja/interpreter/ast"
-	"github.com/luke-goddard/taskninja/interpreter/lex"
+	"github.com/luke-goddard/taskninja/interpreter/token"
 )
 
 type ParseError struct {
 	Message error
-	Token   lex.Token
+	Token   token.Token
 }
 
 type ParseErrorList []ParseError
 
-func (e *ParseErrorList) add(message error, token lex.Token) {
+func (e *ParseErrorList) add(message error, token token.Token) {
 	if message == nil {
 		panic("message cannot be nil")
 	}
@@ -54,7 +54,7 @@ func (e *ParseErrorList) add(message error, token lex.Token) {
 }
 
 type Parser struct {
-	tokens           []lex.Token
+	tokens           []token.Token
 	position         int
 	errors           ParseErrorList
 	hasCheckedExists bool
@@ -62,7 +62,7 @@ type Parser struct {
 	cancel           context.CancelFunc
 }
 
-func NewParser(tokens []lex.Token) *Parser {
+func NewParser(tokens []token.Token) *Parser {
 	createLookupTable()
 	var ctx, cancel = context.WithTimeout(context.Background(), time.Duration(5*time.Second))
 	var p = NewParserWithContext(tokens, ctx)
@@ -70,7 +70,7 @@ func NewParser(tokens []lex.Token) *Parser {
 	return p
 }
 
-func NewParserWithContext(tokens []lex.Token, ctx context.Context) *Parser {
+func NewParserWithContext(tokens []token.Token, ctx context.Context) *Parser {
 	createLookupTable()
 	return &Parser{
 		tokens:           tokens,
@@ -81,24 +81,16 @@ func NewParserWithContext(tokens []lex.Token, ctx context.Context) *Parser {
 	}
 }
 
-func (p *Parser) Parse() (*ast.Command, ParseErrorList) {
-	// if p.cancel != nil {
-	// 	defer p.cancel()
-	// }
-	if p.tokens == nil || len(p.tokens) == 0 {
-		p.errors.add(fmt.Errorf("no tokens to parse"), lex.Token{})
+func (p *Parser) Parse(tokens []token.Token) (*ast.Command, ParseErrorList) {
+	p.tokens = tokens
+	if len(tokens) == 0 {
+		p.errors.add(fmt.Errorf("no tokens to parse"), token.Token{})
 		return nil, p.errors
 	}
 	return parseCommand(p), p.errors
 }
 
 func (p *Parser) hasTokens() bool {
-	// select {
-	// case <-p.context.Done():
-	// 	p.errors.add(fmt.Errorf("Parsing took too long"), lex.Token{})
-	// 	return false
-	// default:
-	// }
 	if p.hasCheckedExists {
 		return true
 	}
@@ -106,7 +98,7 @@ func (p *Parser) hasTokens() bool {
 	if p.position > len(p.tokens)-1 {
 		return false
 	}
-	if p.current().Type == lex.TokenEOF {
+	if p.current().Type == token.Eof {
 		p.consume()
 		return false
 	}
@@ -117,7 +109,7 @@ func (p *Parser) hasNoTokens() bool {
 	return !p.hasTokens()
 }
 
-func (p *Parser) current() *lex.Token {
+func (p *Parser) current() *token.Token {
 	if !p.hasCheckedExists {
 		panic("Must call hasTokens before calling current")
 	}
@@ -135,7 +127,7 @@ func (p *Parser) current() *lex.Token {
 	return &p.tokens[p.position]
 }
 
-func (p *Parser) consume() *lex.Token {
+func (p *Parser) consume() *token.Token {
 	if !p.hasCheckedExists {
 		panic("Must call hasTokens before calling consume")
 	}
@@ -150,7 +142,7 @@ func (p *Parser) consume() *lex.Token {
 	return &p.tokens[p.position-1]
 }
 
-func (p *Parser) expectCurrent(tokenType lex.TokenType) bool {
+func (p *Parser) expectCurrent(tokenType token.TokenType) bool {
 	if p.current().Type != tokenType {
 		p.errors.add(
 			fmt.Errorf(
@@ -165,7 +157,7 @@ func (p *Parser) expectCurrent(tokenType lex.TokenType) bool {
 	return true
 }
 
-func (p *Parser) expectOneOf(t ...lex.TokenType) bool {
+func (p *Parser) expectOneOf(t ...token.TokenType) bool {
 	for _, tokenType := range t {
 		if p.current().Type == tokenType {
 			return true

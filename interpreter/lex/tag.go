@@ -1,5 +1,7 @@
 package lex
 
+import "github.com/luke-goddard/taskninja/interpreter/token"
+
 // +HOME or -HOME
 func lexTag(l *Lexer) StateFn {
 	l.next()
@@ -18,7 +20,7 @@ func lexTag(l *Lexer) StateFn {
 		l.readUntil(func(r rune) bool {
 			return !IsAlphaNumeric(r) && r != '-'
 		})
-		l.emit(TokenTag)
+		l.emit(token.Tag)
 		return lexStart
 	}
 

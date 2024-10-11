@@ -1,15 +1,16 @@
 package manager
 
-import "github.com/luke-goddard/taskninja/interpreter/lex"
+import "github.com/luke-goddard/taskninja/interpreter/token"
 
 // ErrorManager is used to store and process errors
 type ErrorManager struct {
-	errors []ErrorTranspiler
+	errors    []ErrorTranspiler
+	hasErrors bool
 }
 
 // NewErrorManager creates a new error manager
 func NewErrorManager() *ErrorManager {
-	return &ErrorManager{errors: make([]ErrorTranspiler, 0)}
+	return &ErrorManager{errors: make([]ErrorTranspiler, 0), hasErrors: false}
 }
 
 // GetErrors returns all the errors that have been stored
@@ -19,11 +20,11 @@ func (manager *ErrorManager) GetErrors() []ErrorTranspiler {
 
 // HasErrors returns true if there are any errors stored
 func (manager *ErrorManager) HasErrors() bool {
-	return len(manager.errors) > 0
+	return manager.hasErrors
 }
 
 // EmitLex emits a lexical error
-func (manager *ErrorManager) EmitLex(message string, token *lex.Token) {
+func (manager *ErrorManager) EmitLex(message string, token *token.Token) {
 	var err = NewLexError(message).
 		SetToken(token).
 		SetSeverityFatal()
@@ -31,7 +32,7 @@ func (manager *ErrorManager) EmitLex(message string, token *lex.Token) {
 }
 
 // EmitParse emits a parsing error
-func (manager *ErrorManager) EmitParse(message string, token *lex.Token) {
+func (manager *ErrorManager) EmitParse(message string, token *token.Token) {
 	var err = NewParseError(message).
 		SetToken(token).
 		SetSeverityFatal()
@@ -39,7 +40,7 @@ func (manager *ErrorManager) EmitParse(message string, token *lex.Token) {
 }
 
 // EmitSemantic emits a semantic error
-func (manager *ErrorManager) EmitSemantic(message string, token *lex.Token) {
+func (manager *ErrorManager) EmitSemantic(message string, token *token.Token) {
 	var err = NewSemanticError(message).
 		SetToken(token).
 		SetSeverityFatal()
@@ -47,7 +48,7 @@ func (manager *ErrorManager) EmitSemantic(message string, token *lex.Token) {
 }
 
 // EmitTranspilation emits a transpilation error
-func (manager *ErrorManager) EmitTranspilation(message string, token *lex.Token) {
+func (manager *ErrorManager) EmitTranspilation(message string, token *token.Token) {
 	var err = NewTranspilationError(message).
 		SetToken(token).
 		SetSeverityFatal()
@@ -55,5 +56,6 @@ func (manager *ErrorManager) EmitTranspilation(message string, token *lex.Token)
 }
 
 func (manager *ErrorManager) emit(e *ErrorTranspiler) {
+	manager.hasErrors = true
 	manager.errors = append(manager.errors, *e)
 }

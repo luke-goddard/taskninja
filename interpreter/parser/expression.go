@@ -5,22 +5,22 @@ import (
 	"runtime/debug"
 
 	"github.com/luke-goddard/taskninja/interpreter/ast"
-	"github.com/luke-goddard/taskninja/interpreter/lex"
+	"github.com/luke-goddard/taskninja/interpreter/token"
 )
 
 func parsePrimaryExpression(p *Parser) ast.Expression {
 	switch p.current().Type {
-	case lex.TokenString:
+	case token.String:
 		return &ast.Literal{
 			Kind:  ast.LiteralKindString,
 			Value: p.consume().Value,
 		}
-	case lex.TokenNumber:
+	case token.Number:
 		return &ast.Literal{
 			Kind:  ast.LiteralKindNumber,
 			Value: p.consume().Value,
 		}
-	case lex.TokenKey:
+	case token.Key:
 		var k = p.consume().Value
 		p.consume() // Get past colon
 		return &ast.Key{Key: k}
@@ -31,7 +31,7 @@ func parsePrimaryExpression(p *Parser) ast.Expression {
 }
 
 func parseExpression(p *Parser, bp BindingPower) ast.Expression {
-	if p.hasNoTokens() || p.current().Type == lex.TokenEOF{
+	if p.hasNoTokens() || p.current().Type == token.Eof {
 		return nil
 	}
 	var tokenKind = p.current().Type
@@ -61,23 +61,23 @@ func parseExpression(p *Parser, bp BindingPower) ast.Expression {
 
 func parseBinaryExpression(p *Parser, left ast.Expression, bp BindingPower) ast.Expression {
 	if !p.expectOneOf(
-		lex.TokenEQ, lex.TokenLT, lex.TokenPlus,
-		lex.TokenMinus, lex.TokenStar, lex.TokenSlash,
+		token.Equal, token.LessThan, token.Plus,
+		token.Minus, token.Star, token.Slash,
 	) {
 		return nil
 	}
 	var op = p.consume()
 	var binop ast.BinaryOperator
 	switch op.Type {
-	case lex.TokenEQ:
+	case token.Equal:
 		binop = ast.BinaryOperatorEq
-	case lex.TokenLT:
+	case token.LessThan:
 		binop = ast.BinaryOperatorLt
-	case lex.TokenPlus:
+	case token.Plus:
 		binop = ast.BinaryOperatorAdd
-	case lex.TokenMinus:
+	case token.Minus:
 		binop = ast.BinaryOperatorSub
-	case lex.TokenStar:
+	case token.Star:
 		binop = ast.BinaryOperatorMul
 	default:
 		var err = fmt.Errorf("Unknown binary operator: %s", op.String())

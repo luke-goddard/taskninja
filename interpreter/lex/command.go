@@ -2,6 +2,8 @@ package lex
 
 import (
 	"strings"
+
+	"github.com/luke-goddard/taskninja/interpreter/token"
 )
 
 // Represent different types of commands e.g add
@@ -42,18 +44,18 @@ func lexCommand(l *Lexer) StateFn {
 		lexeme == string(CommandTags) {
 		if !l.seenCommand {
 			l.seenCommand = true
-			l.emit(TokenCommand)
+			l.emit(token.Command)
 			return lexStart
 		}
 	}
 
 	if strings.ToLower(lexeme) == "or" {
-		l.emit(TokenOr)
+		l.emit(token.Or)
 		return lexStart
 	}
 
 	if strings.ToLower(lexeme) == "and" {
-		l.emit(TokenAnd)
+		l.emit(token.And)
 		return lexStart
 	}
 

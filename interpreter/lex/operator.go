@@ -1,6 +1,10 @@
 package lex
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/luke-goddard/taskninja/interpreter/token"
+)
 
 func lexOperator(l *Lexer) StateFn {
 	var opp = l.next()
@@ -19,25 +23,25 @@ func lexOperator(l *Lexer) StateFn {
 		return lexNumber
 	}
 
-  if IsNumber(peek) {
-    l.emit(getOperator(opp))
-    return lexStart
-  }
+	if IsNumber(peek) {
+		l.emit(getOperator(opp))
+		return lexStart
+	}
 
 	// +test TODO: Lex tags here
 	return lexWord
 }
 
-func getOperator(opp rune) TokenType {
+func getOperator(opp rune) token.TokenType {
 	switch opp {
 	case '+':
-		return TokenPlus
+		return token.Plus
 	case '-':
-		return TokenMinus
+		return token.Minus
 	case '*':
-		return TokenStar
+		return token.Star
 	case '/':
-		return TokenSlash
+		return token.Slash
 	}
 	var e = fmt.Errorf("Unknown operator: %c", opp)
 	panic(e)

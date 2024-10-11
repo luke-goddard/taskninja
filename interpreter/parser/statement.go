@@ -5,15 +5,15 @@ import (
 	"strings"
 
 	"github.com/luke-goddard/taskninja/interpreter/ast"
-	"github.com/luke-goddard/taskninja/interpreter/lex"
+	"github.com/luke-goddard/taskninja/interpreter/token"
 )
 
 func parseCommand(p *Parser) *ast.Command {
 	if p.hasNoTokens() {
-		p.errors.add(fmt.Errorf("Expected a command"), lex.Token{})
+		p.errors.add(fmt.Errorf("Expected a command"), token.Token{})
 		return nil
 	}
-	if p.current().Type == lex.TokenCommand &&
+	if p.current().Type == token.Command &&
 		strings.ToLower(p.current().Value) == "add" {
 		return parseAddCommand(p)
 	}
@@ -24,10 +24,10 @@ func parseCommand(p *Parser) *ast.Command {
 func parseAddCommand(p *Parser) *ast.Command {
 	p.consume()
 	if p.hasNoTokens() {
-		p.errors.add(fmt.Errorf("Expected a param"), lex.Token{})
+		p.errors.add(fmt.Errorf("Expected a param"), token.Token{})
 		return nil
 	}
-	if !p.expectCurrent(lex.TokenString) {
+	if !p.expectCurrent(token.String) {
 		return nil
 	}
 	var param = parseParam(p)
@@ -44,7 +44,7 @@ func parseAddCommand(p *Parser) *ast.Command {
 
 func parseExpressionStatements(p *Parser) []*ast.ExpressionStatement {
 	var statements []*ast.ExpressionStatement
-	for p.current().Type != lex.TokenEOF {
+	for p.current().Type != token.Eof {
 		statements = append(statements, parseExpressionStatement(p))
 	}
 	return statements
@@ -56,16 +56,16 @@ func parseExpressionStatement(p *Parser) *ast.ExpressionStatement {
 
 func parseParam(p *Parser) *ast.Param {
 	if p.hasNoTokens() {
-		p.errors.add(fmt.Errorf("Expected a param"), lex.Token{})
+		p.errors.add(fmt.Errorf("Expected a param"), token.Token{})
 		return nil
 	}
-	if p.current().Type == lex.TokenString {
+	if p.current().Type == token.String {
 		return &ast.Param{
 			Kind:  ast.ParamTypeDescription,
 			Value: p.consume().Value,
 		}
 	}
-	if p.current().Type == lex.TokenNumber {
+	if p.current().Type == token.Number {
 		return &ast.Param{
 			Kind:  ast.ParamTypeTaskId,
 			Value: p.consume().Value,
@@ -75,7 +75,7 @@ func parseParam(p *Parser) *ast.Param {
 }
 
 func parseCommandKind(p *Parser) ast.CommandKind {
-	if p.current().Type != lex.TokenCommand {
+	if p.current().Type != token.Command {
 		panic("Expected command")
 	}
 	p.consume()
@@ -117,7 +117,7 @@ func parseStatments(p *Parser) []ast.Statement {
 			"parseStatments: %v\n",
 			p.current().String(),
 		)
-		if p.hasNoTokens() || p.current().Type == lex.TokenEOF {
+		if p.hasNoTokens() || p.current().Type == token.Eof {
 			break
 		}
 		statements = append(statements, parseStatment(p))
@@ -137,7 +137,7 @@ func parseStatment(p *Parser) ast.Statement {
 
 func parsePairDeclStatement(p *Parser) ast.Statement {
 	var key = p.consume().Value
-	if p.current().Type != lex.TokenColon {
+	if p.current().Type != token.Colon {
 		panic("Expected colon")
 	}
 	p.consume()
