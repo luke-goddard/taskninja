@@ -1,4 +1,4 @@
-package errorManger
+package manager
 
 import (
 	"fmt"
@@ -22,6 +22,8 @@ const (
 	TranspilerErrorSeverityWarning ErrorTranspilerSeverity = "Warning"
 )
 
+const DEFAULT_ERROR_SEVERITY = TranspilerErrorSeverityFatal
+
 type ErrorTranspiler struct {
 	Variant  ErrorTranspilerVariant
 	Severity ErrorTranspilerSeverity
@@ -30,24 +32,24 @@ type ErrorTranspiler struct {
 	Node     *ast.Node
 }
 
+// NewErrorTranspiler creates a new error transpiler
 func NewErrorTranspiler(
 	variant ErrorTranspilerVariant,
-	severity ErrorTranspilerSeverity,
 	message string,
 ) *ErrorTranspiler {
 	return &ErrorTranspiler{
 		Variant:  variant,
-		Severity: severity,
+		Severity: DEFAULT_ERROR_SEVERITY,
 		Message:  message,
 	}
 }
 
 func (e *ErrorTranspiler) Error() string {
 	var baseMessage = fmt.Sprintf("(%s) %s: %s", e.Severity, e.Variant, e.Message)
-  if e.hasToken() {
-    baseMessage = fmt.Sprintf("%s at %s", baseMessage, e.Token.Position.String())
-  }
-  return baseMessage
+	if e.hasToken() {
+		baseMessage = fmt.Sprintf("%s at %s", baseMessage, e.Token.Position.String())
+	}
+	return baseMessage
 }
 
 func (e *ErrorTranspiler) SetToken(token *lex.Token) *ErrorTranspiler {
@@ -60,5 +62,35 @@ func (e *ErrorTranspiler) SetNode(node *ast.Node) *ErrorTranspiler {
 	return e
 }
 
+func (e *ErrorTranspiler) SetSeverityFatal() *ErrorTranspiler {
+	e.Severity = TranspilerErrorSeverityFatal
+	return e
+}
+
+func (e *ErrorTranspiler) SetSeverityWarning() *ErrorTranspiler {
+	e.Severity = TranspilerErrorSeverityWarning
+	return e
+}
+
 func (e *ErrorTranspiler) hasToken() bool { return e.Token != nil }
 func (e *ErrorTranspiler) hasNode() bool  { return e.Node != nil }
+
+// Occured during the Lexical Analysis phase
+func NewLexError(message string) *ErrorTranspiler {
+	return NewErrorTranspiler(TranspilerErrorLex, message)
+}
+
+// Occured during the Syntax Analysis phase
+func NewParseError(message string) *ErrorTranspiler {
+	return NewErrorTranspiler(TranspilerErrorParse, message)
+}
+
+// Occured during the Semantic Analysis phase
+func NewSemanticError(message string) *ErrorTranspiler {
+	return NewErrorTranspiler(TranspilerErrorSemantic, message)
+}
+
+// Occured during the Transpilation phase
+func NewTranspilationError(message string) *ErrorTranspiler {
+	return NewErrorTranspiler(TranspilerErrorTranspilation, message)
+}

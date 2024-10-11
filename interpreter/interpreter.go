@@ -3,15 +3,17 @@ package interpreter
 import (
 	"fmt"
 
+	"github.com/luke-goddard/taskninja/interpreter/errorManager"
 	"github.com/luke-goddard/taskninja/interpreter/lex"
 	"github.com/luke-goddard/taskninja/interpreter/parser"
 	"github.com/sanity-io/litter"
 )
 
 type Interpreter struct {
-	input string
-	lexer *lex.Lexer
-  parser *parser.Parser
+	input  string
+	lexer  *lex.Lexer
+	parser *parser.Parser
+	errs   *manager.ErrorManager
 }
 
 func NewInterpreter(input string) *Interpreter {
