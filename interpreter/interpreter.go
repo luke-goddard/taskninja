@@ -11,6 +11,7 @@ import (
 type Interpreter struct {
 	input string
 	lexer *lex.Lexer
+  parser *parser.Parser
 }
 
 func NewInterpreter(input string) *Interpreter {
