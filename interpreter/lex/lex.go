@@ -109,6 +109,7 @@ func (l *Lexer) emitError(error string) StateFn {
 	return nil
 }
 
+// Returns nill, indicating that the lexer should stop processing
 func (l *Lexer) errorf(format string, args ...interface{}) StateFn {
 	l.Items <- NewToken(
 		TokenError,
