@@ -1,2 +1,2 @@
 // Used to handle the errors for the transpilation pipeline
-package manger
+package manager
