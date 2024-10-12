@@ -62,6 +62,12 @@ func (p *Parser) Parse(tokens []token.Token) (*ast.Command, []manager.ErrorTrans
 	return parseCommand(p), p.errors.ParseErrors()
 }
 
+func (p *Parser) Reset() *Parser {
+  p.position = 0
+  p.hasCheckedExists = false
+  return p
+}
+
 func (p *Parser) hasTokens() bool {
 	if p.hasCheckedExists {
 		return true

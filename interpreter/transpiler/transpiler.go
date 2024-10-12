@@ -21,6 +21,13 @@ func NewTranspiler(manager *manager.ErrorManager) *Transpiler {
 	}
 }
 
-func (transpiler *Transpiler) Transpile(comand *ast.Command) (SqlStatement, SqlArgs, []manager.ErrorTranspiler) {
+func (transpiler *Transpiler) Reset() *Transpiler {
+  transpiler.builder.Reset()
+  return transpiler
+}
+
+func (transpiler *Transpiler) Transpile(
+	comand *ast.Command,
+) (SqlStatement, SqlArgs, []manager.ErrorTranspiler) {
 	panic("!TODO: Implement Transpiler.Transpile()")
 }

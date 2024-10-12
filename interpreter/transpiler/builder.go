@@ -15,3 +15,10 @@ func NewSqlBuilder() *SqlBuilder {
     Delete: sqlbuilder.NewDeleteBuilder(),
   }
 }
+
+func (builder *SqlBuilder) Reset() *SqlBuilder {
+  builder.Select = sqlbuilder.NewSelectBuilder()
+  builder.Insert = sqlbuilder.NewInsertBuilder()
+  builder.Delete = sqlbuilder.NewDeleteBuilder()
+  return builder
+}
