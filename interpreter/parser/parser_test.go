@@ -76,8 +76,8 @@ func TestParser(t *testing.T) {
 }
 
 func FuzzParser(f *testing.F) {
-  var errManager = manager.NewErrorManager()
-  var parser = NewParser(errManager)
+	var errManager = manager.NewErrorManager()
+	var parser = NewParser(errManager)
 	f.Fuzz(func(t *testing.T, input []byte) {
 		t.Logf("Fuzzing: %s", input)
 		var tokens = make([]token.Token, 0)
@@ -96,6 +96,6 @@ func FuzzParser(f *testing.F) {
 			t.Logf("Token: %v", token.Type.String())
 		}
 		tokens = append(tokens, token.Token{Type: token.Eof, Value: ""})
-		parser.Parse(tokens)
+		parser.Reset().Parse(tokens)
 	})
 }
