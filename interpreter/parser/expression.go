@@ -48,8 +48,9 @@ func parseExpression(parser *Parser, bp BindingPower) ast.Expression {
 		var ledHandler, exists = LedTable[tokenKind]
 		if !exists {
 			var current = parser.current()
-			var err = fmt.Errorf("Missing led handler Unknown token: %s", current.String())
-			panic(err)
+			var message = fmt.Sprintf("Missing led handler Unknown token: %s", current.String())
+      parser.errors.EmitParse(message, current)
+      return nil
 		}
 		left = ledHandler(parser, left, bp)
 	}

@@ -74,18 +74,6 @@ func parseParam(parser *Parser) *ast.Param {
 	panic("Unknown param")
 }
 
-func parseCommandKind(parser *Parser) ast.CommandKind {
-	if parser.current().Type != token.Command {
-		panic("Expected command")
-	}
-	parser.consume()
-	switch strings.ToLower(parser.current().Value) {
-	case "add":
-		return ast.CommandKindAdd
-	}
-	panic("Unknown command")
-}
-
 func parseTagDecStatement(parser *Parser) ast.Statement {
 	var value = parser.current().Value
 	if len(value) == 0 {
