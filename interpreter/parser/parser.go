@@ -29,65 +29,37 @@
 package parser
 
 import (
-	"context"
 	"fmt"
 	"runtime/debug"
-	"time"
 
 	"github.com/luke-goddard/taskninja/interpreter/ast"
+	"github.com/luke-goddard/taskninja/interpreter/manager"
 	"github.com/luke-goddard/taskninja/interpreter/token"
 )
-
-type ParseError struct {
-	Message error
-	Token   token.Token
-}
-
-type ParseErrorList []ParseError
-
-func (e *ParseErrorList) add(message error, token token.Token) {
-	if message == nil {
-		panic("message cannot be nil")
-	}
-	fmt.Println(message)
-	*e = append(*e, ParseError{message, token})
-}
 
 type Parser struct {
 	tokens           []token.Token
 	position         int
-	errors           ParseErrorList
-	hasCheckedExists bool
-	context          context.Context
-	cancel           context.CancelFunc
+	hasCheckedExists bool // Token, not column/table
+	manager          *manager.ErrorManager
 }
 
-func NewParser(tokens []token.Token) *Parser {
-	createLookupTable()
-	var ctx, cancel = context.WithTimeout(context.Background(), time.Duration(5*time.Second))
-	var p = NewParserWithContext(tokens, ctx)
-	p.cancel = cancel
-	return p
-}
-
-func NewParserWithContext(tokens []token.Token, ctx context.Context) *Parser {
+func NewParser(manager *manager.ErrorManager) *Parser {
 	createLookupTable()
 	return &Parser{
-		tokens:           tokens,
 		position:         0,
 		hasCheckedExists: false,
-		context:          ctx,
-		errors:           ParseErrorList{},
+		manager:          manager,
 	}
 }
 
-func (p *Parser) Parse(tokens []token.Token) (*ast.Command, ParseErrorList) {
+func (p *Parser) Parse(tokens []token.Token) (*ast.Command, []manager.ErrorTranspiler) {
 	p.tokens = tokens
 	if len(tokens) == 0 {
-		p.errors.add(fmt.Errorf("no tokens to parse"), token.Token{})
-		return nil, p.errors
+		p.manager.EmitParse("no tokens to parse", &token.Token{})
+		return nil, p.manager.ParseErrors()
 	}
-	return parseCommand(p), p.errors
+	return parseCommand(p), p.manager.ParseErrors()
 }
 
 func (p *Parser) hasTokens() bool {
@@ -105,71 +77,64 @@ func (p *Parser) hasTokens() bool {
 	return true
 }
 
-func (p *Parser) hasNoTokens() bool {
-	return !p.hasTokens()
+func (parser *Parser) hasNoTokens() bool {
+	return !parser.hasTokens()
 }
 
-func (p *Parser) current() *token.Token {
-	if !p.hasCheckedExists {
+func (parser *Parser) current() *token.Token {
+	if !parser.hasCheckedExists {
 		panic("Must call hasTokens before calling current")
 	}
-	if p.position >= len(p.tokens) {
+	if parser.position >= len(parser.tokens) {
 		var err = fmt.Errorf(
 			"Position is greater than the number of tokens Position: %d total: %d\n",
-			p.position,
-			len(p.tokens),
+			parser.position,
+			len(parser.tokens),
 		)
 		panic(err)
 	}
-	if p.position < 0 {
+	if parser.position < 0 {
 		panic("Position is less than 0")
 	}
-	return &p.tokens[p.position]
+	return &parser.tokens[parser.position]
 }
 
-func (p *Parser) consume() *token.Token {
-	if !p.hasCheckedExists {
+func (parser *Parser) consume() *token.Token {
+	if !parser.hasCheckedExists {
 		panic("Must call hasTokens before calling consume")
 	}
-	if p.position >= len(p.tokens) {
+	if parser.position >= len(parser.tokens) {
 		debug.PrintStack()
 		panic("Position is greater than the number of tokens")
 	}
-	if p.position < 0 {
+	if parser.position < 0 {
 		panic("Position is less than 0")
 	}
-	p.position++
-	return &p.tokens[p.position-1]
+	parser.position++
+	return &parser.tokens[parser.position-1]
 }
 
-func (p *Parser) expectCurrent(tokenType token.TokenType) bool {
-	if p.current().Type != tokenType {
-		p.errors.add(
-			fmt.Errorf(
-				"Expected token type %s, got %s",
-				tokenType.String(),
-				p.current().Type.String(),
-			),
-			*p.current(),
+func (parser *Parser) expectCurrent(tokenType token.TokenType) bool {
+	if parser.current().Type != tokenType {
+		var message = fmt.Sprintf(
+			"Expected token type %s, got %s",
+			tokenType.String(),
+			parser.current().Type.String(),
 		)
+		parser.manager.EmitParse(message, parser.current())
 		return false
 	}
 	return true
 }
 
-func (p *Parser) expectOneOf(t ...token.TokenType) bool {
+func (parser *Parser) expectOneOf(t ...token.TokenType) bool {
 	for _, tokenType := range t {
-		if p.current().Type == tokenType {
+		if parser.current().Type == tokenType {
 			return true
 		}
 	}
-	p.errors.add(
-		fmt.Errorf(
-			"Expected one of token types %v, got %s",
-			t,
-			p.current().Type.String(),
-		),
-		*p.current(),
-	)
+	var current = parser.current().Type.String()
+	var message = fmt.Sprintf("Expected one of token types %v, got %s", t, current)
+	parser.manager.EmitLex(message, parser.current())
 	return false
 }

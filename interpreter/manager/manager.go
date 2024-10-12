@@ -59,3 +59,33 @@ func (manager *ErrorManager) emit(e *ErrorTranspiler) {
 	manager.hasErrors = true
 	manager.errors = append(manager.errors, *e)
 }
+
+func (manager *ErrorManager) Errors() []ErrorTranspiler {
+	return manager.errors
+}
+
+func (manager *ErrorManager) ParseErrors() []ErrorTranspiler {
+  return manager.filterErrors(TranspilerErrorParse)
+}
+
+func (manager *ErrorManager) LexErrors() []ErrorTranspiler {
+  return manager.filterErrors(TranspilerErrorLex)
+}
+
+func (manager *ErrorManager) SemanticErrors() []ErrorTranspiler {
+  return manager.filterErrors(TranspilerErrorSemantic)
+}
+
+func (manager *ErrorManager) TranspilationErrors() []ErrorTranspiler {
+  return manager.filterErrors(TranspilerErrorTranspilation)
+}
+
+func (manager *ErrorManager) filterErrors(variant ErrorTranspilerVariant) []ErrorTranspiler {
+  var errors = make([]ErrorTranspiler, 0)
+  for _, e := range manager.errors {
+    if e.Variant == variant {
+      errors = append(errors, e)
+    }
+  }
+  return errors
+}

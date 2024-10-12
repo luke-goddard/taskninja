@@ -2,71 +2,68 @@ package parser
 
 import (
 	"fmt"
-	"runtime/debug"
-
 	"github.com/luke-goddard/taskninja/interpreter/ast"
 	"github.com/luke-goddard/taskninja/interpreter/token"
 )
 
-func parsePrimaryExpression(p *Parser) ast.Expression {
-	switch p.current().Type {
+func parsePrimaryExpression(parser *Parser) ast.Expression {
+	switch parser.current().Type {
 	case token.String:
 		return &ast.Literal{
 			Kind:  ast.LiteralKindString,
-			Value: p.consume().Value,
+			Value: parser.consume().Value,
 		}
 	case token.Number:
 		return &ast.Literal{
 			Kind:  ast.LiteralKindNumber,
-			Value: p.consume().Value,
+			Value: parser.consume().Value,
 		}
 	case token.Key:
-		var k = p.consume().Value
-		p.consume() // Get past colon
+		var k = parser.consume().Value
+		parser.consume() // Get past colon
 		return &ast.Key{Key: k}
 	}
-	var current = p.current()
+	var current = parser.current()
 	var err = fmt.Errorf("Unknown primary expression: %s", current.String())
 	panic(err)
 }
 
-func parseExpression(p *Parser, bp BindingPower) ast.Expression {
-	if p.hasNoTokens() || p.current().Type == token.Eof {
+func parseExpression(parser *Parser, bp BindingPower) ast.Expression {
+	if parser.hasNoTokens() || parser.current().Type == token.Eof {
 		return nil
 	}
-	var tokenKind = p.current().Type
+	var tokenKind = parser.current().Type
 	var nudHandler, exists = NudTable[tokenKind]
 	if !exists {
-		var current = p.current()
-		debug.PrintStack()
-		var err = fmt.Errorf("Nud handler does not exist for token: %s", current.String())
-		p.errors.add(err, *current)
+		var current = parser.current()
+		var message = fmt.Sprintf("Nud handler does not exist for token: %s", current.String())
+		parser.manager.EmitParse(message, current)
 		return nil
 	}
 
-	var left = nudHandler(p)
+	var left = nudHandler(parser)
 
-	for BindingPowerTable[p.current().Type] > bp {
-		var tokenKind = p.current().Type
+	for BindingPowerTable[parser.current().Type] > bp {
+		var tokenKind = parser.current().Type
 		var ledHandler, exists = LedTable[tokenKind]
 		if !exists {
-			var current = p.current()
+			var current = parser.current()
 			var err = fmt.Errorf("Missing led handler Unknown token: %s", current.String())
 			panic(err)
 		}
-		left = ledHandler(p, left, bp)
+		left = ledHandler(parser, left, bp)
 	}
 	return left
 }
 
-func parseBinaryExpression(p *Parser, left ast.Expression, bp BindingPower) ast.Expression {
-	if !p.expectOneOf(
+func parseBinaryExpression(parser *Parser, left ast.Expression, bp BindingPower) ast.Expression {
+	if !parser.expectOneOf(
 		token.Equal, token.LessThan, token.Plus,
 		token.Minus, token.Star, token.Slash,
 	) {
 		return nil
 	}
-	var op = p.consume()
+	var op = parser.consume()
 	var binop ast.BinaryOperator
 	switch op.Type {
 	case token.Equal:
@@ -84,7 +81,7 @@ func parseBinaryExpression(p *Parser, left ast.Expression, bp BindingPower) ast.
 		panic(err)
 	}
 
-	var right = parseExpression(p, bp)
+	var right = parseExpression(parser, bp)
 	if right == nil {
 		return nil
 	}
@@ -95,12 +92,12 @@ func parseBinaryExpression(p *Parser, left ast.Expression, bp BindingPower) ast.
 	}
 }
 
-func parseGroupedExpression(p *Parser) ast.Expression {
-	p.consume() // Get past left paren
-	var expression = parseExpression(p, BP_DEFAULT)
+func parseGroupedExpression(parser *Parser) ast.Expression {
+	parser.consume() // Get past left paren
+	var expression = parseExpression(parser, BP_DEFAULT)
 	if expression == nil {
 		return nil
 	}
-	p.consume() // Get past right paren
+	parser.consume() // Get past right paren
 	return expression
 }

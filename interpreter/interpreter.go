@@ -1,9 +1,12 @@
 package interpreter
 
 import (
+	"fmt"
+
 	"github.com/luke-goddard/taskninja/interpreter/lex"
 	"github.com/luke-goddard/taskninja/interpreter/manager"
 	"github.com/luke-goddard/taskninja/interpreter/parser"
+	"github.com/sanity-io/litter"
 )
 
 type Interpreter struct {
@@ -16,7 +19,8 @@ type Interpreter struct {
 func NewInterpreter() *Interpreter {
 	var manager = manager.NewErrorManager()
 	return &Interpreter{
-		lexer: lex.NewLexer(manager),
+		lexer:  lex.NewLexer(manager),
+		parser: parser.NewParser(manager),
 	}
 }
 
@@ -27,6 +31,10 @@ func (interpreter *Interpreter) Execute(input string) {
 		SetInput(input).
 		Tokenize()
 
-	interpreter.parser.Parse(tokens)
-}
+	var ast, err = interpreter.parser.Parse(tokens)
+  if err != nil {
+    fmt.Println(err)
+  }
 
+  litter.Dump(ast)
+}
