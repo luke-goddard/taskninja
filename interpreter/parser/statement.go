@@ -42,14 +42,6 @@ func parseAddCommand(parser *Parser) *ast.Command {
 	}
 }
 
-func parseExpressionStatements(parser *Parser) []*ast.ExpressionStatement {
-	var statements []*ast.ExpressionStatement
-	for parser.current().Type != token.Eof {
-		statements = append(statements, parseExpressionStatement(parser))
-	}
-	return statements
-}
-
 func parseExpressionStatement(parser *Parser) *ast.ExpressionStatement {
 	return &ast.ExpressionStatement{Expr: parseExpression(parser, BP_DEFAULT)}
 }
