@@ -1,6 +1,6 @@
 package db
 
-const TaskSchema = `
+const M000_TaskSchema = `
 CREATE TABLE IF NOT EXISTS tasks (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	title TEXT NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS tasks (
 	dueUtc TEXT,
 	updatedAtUtc TEXT NOT NULL DEFAULT current_timestamp,
 	createdAtUtc TEXT NOT NULL DEFAULT current_timestamp,
-	completedAtUtc TEXT,
+	completedAtUtc TEXT
 );`
 
 type TaskPriority int
@@ -23,12 +23,12 @@ const (
 )
 
 type Task struct {
-	ID              int          `json:"id" db:"id"`
-	Description     string       `json:"description" db:"description"`
-	Due             string       `json:"due" db:"due"`
-	Completed       bool         `json:"completed" db:"completed"`
-	Priority        TaskPriority `json:"priority" db:"priority"`
-	CreatedUtc      string       `json:"createdUtc" db:"createdUtc"`
-	UpdatedAtUtc    string       `json:"updatedAtUtc" db:"updatedAtUtc"`
-	CompletedUtc    string       `json:"completedUtc" db:"completedUtc"`
+	ID           int          `json:"id" db:"id"`
+	Description  string       `json:"description" db:"description"`
+	Due          string       `json:"due" db:"due"`
+	Completed    bool         `json:"completed" db:"completed"`
+	Priority     TaskPriority `json:"priority" db:"priority"`
+	CreatedUtc   string       `json:"createdUtc" db:"createdUtc"`
+	UpdatedAtUtc string       `json:"updatedAtUtc" db:"updatedAtUtc"`
+	CompletedUtc string       `json:"completedUtc" db:"completedUtc"`
 }
