@@ -57,8 +57,8 @@ func (interpreter *Interpreter) Execute(input string) {
 		return
 	}
 
+	litter.Dump(cmd)
 	sql, args, errs = interpreter.transpiler.Reset().Transpile(cmd)
 	fmt.Println(sql)
 	fmt.Println(args)
-	litter.Dump(cmd)
 }

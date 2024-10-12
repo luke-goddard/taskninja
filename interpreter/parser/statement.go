@@ -16,6 +16,10 @@ func parseCommand(parser *Parser) *ast.Command {
 		strings.ToLower(parser.current().Value) == "add" {
 		return parseAddCommand(parser)
 	}
+  if parser.current().Type == token.Command &&
+    strings.ToLower(parser.current().Value) == "list" {
+    return parseListCommand(parser)
+  }
 	parser.errors.EmitParse("Unknown command", parser.current())
 	return nil
 }
@@ -37,6 +41,15 @@ func parseAddCommand(parser *Parser) *ast.Command {
 	return &ast.Command{
 		Kind:    ast.CommandKindAdd,
 		Param:   param,
+		Options: options,
+	}
+}
+
+func parseListCommand(parser *Parser) *ast.Command {
+	parser.consume()
+	var options = parseStatments(parser)
+	return &ast.Command{
+		Kind:    ast.CommandKindList,
 		Options: options,
 	}
 }
