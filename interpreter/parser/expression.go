@@ -37,7 +37,7 @@ func parseExpression(parser *Parser, bp BindingPower) ast.Expression {
 	if !exists {
 		var current = parser.current()
 		var message = fmt.Sprintf("Nud handler does not exist for token: %s", current.String())
-		parser.manager.EmitParse(message, current)
+		parser.errors.EmitParse(message, current)
 		return nil
 	}
 

@@ -41,7 +41,7 @@ type Parser struct {
 	tokens           []token.Token
 	position         int
 	hasCheckedExists bool // Token, not column/table
-	manager          *manager.ErrorManager
+	errors          *manager.ErrorManager
 }
 
 func NewParser(manager *manager.ErrorManager) *Parser {
@@ -49,17 +49,17 @@ func NewParser(manager *manager.ErrorManager) *Parser {
 	return &Parser{
 		position:         0,
 		hasCheckedExists: false,
-		manager:          manager,
+		errors:          manager,
 	}
 }
 
 func (p *Parser) Parse(tokens []token.Token) (*ast.Command, []manager.ErrorTranspiler) {
 	p.tokens = tokens
 	if len(tokens) == 0 {
-		p.manager.EmitParse("no tokens to parse", &token.Token{})
-		return nil, p.manager.ParseErrors()
+		p.errors.EmitParse("no tokens to parse", &token.Token{})
+		return nil, p.errors.ParseErrors()
 	}
-	return parseCommand(p), p.manager.ParseErrors()
+	return parseCommand(p), p.errors.ParseErrors()
 }
 
 func (p *Parser) hasTokens() bool {
@@ -121,7 +121,7 @@ func (parser *Parser) expectCurrent(tokenType token.TokenType) bool {
 			tokenType.String(),
 			parser.current().Type.String(),
 		)
-		parser.manager.EmitParse(message, parser.current())
+		parser.errors.EmitParse(message, parser.current())
 		return false
 	}
 	return true
@@ -135,6 +135,6 @@ func (parser *Parser) expectOneOf(t ...token.TokenType) bool {
 	}
 	var current = parser.current().Type.String()
 	var message = fmt.Sprintf("Expected one of token types %v, got %s", t, current)
-	parser.manager.EmitLex(message, parser.current())
+	parser.errors.EmitLex(message, parser.current())
 	return false
 }

@@ -10,21 +10,21 @@ import (
 
 func parseCommand(parser *Parser) *ast.Command {
 	if parser.hasNoTokens() {
-		parser.manager.EmitParse("no tokens to parse", &token.Token{})
+		parser.errors.EmitParse("no tokens to parse", &token.Token{})
 		return nil
 	}
 	if parser.current().Type == token.Command &&
 		strings.ToLower(parser.current().Value) == "add" {
 		return parseAddCommand(parser)
 	}
-	parser.manager.EmitParse("Unknown command", parser.current())
+	parser.errors.EmitParse("Unknown command", parser.current())
 	return nil
 }
 
 func parseAddCommand(parser *Parser) *ast.Command {
 	parser.consume()
 	if parser.hasNoTokens() {
-		parser.manager.EmitParse("Expected a param", &token.Token{})
+		parser.errors.EmitParse("Expected a param", &token.Token{})
 		return nil
 	}
 	if !parser.expectCurrent(token.String) {
@@ -56,7 +56,7 @@ func parseExpressionStatement(parser *Parser) *ast.ExpressionStatement {
 
 func parseParam(parser *Parser) *ast.Param {
 	if parser.hasNoTokens() {
-		parser.manager.EmitParse("Expected a param", &token.Token{})
+		parser.errors.EmitParse("Expected a param", &token.Token{})
 		return nil
 	}
 	if parser.current().Type == token.String {
