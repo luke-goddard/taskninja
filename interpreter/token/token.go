@@ -31,8 +31,8 @@ const (
 	RightParen TokenType = iota // )
 	Tag        TokenType = iota // +HOME, -HOME
 	Command    TokenType = iota // add, modify, etc.
-	LessThan         TokenType = iota // <
-	Equal         TokenType = iota // =
+	LessThan   TokenType = iota // <
+	Equal      TokenType = iota // =
 	Or         TokenType = iota // or
 	And        TokenType = iota // and
 )
@@ -96,40 +96,58 @@ func (t *TokenType) String() string {
 	switch *t {
 	case Eof:
 		return "EOF"
+
 	case Error:
 		return "Error"
+
 	case String:
 		return "String"
+
 	case Key:
 		return "Key"
+
 	case Tag:
 		return "Tag"
+
 	case Number:
 		return "Number"
+
 	case Plus:
 		return "Plus"
+
 	case Minus:
 		return "Minus"
+
 	case Star:
 		return "Star"
+
 	case Slash:
 		return "Slash"
+
 	case Command:
 		return "Command"
+
 	case Colon:
 		return "Colon"
+
 	case LeftParen:
 		return "LeftParen"
+
 	case RightParen:
 		return "RightParen"
+
 	case LessThan:
 		return "LT"
+
 	case Equal:
 		return "EQ"
+
 	case Or:
 		return "Or"
+
 	case And:
 		return "And"
+
 	default:
 		var err = fmt.Errorf("Unknown token type: %d", *t)
 		panic(err)
