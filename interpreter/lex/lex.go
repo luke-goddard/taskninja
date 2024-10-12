@@ -19,7 +19,7 @@ const EOF = -1
 
 // A lexer is used to tokenize a string into a series of tokens
 type Lexer struct {
-	manager     *manager.ErrorManager
+	errors     *manager.ErrorManager
 	input       string        // the string being scanned
 	line        int           // current line number
 	start       token.Pos     // start position of this item
@@ -34,7 +34,7 @@ type Lexer struct {
 // Create a new lexer that will tokenize the given input
 func NewLexer(manager *manager.ErrorManager) *Lexer {
 	return &Lexer{
-		manager:     manager,
+		errors:     manager,
 		line:        1,
 		start:       0,
 		position:    0,
@@ -121,7 +121,7 @@ func (l *Lexer) emitError(message string) StateFn {
 		l.line,
 		message,
 	)
-	l.manager.EmitLex(message, token)
+	l.errors.EmitLex(message, token)
 	return nil
 }
 
