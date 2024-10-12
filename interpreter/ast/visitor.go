@@ -24,13 +24,12 @@ func Walk(v Visitor, node Node) {
 	case *ExpressionStatement:
 		Walk(v, n.Expr)
 
-
 	case *LogicalExpression:
 		Walk(v, n.Left)
 		Walk(v, n.Right)
 
-  default:
-    panic("unreachable")
+	default:
+		panic("unreachable")
 	}
 
 }
