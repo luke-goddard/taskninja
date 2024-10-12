@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/luke-goddard/taskninja/interpreter/ast"
@@ -93,10 +92,6 @@ func parseStatments(parser *Parser) []ast.Statement {
 	var statements []ast.Statement
 
 	for {
-		fmt.Printf(
-			"parseStatments: %v\n",
-			parser.current().String(),
-		)
 		if parser.hasNoTokens() || parser.current().Type == token.Eof {
 			break
 		}

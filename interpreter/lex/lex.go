@@ -19,7 +19,7 @@ const EOF = -1
 
 // A lexer is used to tokenize a string into a series of tokens
 type Lexer struct {
-	errors     *manager.ErrorManager
+	errors      *manager.ErrorManager
 	input       string        // the string being scanned
 	line        int           // current line number
 	start       token.Pos     // start position of this item
@@ -34,7 +34,7 @@ type Lexer struct {
 // Create a new lexer that will tokenize the given input
 func NewLexer(manager *manager.ErrorManager) *Lexer {
 	return &Lexer{
-		errors:     manager,
+		errors:      manager,
 		line:        1,
 		start:       0,
 		position:    0,
@@ -67,7 +67,7 @@ func (l *Lexer) Reset() *Lexer {
 }
 
 // Tokenize the input string and return the tokens
-func (l *Lexer) Tokenize() []token.Token {
+func (l *Lexer) Tokenize() ([]token.Token, []manager.ErrorTranspiler) {
 	for state := l.initalState; state != nil; {
 		l.depth++
 		if l.depth >= l.maxDepth {
@@ -76,7 +76,7 @@ func (l *Lexer) Tokenize() []token.Token {
 		}
 		state = state(l)
 	}
-	return l.tokens
+	return l.tokens, l.errors.LexErrors()
 }
 
 // Get the next rune in the input, incrementing the position

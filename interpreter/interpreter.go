@@ -26,15 +26,19 @@ func NewInterpreter() *Interpreter {
 
 func (interpreter *Interpreter) Execute(input string) {
 	interpreter.input = input
-	var tokens = interpreter.lexer.
+	var tokens, errs = interpreter.lexer.
 		Reset().
 		SetInput(input).
 		Tokenize()
 
-	var ast, err = interpreter.parser.Parse(tokens)
-  if err != nil {
-    fmt.Println(err)
+  if len(errs) > 0 {
+    fmt.Println(errs)
   }
 
-  litter.Dump(ast)
+	var ast, err = interpreter.parser.Parse(tokens)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	litter.Dump(ast)
 }
