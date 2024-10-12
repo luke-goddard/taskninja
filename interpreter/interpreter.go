@@ -3,11 +3,11 @@ package interpreter
 import (
 	"fmt"
 
-	"github.com/luke-goddard/taskninja/interpreter/lex"
 	"github.com/luke-goddard/taskninja/interpreter/ast"
-	"github.com/luke-goddard/taskninja/interpreter/token"
+	"github.com/luke-goddard/taskninja/interpreter/lex"
 	"github.com/luke-goddard/taskninja/interpreter/manager"
 	"github.com/luke-goddard/taskninja/interpreter/parser"
+	"github.com/luke-goddard/taskninja/interpreter/token"
 	"github.com/luke-goddard/taskninja/interpreter/transpiler"
 	"github.com/sanity-io/litter"
 )
@@ -32,11 +32,11 @@ func NewInterpreter() *Interpreter {
 func (interpreter *Interpreter) Execute(input string) {
 	interpreter.input = input
 
-  var tokens []token.Token
-  var cmd *ast.Command
-  var sql transpiler.SqlStatement
-  var args transpiler.SqlArgs
-  var errs []manager.ErrorTranspiler
+	var tokens []token.Token
+	var cmd *ast.Command
+	var sql transpiler.SqlStatement
+	var args transpiler.SqlArgs
+	var errs []manager.ErrorTranspiler
 
 	tokens, errs = interpreter.lexer.
 		Reset().
@@ -45,20 +45,20 @@ func (interpreter *Interpreter) Execute(input string) {
 
 	if len(errs) > 0 {
 		fmt.Println(errs)
-    return
+		return
 	}
 
 	cmd, errs = interpreter.parser.
 		Reset().
 		Parse(tokens)
 
-  if len(errs) > 0 {
-    fmt.Println(errs)
-    return
-  }
+	if len(errs) > 0 {
+		fmt.Println(errs)
+		return
+	}
 
-  sql, args, errs = interpreter.transpiler.Reset().Transpile(cmd)
-  fmt.Println(sql)
-  fmt.Println(args)
+	sql, args, errs = interpreter.transpiler.Reset().Transpile(cmd)
+	fmt.Println(sql)
+	fmt.Println(args)
 	litter.Dump(cmd)
 }

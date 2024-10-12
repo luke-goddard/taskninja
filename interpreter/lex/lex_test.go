@@ -7,12 +7,13 @@ import (
 )
 
 func TestLexStart(t *testing.T) {
+
 	var tc = []struct {
 		input     string
 		tokenType TokenType
 		value     string
 	}{
-		{"", TokenEOF, ""},
+		{"", token.TokenEOF, ""},
 		{"hello hello", TokenString, "hello"},
 		{"add hello", TokenCommand, "add"},
 		{"all", TokenCommand, "all"},
