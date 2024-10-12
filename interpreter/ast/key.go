@@ -14,3 +14,4 @@ func (p *Key) Type() NodeType {
 
 func (p *Key) Statement()  {}
 func (p *Key) Expression() {}
+

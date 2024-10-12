@@ -1,6 +1,9 @@
 package transpiler
 
-import "github.com/huandu/go-sqlbuilder"
+import (
+	"github.com/huandu/go-sqlbuilder"
+	"github.com/luke-goddard/taskninja/interpreter/ast"
+)
 
 type table string
 type joinExpression string
@@ -52,4 +55,17 @@ func (j *JoinTranspiler) hasSeen(table table, expr joinExpression) bool {
 		ret = true
 	}
 	return ret
+}
+
+func (j *JoinTranspiler) reset() {
+	j.sql = sqlbuilder.NewSelectBuilder()
+	j.previouslySeen = make(map[table]map[joinExpression]bool)
+}
+
+func (j *JoinTranspiler) Visit(node ast.Node) *JoinTranspiler {
+	// switch node := node.(type) {
+	// case *ast.Tag:
+	// 	j.Join("tags", "tags.id = taskTags.tagId")
+	// }
+	return j
 }
