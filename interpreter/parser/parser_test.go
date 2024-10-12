@@ -56,22 +56,28 @@ func TestParser(t *testing.T) {
 	for _, test := range tc {
 		t.Run(test.input, func(t *testing.T) {
 			var errManager = manager.NewErrorManager()
-			var tokens = lex.NewLexer(errManager).SetInput(test.input).Tokenize()
-			var parser = NewParser(tokens)
-			var tree, errs = parser.Parse()
+			var tokens []token.Token
+			var errs []manager.ErrorTranspiler
+			var ast *ast.Command
+
+			tokens, errs = lex.NewLexer(errManager).SetInput(test.input).Tokenize()
+			ast, errs = NewParser(errManager).Parse(tokens)
+
 			if !assert.Empty(t, errs) {
 				for _, err := range errs {
 					t.Logf("Error: %v", err)
 				}
 				t.Skip()
 			}
-			litter.Dump(tree)
-			assert.Equal(t, &test.expected, tree)
+			litter.Dump(ast)
+			assert.Equal(t, &test.expected, ast)
 		})
 	}
 }
 
 func FuzzParser(f *testing.F) {
+  var errManager = manager.NewErrorManager()
+  var parser = NewParser(errManager)
 	f.Fuzz(func(t *testing.T, input []byte) {
 		t.Logf("Fuzzing: %s", input)
 		var tokens = make([]token.Token, 0)
@@ -90,7 +96,6 @@ func FuzzParser(f *testing.F) {
 			t.Logf("Token: %v", token.Type.String())
 		}
 		tokens = append(tokens, token.Token{Type: token.Eof, Value: ""})
-		var parser = NewParser(tokens)
-		parser.Parse()
+		parser.Parse(tokens)
 	})
 }
