@@ -1,6 +1,8 @@
 package manager
 
-import "github.com/luke-goddard/taskninja/interpreter/token"
+import (
+	"github.com/luke-goddard/taskninja/interpreter/token"
+)
 
 // ErrorManager is used to store and process errors
 type ErrorManager struct {
@@ -65,27 +67,33 @@ func (manager *ErrorManager) Errors() []ErrorTranspiler {
 }
 
 func (manager *ErrorManager) ParseErrors() []ErrorTranspiler {
-  return manager.filterErrors(TranspilerErrorParse)
+	return manager.filterErrors(TranspilerErrorParse)
 }
 
 func (manager *ErrorManager) LexErrors() []ErrorTranspiler {
-  return manager.filterErrors(TranspilerErrorLex)
+	return manager.filterErrors(TranspilerErrorLex)
 }
 
 func (manager *ErrorManager) SemanticErrors() []ErrorTranspiler {
-  return manager.filterErrors(TranspilerErrorSemantic)
+	return manager.filterErrors(TranspilerErrorSemantic)
 }
 
 func (manager *ErrorManager) TranspilationErrors() []ErrorTranspiler {
-  return manager.filterErrors(TranspilerErrorTranspilation)
+	return manager.filterErrors(TranspilerErrorTranspilation)
 }
 
 func (manager *ErrorManager) filterErrors(variant ErrorTranspilerVariant) []ErrorTranspiler {
-  var errors = make([]ErrorTranspiler, 0)
-  for _, e := range manager.errors {
-    if e.Variant == variant {
-      errors = append(errors, e)
-    }
-  }
-  return errors
+	var errors = make([]ErrorTranspiler, 0)
+	for _, e := range manager.errors {
+		if e.Variant == variant {
+			errors = append(errors, e)
+		}
+	}
+	return errors
+}
+
+func (manager *ErrorManager) Reset() *ErrorManager {
+	manager.errors = make([]ErrorTranspiler, 0)
+	manager.hasErrors = false
+	return manager
 }

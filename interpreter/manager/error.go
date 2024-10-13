@@ -47,8 +47,7 @@ func NewErrorTranspiler(
 func (e *ErrorTranspiler) Error() string {
 	var baseMessage = fmt.Sprintf("(%s) %s: %s", e.Severity, e.Variant, e.Message)
 	if e.hasToken() {
-		// TODO: Add position information
-		// baseMessage = fmt.Sprintf("%s at %s", baseMessage, e.Token.Position.String())
+		baseMessage = fmt.Sprintf("%s: %s", baseMessage, e.Token.String())
 	}
 	return baseMessage
 }

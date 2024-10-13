@@ -23,3 +23,14 @@ func (c *Command) Type() NodeType {
 }
 
 func (c *Command) Statement() {}
+
+func (c *CommandKind) String() string {
+	switch *c {
+	case CommandKindAdd:
+		return "add"
+	case CommandKindList:
+		return "list"
+	default:
+		return "unknown"
+	}
+}

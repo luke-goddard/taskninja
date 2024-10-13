@@ -30,7 +30,6 @@ package parser
 
 import (
 	"fmt"
-	"runtime/debug"
 
 	"github.com/luke-goddard/taskninja/interpreter/ast"
 	"github.com/luke-goddard/taskninja/interpreter/manager"
@@ -110,7 +109,6 @@ func (parser *Parser) consume() *token.Token {
 		panic("Must call hasTokens before calling consume")
 	}
 	if parser.position >= len(parser.tokens) {
-		debug.PrintStack()
 		panic("Position is greater than the number of tokens")
 	}
 	if parser.position < 0 {

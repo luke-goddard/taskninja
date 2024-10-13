@@ -16,10 +16,12 @@ func parseCommand(parser *Parser) *ast.Command {
 		strings.ToLower(parser.current().Value) == "add" {
 		return parseAddCommand(parser)
 	}
-  if parser.current().Type == token.Command &&
-    strings.ToLower(parser.current().Value) == "list" {
-    return parseListCommand(parser)
-  }
+
+	if parser.current().Type == token.Command &&
+		strings.ToLower(parser.current().Value) == "list" {
+		return parseListCommand(parser)
+	}
+
 	parser.errors.EmitParse("Unknown command", parser.current())
 	return nil
 }
