@@ -11,7 +11,8 @@ var baseStyle = lipgloss.NewStyle().
 	BorderForeground(lipgloss.Color("240"))
 
 type model struct {
-	table table.Model
+	table      table.Model
+	dimensions *TerminalDimensions
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -43,25 +44,31 @@ func (m model) View() string {
 
 func (m model) Init() tea.Cmd { return nil }
 
-func NewTui() {
-	var columns = []table.Column{
-		{Title: "ID", Width: 2},
-		{Title: "Name", Width: 30},
-		{Title: "Priority", Width: 10},
-		{Title: "Project", Width: 10},
-		{Title: "Tags", Width: 10},
+func NewTui() error {
+
+	var dimensions, err = NewTerminalDimensions()
+	if err != nil {
+		return err
 	}
+
+	// https://github.com/charmbracelet/bubbletea/issues/43
+	var columns = []table.Column{
+		{Title: "ID", Width: dimensions.Width.PercentOrMin(0.02, 4)},
+		{Title: "Age", Width: dimensions.Width.PercentOrMin(0.02, 4)},
+		{Title: "Name", Width: dimensions.Width.PercentOrMin(0.54, 10)},
+		{Title: "Priority", Width: dimensions.Width.PercentOrMin(0.06, 10)},
+		{Title: "Project", Width: dimensions.Width.PercentOrMin(0.137, 10)},
+		{Title: "Tags", Width: dimensions.Width.PercentOrMin(0.16, 5)},
+	}
+
 	var rows = []table.Row{
-		{"1", "Task 1", "1", "Project 1", "tag1, tag2"},
-		{"2", "Task 2", "2", "Project 2", "tag3, tag4"},
-		{"3", "Task 3", "3", "Project 3", "tag5, tag6"},
-		{"4", "Task 4", "4", "Project 4", "tag7, tag8"},
+		{"1", "23", "Buy groceries", "High", "Shopping", "food"},
 	}
 	var tbl = table.New(
 		table.WithColumns(columns),
 		table.WithRows(rows),
 		table.WithFocused(true),
-		table.WithHeight(10),
+		table.WithHeight(dimensions.Height.PercentOrMin(0.7, 10)),
 	)
 
 	var style = table.DefaultStyles()
@@ -81,4 +88,5 @@ func NewTui() {
 
 	var model = model{table: tbl}
 	tea.NewProgram(model, tea.WithAltScreen()).Run()
+	return nil
 }

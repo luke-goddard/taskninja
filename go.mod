@@ -22,6 +22,8 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/gdamore/encoding v1.0.0 // indirect
+	github.com/gdamore/tcell v1.4.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
