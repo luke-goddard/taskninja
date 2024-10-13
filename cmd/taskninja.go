@@ -2,21 +2,22 @@ package main
 
 import (
 	"os"
-	"strings"
 
-	"github.com/luke-goddard/taskninja/interpreter"
+	"github.com/luke-goddard/taskninja/core"
 )
 
 func main() {
-	var args []string
-	if len(os.Args) > 1 {
-		args = os.Args[1:]
-	}
-	var sb = strings.Builder{}
-	for _, arg := range args {
-		sb.WriteString(arg)
-	}
-	var command = sb.String()
-	var interpreter = interpreter.NewInterpreter()
-	interpreter.Execute(command)
+	var runner = core.NewRunner(os.Args)
+	runner.Run()
+	// var args []string
+	// if len(os.Args) > 1 {
+	// 	args = os.Args[1:]
+	// }
+	// var sb = strings.Builder{}
+	// for _, arg := range args {
+	// 	sb.WriteString(arg)
+	// }
+	// var command = sb.String()
+	// var interpreter = interpreter.NewInterpreter()
+	// interpreter.Execute(command)
 }
