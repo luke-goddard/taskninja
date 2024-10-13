@@ -36,9 +36,22 @@ const (
 	ConnectionModeHTTP     ConnectionMode = "http"
 )
 
-type Connection struct {
+type SqlConnectionConfig struct {
 	Mode ConnectionMode `yaml:"mode"`       // in-memory, file, http
 	Path string         `yaml:"connection"` // connection string
+}
+
+func (c *SqlConnectionConfig) DSN() string {
+	switch c.Mode {
+	case ConnectionModeInMemory:
+		return ":memory:"
+	case ConnectionModeFile:
+		return c.Path
+	case ConnectionModeHTTP:
+		return c.Path
+	default:
+		return ":memory:"
+	}
 }
 
 type Log struct {
@@ -47,8 +60,8 @@ type Log struct {
 }
 
 type Config struct {
-	Connection Connection `yaml:"connection"` // How to connect to the sqlite database
-	Log        Log        `yaml:"log"`        // How to log
+	Connection SqlConnectionConfig `yaml:"connection"` // How to connect to the sqlite database
+	Log        Log                 `yaml:"log"`        // How to log
 }
 
 type ConfigErrorVariant string
@@ -140,6 +153,7 @@ func Bootstrap() *Config {
 	viper.SetConfigFile(configLocation)
 	viper.SetDefault("connection.mode", ConnectionModeInMemory)
 	viper.SetDefault("connection.path", "")
+	viper.SetDefault("log.level", LogLevelInfo)
 
 	err = viper.WriteConfig()
 	if err != nil {
@@ -172,6 +186,7 @@ func (c *Config) InitLogger() {
 	case LogLevelError:
 		level = zerolog.ErrorLevel
 	default:
+		log.Warn().Msg("Unknown log level set in config file, defaulting to info")
 		level = zerolog.InfoLevel
 	}
 	zerolog.SetGlobalLevel(level)
