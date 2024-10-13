@@ -8,6 +8,7 @@ import (
 	"github.com/luke-goddard/taskninja/db"
 	"github.com/luke-goddard/taskninja/interpreter"
 	"github.com/luke-goddard/taskninja/interpreter/ast"
+	"github.com/luke-goddard/taskninja/tui"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -43,6 +44,10 @@ func (r *Runner) Run() {
 	r.configDefaultLogger()
 	r.loadConfigOrFail()
 	r.config.InitLogger()
+
+	if r.args == "" {
+		tui.NewTui()
+	}
 
 	var db, err = db.NewStore(&r.config.Connection)
 	if err != nil {

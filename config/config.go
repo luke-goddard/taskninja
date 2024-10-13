@@ -173,12 +173,19 @@ func Bootstrap() *Config {
 }
 
 func (c *Config) InitLogger() {
+	switch LogMode(c.Log.Mode) {
+	case LogModePretty:
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	case LogModeJson:
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	}
 	var level zerolog.Level
 	switch LogLevel(c.Log.Level) {
 	case LogLevelTrace:
 		level = zerolog.TraceLevel
 	case LogLevelDebug:
 		level = zerolog.DebugLevel
+		log.Logger = log.With().Caller().Logger()
 	case LogLevelInfo:
 		level = zerolog.InfoLevel
 	case LogLevelWarn:
@@ -190,10 +197,4 @@ func (c *Config) InitLogger() {
 		level = zerolog.InfoLevel
 	}
 	zerolog.SetGlobalLevel(level)
-	switch LogMode(c.Log.Mode) {
-	case LogModePretty:
-		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-	case LogModeJson:
-		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-	}
 }
