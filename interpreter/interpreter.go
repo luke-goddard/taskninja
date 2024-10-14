@@ -1,3 +1,4 @@
+// Converts the query into a SQL statement
 package interpreter
 
 import (
