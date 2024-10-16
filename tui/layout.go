@@ -17,6 +17,7 @@ type model struct {
 	tabs       *components.Tabs
 	table      *components.TaskTable
 	input      *components.TextInput
+	doughnut   *components.Doughnut
 	dimensions *utils.TerminalDimensions
 	activeTab  int
 }
@@ -39,19 +40,36 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var newInput, _ = m.input.Update(msg)
 	m.input = newInput
 
+	var newDoughnut *components.Doughnut
+	newDoughnut, cmd = m.doughnut.Update(msg)
+	m.doughnut = newDoughnut
+
 	return m, cmd
 }
 
 func (m model) View() string {
 	var document strings.Builder
 	document.WriteString(m.tabs.View() + "\n")
-	document.WriteString(m.table.View() + "\n")
-	document.WriteString(m.table.HelpView() + "\n")
-	document.WriteString(m.input.View() + "\n")
+	if m.tabs.ActiveTab == 2 {
+		document.WriteString("\n")
+		document.WriteString(m.doughnut.View() + "\n")
+	} else {
+
+		document.WriteString(m.table.View() + "\n")
+		document.WriteString(m.table.HelpView() + "\n")
+		document.WriteString(m.input.View() + "\n")
+	}
 	return document.String()
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd {
+	return tea.Batch(
+		m.table.Init(),
+		m.tabs.Init(),
+		m.input.Init(),
+		m.doughnut.Init(),
+	)
+}
 
 func NewTui() error {
 
@@ -66,6 +84,7 @@ func NewTui() error {
 	var model = model{
 		input:      components.NewTextInput(dimensions),
 		table:      components.NewTaskTable(baseStyle, dimensions, theme),
+		doughnut:   components.NewDonut(dimensions),
 		tabs:       tabs,
 		dimensions: dimensions,
 	}

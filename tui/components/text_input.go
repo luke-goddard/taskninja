@@ -41,9 +41,8 @@ func (t *TextInput) Update(msg tea.Msg) (*TextInput, tea.Cmd) {
 
 func (t *TextInput) View() string {
 	return fmt.Sprintf(
-		"What’s your favorite Pokémon?\n\n%s\n\n%s",
+		"What’s your favorite Pokémon?\n\n%s\n",
 		t.txtInput.View(),
-		"(esc to quit)",
 	) + "\n"
 }
 
