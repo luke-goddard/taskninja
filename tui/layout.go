@@ -16,6 +16,7 @@ var baseStyle = lipgloss.NewStyle().
 type model struct {
 	tabs       *components.Tabs
 	table      *components.TaskTable
+	input      *components.TextInput
 	dimensions *utils.TerminalDimensions
 	activeTab  int
 }
@@ -35,17 +36,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var newTabs, _ = m.tabs.Update(msg)
 	m.tabs = newTabs
 
+	var newInput, _ = m.input.Update(msg)
+	m.input = newInput
+
 	return m, cmd
 }
 
 func (m model) View() string {
 	var document strings.Builder
-
-	// document.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...))
-	// document.WriteString("\n")
 	document.WriteString(m.tabs.View() + "\n")
 	document.WriteString(m.table.View() + "\n")
 	document.WriteString(m.table.HelpView() + "\n")
+	document.WriteString(m.input.View() + "\n")
 	return document.String()
 }
 
@@ -62,10 +64,12 @@ func NewTui() error {
 
 	var tabs = components.NewTabs()
 	var model = model{
+		input:      components.NewTextInput(dimensions),
 		table:      components.NewTaskTable(baseStyle, dimensions, theme),
 		tabs:       tabs,
 		dimensions: dimensions,
 	}
+
 	tea.NewProgram(model, tea.WithAltScreen()).Run()
 	return nil
 }

@@ -32,7 +32,7 @@ func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions
 		table.WithColumns(columns),
 		table.WithRows(rows),
 		table.WithFocused(true),
-		table.WithHeight(dimensions.Height.PercentOrMin(0.7, 10)),
+		table.WithHeight(dimensions.Height.PercentOrMin(0.6, 10)),
 	)
 
 	var style = table.DefaultStyles()
