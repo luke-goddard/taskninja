@@ -44,6 +44,7 @@ func NewTextInput(dimensions *utils.TerminalDimensions) *TextInput {
 
 func (t *TextInput) Update(msg tea.Msg) (*TextInput, tea.Cmd) {
 	var cmd tea.Cmd
+	var enabled = t.Enabled()
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -61,11 +62,15 @@ func (t *TextInput) Update(msg tea.Msg) (*TextInput, tea.Cmd) {
 		case "a":
 			t.Enable()
 			t.txtInput.Focus()
-			return t, cmd
+			if !enabled {
+				t.txtInput.SetValue("add \"")
+			}
 		}
 	}
 
-	t.txtInput, cmd = t.txtInput.Update(msg)
+	if enabled {
+		t.txtInput, cmd = t.txtInput.Update(msg)
+	}
 	return t, cmd
 }
 
