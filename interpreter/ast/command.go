@@ -43,7 +43,7 @@ func (c *CommandKind) String() string {
 
 func (c *Command) EvalSelect(builder *sqlbuilder.SelectBuilder, addError AddError) interface{} {
 	if len(c.Options) == 0 {
-		addError(fmt.Errorf("command %s requires at least one option", c.Kind))
+		addError(fmt.Errorf("command %s requires at least one option", c.Kind.String()))
 		return nil
 
 	}

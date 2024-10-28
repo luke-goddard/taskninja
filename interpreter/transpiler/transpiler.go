@@ -37,6 +37,8 @@ func (transpiler *Transpiler) Transpile(
 			From("tasks")
 		var whereClauses = command.EvalSelect(builder, nil)
 		builder.Where(fmt.Sprint(whereClauses))
+		var sql, args = builder.Build()
+		return SqlStatement(sql), SqlArgs(args), transpiler.manager.Errors()
 
 	}
 	return "", nil, transpiler.manager.Errors()

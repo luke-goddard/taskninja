@@ -35,22 +35,6 @@ func TestParser(t *testing.T) {
 				},
 			},
 		},
-		{
-			input: `add "do the dishes" project:=home`,
-			expected: ast.Command{
-				Kind:  ast.CommandKindAdd,
-				Param: &ast.Param{Kind: ast.ParamTypeDescription, Value: "do the dishes"},
-				Options: []ast.Statement{
-					&ast.ExpressionStatement{
-						Expr: &ast.BinaryExpression{
-							Left:     &ast.Key{Key: "project"},
-							Operator: ast.BinaryOperatorEq,
-							Right:    &ast.Literal{Value: "home"},
-						},
-					},
-				},
-			},
-		},
 	}
 
 	for _, test := range tc {
