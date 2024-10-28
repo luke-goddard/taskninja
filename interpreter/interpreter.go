@@ -10,7 +10,6 @@ import (
 	"github.com/luke-goddard/taskninja/interpreter/parser"
 	"github.com/luke-goddard/taskninja/interpreter/token"
 	"github.com/luke-goddard/taskninja/interpreter/transpiler"
-	"github.com/sanity-io/litter"
 )
 
 type Interpreter struct {
@@ -65,7 +64,7 @@ func (interpreter *Interpreter) ParserString(input string) (*ast.Command, []mana
 	return interpreter.Parse(tokens)
 }
 
-func (interpreter *Interpreter) Execute(input string) {
+func (interpreter *Interpreter) Execute(input string) (transpiler.SqlStatement, transpiler.SqlArgs, error) {
 	interpreter.input = input
 
 	var tokens []token.Token
@@ -80,8 +79,7 @@ func (interpreter *Interpreter) Execute(input string) {
 		Tokenize()
 
 	if len(errs) > 0 {
-		fmt.Println(errs)
-		return
+		return "", nil, fmt.Errorf("failed to tokenize input")
 	}
 
 	cmd, errs = interpreter.parser.
@@ -89,12 +87,14 @@ func (interpreter *Interpreter) Execute(input string) {
 		Parse(tokens)
 
 	if len(errs) > 0 {
-		fmt.Println(errs)
-		return
+		var err = fmt.Errorf("failed to parse input: %v", errs)
+		return "", nil, err
 	}
 
-	litter.Dump(cmd)
 	sql, args, errs = interpreter.transpiler.Reset().Transpile(cmd)
-	fmt.Println(sql)
-	fmt.Println(args)
+	if len(errs) > 0 {
+		var err = fmt.Errorf("failed to transpile input: %v", errs)
+		return "", nil, err
+	}
+	return sql, args, nil
 }

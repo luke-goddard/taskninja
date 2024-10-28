@@ -1,5 +1,7 @@
 package ast
 
+import "github.com/huandu/go-sqlbuilder"
+
 type TagOperator int // TagOperator is an enum for tag operators.
 
 const (
@@ -21,3 +23,7 @@ func (t *Tag) Type() NodeType {
 }
 
 func (t *Tag) Statement() {}
+
+func (t *Tag) EvalSelect(builder *sqlbuilder.SelectBuilder, addError AddError) interface{} {
+	return ""
+}

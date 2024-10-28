@@ -1,6 +1,9 @@
 package transpiler
 
 import (
+	"fmt"
+
+	"github.com/huandu/go-sqlbuilder"
 	"github.com/luke-goddard/taskninja/interpreter/ast"
 	"github.com/luke-goddard/taskninja/interpreter/manager"
 )
@@ -11,23 +14,30 @@ type SqlArgs []interface{}
 type Transpiler struct {
 	manager *manager.ErrorManager
 	join    *JoinTranspiler
-	builder *SqlBuilder
 }
 
 func NewTranspiler(manager *manager.ErrorManager) *Transpiler {
 	return &Transpiler{
 		manager: manager,
-		builder: NewSqlBuilder(),
 	}
 }
 
 func (transpiler *Transpiler) Reset() *Transpiler {
-  transpiler.builder.Reset()
-  return transpiler
+	transpiler.manager.Reset()
+	return transpiler
 }
 
 func (transpiler *Transpiler) Transpile(
-	comand *ast.Command,
+	command *ast.Command,
 ) (SqlStatement, SqlArgs, []manager.ErrorTranspiler) {
-	panic("!TODO: Implement Transpiler.Transpile()")
+	switch command.Kind {
+	case ast.CommandKindList:
+		var builder = sqlbuilder.
+			Select("id").
+			From("tasks")
+		var whereClauses = command.EvalSelect(builder, nil)
+		builder.Where(fmt.Sprint(whereClauses))
+
+	}
+	return "", nil, transpiler.manager.Errors()
 }

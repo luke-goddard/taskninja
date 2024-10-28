@@ -1,5 +1,13 @@
 package ast
 
+import (
+	"fmt"
+	"strconv"
+	"strings"
+
+	"github.com/huandu/go-sqlbuilder"
+)
+
 //=============================================================================
 // Binary Expression
 //=============================================================================
@@ -37,6 +45,35 @@ func (b *BinaryExpression) Type() NodeType {
 	return NodeTypeBinaryExpression
 }
 
+func (b *BinaryExpression) EvalSelect(builder *sqlbuilder.SelectBuilder, addError AddError) interface{} {
+	var left = b.Left.EvalSelect(builder, addError)
+	var right = b.Right.EvalSelect(builder, addError)
+
+	switch left.(type) {
+	case string:
+		var l = left.(string)
+		switch b.Operator {
+		case BinaryOperatorLe:
+			return builder.LessEqualThan(l, right)
+		case BinaryOperatorLt:
+			return builder.LessThan(l, right)
+		case BinaryOperatorGe:
+			return builder.GreaterEqualThan(l, right)
+		case BinaryOperatorGt:
+			return builder.GreaterThan(l, right)
+		case BinaryOperatorEq:
+			return builder.Equal(l, right)
+		case BinaryOperatorNe:
+			return builder.NotEqual(l, right)
+		default:
+			addError(fmt.Errorf("Unknown binary operator: %d", b.Operator))
+		}
+	default:
+		addError(fmt.Errorf("Expected string got %T", left))
+	}
+	return ""
+}
+
 //=============================================================================
 // Expression Statement
 //=============================================================================
@@ -59,6 +96,10 @@ func (e *ExpressionStatement) Type() NodeType {
 
 func (c *ExpressionStatement) Statement()  {}
 func (c *ExpressionStatement) Expression() {}
+
+func (e *ExpressionStatement) EvalSelect(builder *sqlbuilder.SelectBuilder, addError AddError) interface{} {
+	return e.Expr.EvalSelect(builder, addError)
+}
 
 //=============================================================================
 // Literal Expression
@@ -96,6 +137,23 @@ func (l *LiteralKind) String() string {
 	return "Unknown"
 }
 
+func (l *Literal) EvalSelect(builder *sqlbuilder.SelectBuilder, addError AddError) interface{} {
+	if l.Kind == LiteralKindString {
+		return l.Value
+	}
+	if strings.Contains(l.Value, ".") {
+		var fl, err = strconv.ParseFloat(l.Value, 64)
+		if err != nil {
+			return addError(fmt.Errorf("Failed to parse float: %s %w ", l.Value, err))
+		}
+		return fl
+	}
+	var in, err = strconv.ParseInt(l.Value, 10, 64)
+	if err != nil {
+		return addError(fmt.Errorf("Failed to parse int: %s %w ", l.Value, err))
+	}
+	return in
+}
 
 //=============================================================================
 // Logical Expression
@@ -123,3 +181,21 @@ func (l *LogicalExpression) Type() NodeType {
 }
 
 func (l *LogicalExpression) Expression() {}
+
+func (l *LogicalExpression) EvalSelect(builder *sqlbuilder.SelectBuilder, addError AddError) interface{} {
+	var left = l.Left.EvalSelect(builder, addError)
+	var right = l.Right.EvalSelect(builder, addError)
+
+	switch left.(type) {
+	case string:
+		switch l.Operator {
+		case LogicalOperatorAnd:
+			return builder.And(left.(string), right.(string))
+		case LogicalOperatorOr:
+			return builder.Or(left.(string), right.(string))
+		default:
+			return addError(fmt.Errorf("Unknown logical operator: %d", l.Operator))
+		}
+	}
+	return addError(fmt.Errorf("Expected string got %T", left))
+}

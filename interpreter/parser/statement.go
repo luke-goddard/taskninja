@@ -124,14 +124,3 @@ func parseStatment(parser *Parser) ast.Statement {
 	var statement = parseExpressionStatement(parser)
 	return statement
 }
-
-func parsePairDeclStatement(parser *Parser) ast.Statement {
-	var key = parser.consume().Value
-	if parser.current().Type != token.Colon {
-		panic("Expected colon")
-	}
-	parser.consume()
-	return &ast.Key{
-		Key: key,
-	}
-}

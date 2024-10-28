@@ -18,10 +18,6 @@ func parsePrimaryExpression(parser *Parser) ast.Expression {
 			Kind:  ast.LiteralKindNumber,
 			Value: parser.consume().Value,
 		}
-	case token.Key:
-		var k = parser.consume().Value
-		parser.consume() // Get past colon
-		return &ast.Key{Key: k}
 	}
 	var current = parser.current()
 	var err = fmt.Errorf("Unknown primary expression: %s", current.String())

@@ -1,5 +1,11 @@
 package ast
 
+import (
+	"github.com/huandu/go-sqlbuilder"
+)
+
+type AddError func(error) interface{}
+
 type Column int   // Column represents a column in the source code.
 type Line int     // Line represents a line in the source code.
 type NodeType int // NodeType represents the type of a node. e.g BinaryExpression, Literal, Command, etc.
@@ -31,6 +37,11 @@ type Node interface {
 	EndColumn() Column
 	StartLine() Line
 	EndLine() Line
+	Transpile
+}
+
+type Transpile interface {
+	EvalSelect(*sqlbuilder.SelectBuilder, AddError) interface{}
 }
 
 // Emulate the Node interface with embedded struct.

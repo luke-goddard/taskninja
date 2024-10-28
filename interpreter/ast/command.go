@@ -1,5 +1,11 @@
 package ast
 
+import (
+	"fmt"
+
+	"github.com/huandu/go-sqlbuilder"
+)
+
 type CommandKind int
 
 const (
@@ -33,4 +39,16 @@ func (c *CommandKind) String() string {
 	default:
 		return "unknown"
 	}
+}
+
+func (c *Command) EvalSelect(builder *sqlbuilder.SelectBuilder, addError AddError) interface{} {
+	if len(c.Options) == 0 {
+		addError(fmt.Errorf("command %s requires at least one option", c.Kind))
+		return nil
+
+	}
+	for _, option := range c.Options {
+		option.EvalSelect(builder, addError)
+	}
+	return builder
 }

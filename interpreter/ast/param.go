@@ -1,5 +1,7 @@
 package ast
 
+import "github.com/huandu/go-sqlbuilder"
+
 type ParamType int
 
 const (
@@ -21,3 +23,7 @@ func (p *Param) Type() NodeType {
 }
 
 func (p *Param) Expression() {}
+
+func (p *Param) EvalSelect(builder *sqlbuilder.SelectBuilder, addError AddError) interface{} {
+	return ""
+}
