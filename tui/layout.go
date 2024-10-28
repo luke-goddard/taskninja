@@ -9,7 +9,8 @@ import (
 	"github.com/luke-goddard/taskninja/tui/utils"
 )
 
-var baseStyle = lipgloss.NewStyle().
+var baseStyle = lipgloss.
+	NewStyle().
 	BorderStyle(lipgloss.NormalBorder()).
 	BorderForeground(lipgloss.Color("240"))
 
@@ -31,11 +32,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	}
-	var newTable, _ = m.table.Update(msg)
-	m.table = newTable
+	if m.input.Disabled() {
+		var newTable, _ = m.table.Update(msg)
+		m.table = newTable
 
-	var newTabs, _ = m.tabs.Update(msg)
-	m.tabs = newTabs
+		var newTabs, _ = m.tabs.Update(msg)
+		m.tabs = newTabs
+	}
+
 
 	var newInput, _ = m.input.Update(msg)
 	m.input = newInput
