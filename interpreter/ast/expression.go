@@ -74,6 +74,10 @@ func (b *BinaryExpression) EvalSelect(builder *sqlbuilder.SelectBuilder, addErro
 	return ""
 }
 
+func (bin *BinaryExpression) EvalInsert(transpiler *Transpiler) interface{} {
+	panic("implement me")
+}
+
 //=============================================================================
 // Expression Statement
 //=============================================================================
@@ -90,15 +94,19 @@ type ExpressionStatement struct {
 	NodePosition
 }
 
-func (e *ExpressionStatement) Type() NodeType {
+func (stmt *ExpressionStatement) Type() NodeType {
 	return NodeTypeExpressionStatement
 }
 
-func (c *ExpressionStatement) Statement()  {}
-func (c *ExpressionStatement) Expression() {}
+func (stmt *ExpressionStatement) Statement()  {}
+func (stmt *ExpressionStatement) Expression() {}
 
-func (e *ExpressionStatement) EvalSelect(builder *sqlbuilder.SelectBuilder, addError AddError) interface{} {
-	return e.Expr.EvalSelect(builder, addError)
+func (stmt *ExpressionStatement) EvalSelect(builder *sqlbuilder.SelectBuilder, addError AddError) interface{} {
+	return stmt.Expr.EvalSelect(builder, addError)
+}
+
+func (stmt *ExpressionStatement) EvalInsert(transpiler *Transpiler) interface{} {
+	return stmt.Expr.EvalInsert(transpiler)
 }
 
 //=============================================================================
@@ -138,21 +146,30 @@ func (l *LiteralKind) String() string {
 }
 
 func (l *Literal) EvalSelect(builder *sqlbuilder.SelectBuilder, addError AddError) interface{} {
+	return l.ToValue(nil)
+}
+
+func (l *Literal) ToValue(transpiler *Transpiler) interface{} {
 	if l.Kind == LiteralKindString {
 		return l.Value
 	}
 	if strings.Contains(l.Value, ".") {
 		var fl, err = strconv.ParseFloat(l.Value, 64)
 		if err != nil {
-			return addError(fmt.Errorf("Failed to parse float: %s %w ", l.Value, err))
+			return transpiler.AddError(fmt.Errorf("Failed to parse float: %s %w ", l.Value, err), l)
 		}
 		return fl
 	}
 	var in, err = strconv.ParseInt(l.Value, 10, 64)
 	if err != nil {
-		return addError(fmt.Errorf("Failed to parse int: %s %w ", l.Value, err))
+		return transpiler.AddError(fmt.Errorf("Failed to parse int: %s %w ", l.Value, err), l)
 	}
 	return in
+}
+
+func (lit *Literal) EvalInsert(transpiler *Transpiler) interface{} {
+	transpiler.AddValue(lit.ToValue(transpiler))
+	return nil
 }
 
 //=============================================================================
@@ -198,4 +215,37 @@ func (l *LogicalExpression) EvalSelect(builder *sqlbuilder.SelectBuilder, addErr
 		}
 	}
 	return addError(fmt.Errorf("Expected string got %T", left))
+}
+
+func (logical *LogicalExpression) EvalInsert(transpiler *Transpiler) interface{} {
+	panic("implement me")
+}
+
+// =============================================================================
+// Key
+// =============================================================================
+type Key struct {
+	Key  string
+	Expr Expression
+	NodePosition
+}
+
+func (key *Key) Expression() {}
+func (key *Key) Type() NodeType {
+	return NodeTypeBinaryExpression
+}
+
+func (key *Key) EvalSelect(builder *sqlbuilder.SelectBuilder, addError AddError) interface{} {
+	return key.Expr.EvalSelect(builder, addError)
+}
+
+func (key *Key) EvalInsert(transpiler *Transpiler) interface{} {
+	var lowerK = strings.ToLower(key.Key)
+	switch lowerK {
+	case "priority":
+		transpiler.AddCol("priority")
+		return key.Expr.EvalInsert(transpiler)
+	default:
+		return transpiler.AddError(fmt.Errorf("Unknown key: %s", key.Key), key)
+	}
 }

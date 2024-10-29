@@ -18,6 +18,16 @@ func parsePrimaryExpression(parser *Parser) ast.Expression {
 			Kind:  ast.LiteralKindNumber,
 			Value: parser.consume().Value,
 		}
+	case token.Key:
+		var key = parser.consume().Value
+		if !parser.expectCurrent(token.Colon){
+			panic("TODO err handle")
+		}
+		parser.consume()
+		return &ast.Key{
+			Key: key,
+			Expr: parseExpression(parser, BP_PRIMARY),
+		}
 	}
 	var current = parser.current()
 	var err = fmt.Errorf("Unknown primary expression: %s", current.String())

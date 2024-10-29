@@ -1,6 +1,8 @@
 package ast
 
-import "github.com/huandu/go-sqlbuilder"
+import (
+	"github.com/huandu/go-sqlbuilder"
+)
 
 type ParamType int
 
@@ -25,5 +27,9 @@ func (p *Param) Type() NodeType {
 func (p *Param) Expression() {}
 
 func (p *Param) EvalSelect(builder *sqlbuilder.SelectBuilder, addError AddError) interface{} {
+	return ""
+}
+
+func (p *Param) EvalInsert(transpiler *Transpiler) interface{} {
 	return ""
 }

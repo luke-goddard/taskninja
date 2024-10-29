@@ -9,14 +9,14 @@ import (
 	"github.com/luke-goddard/taskninja/interpreter/manager"
 	"github.com/luke-goddard/taskninja/interpreter/parser"
 	"github.com/luke-goddard/taskninja/interpreter/token"
-	"github.com/luke-goddard/taskninja/interpreter/transpiler"
+	"github.com/sanity-io/litter"
 )
 
 type Interpreter struct {
 	input      string
 	lexer      *lex.Lexer
 	parser     *parser.Parser
-	transpiler *transpiler.Transpiler
+	transpiler *ast.Transpiler
 	errs       *manager.ErrorManager
 }
 
@@ -25,7 +25,7 @@ func NewInterpreter() *Interpreter {
 	return &Interpreter{
 		lexer:      lex.NewLexer(manager),
 		parser:     parser.NewParser(manager),
-		transpiler: transpiler.NewTranspiler(manager),
+		transpiler: ast.NewTranspiler(),
 		errs:       manager,
 	}
 }
@@ -64,13 +64,13 @@ func (interpreter *Interpreter) ParserString(input string) (*ast.Command, []mana
 	return interpreter.Parse(tokens)
 }
 
-func (interpreter *Interpreter) Execute(input string) (transpiler.SqlStatement, transpiler.SqlArgs, error) {
+func (interpreter *Interpreter) Execute(input string) (ast.SqlStatement, ast.SqlArgs, error) {
 	interpreter.input = input
 
 	var tokens []token.Token
 	var cmd *ast.Command
-	var sql transpiler.SqlStatement
-	var args transpiler.SqlArgs
+	var sql ast.SqlStatement
+	var args ast.SqlArgs
 	var errs []manager.ErrorTranspiler
 
 	tokens, errs = interpreter.lexer.
@@ -86,14 +86,17 @@ func (interpreter *Interpreter) Execute(input string) (transpiler.SqlStatement, 
 		Reset().
 		Parse(tokens)
 
+	litter.Dump(cmd)
+
 	if len(errs) > 0 {
 		var err = fmt.Errorf("failed to parse input: %v", errs)
 		return "", nil, err
 	}
 
-	sql, args, errs = interpreter.transpiler.Reset().Transpile(cmd)
-	if len(errs) > 0 {
-		var err = fmt.Errorf("failed to transpile input: %v", errs)
+	var tranErrors []ast.TranspileError
+	sql, args, tranErrors = interpreter.transpiler.Reset().Transpile(cmd)
+	if len(tranErrors) > 0 {
+		var err = fmt.Errorf("failed to transpile input: %v", tranErrors)
 		return "", nil, err
 	}
 	return sql, args, nil

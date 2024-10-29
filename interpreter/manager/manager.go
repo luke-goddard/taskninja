@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"github.com/luke-goddard/taskninja/interpreter/ast"
 	"github.com/luke-goddard/taskninja/interpreter/token"
 )
 
@@ -50,9 +51,9 @@ func (manager *ErrorManager) EmitSemantic(message string, token *token.Token) {
 }
 
 // EmitTranspilation emits a transpilation error
-func (manager *ErrorManager) EmitTranspilation(message string, token *token.Token) {
+func (manager *ErrorManager) EmitTranspilation(message string, node *ast.Node) {
 	var err = NewTranspilationError(message).
-		SetToken(token).
+		SetNode(node).
 		SetSeverityFatal()
 	manager.emit(err)
 }

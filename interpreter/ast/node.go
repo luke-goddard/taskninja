@@ -4,7 +4,9 @@ import (
 	"github.com/huandu/go-sqlbuilder"
 )
 
-type AddError func(error) interface{}
+type AddError func(error) error
+type AddValue func(interface{})
+type AddCol func(string)
 
 type Column int   // Column represents a column in the source code.
 type Line int     // Line represents a line in the source code.
@@ -42,6 +44,7 @@ type Node interface {
 
 type Transpile interface {
 	EvalSelect(*sqlbuilder.SelectBuilder, AddError) interface{}
+	EvalInsert(*Transpiler) interface{}
 }
 
 // Emulate the Node interface with embedded struct.

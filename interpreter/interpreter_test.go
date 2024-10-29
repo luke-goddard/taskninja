@@ -3,6 +3,7 @@ package interpreter
 import (
 	"testing"
 
+	"github.com/luke-goddard/taskninja/interpreter/ast"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,7 +13,16 @@ func TestInterpreter(t *testing.T) {
 		expectedSql  string
 		expectedArgs interface{}
 	}{
-		{input: `list "do the dishes"`, expectedSql: "SELECT id FROM tasks WHERE description = ?", expectedArgs: "do the dishes"},
+		{
+			input:        `add "do the dishes"`,
+			expectedSql:  "INSERT INTO tasks (description) VALUES (?)",
+			expectedArgs: ast.SqlArgs{"do the dishes"},
+		},
+		{
+			input:        `add "cook" priority:High`,
+			expectedSql:  `INSERT INTO tasks (description, priority) VALUES (?, ?)`,
+			expectedArgs: ast.SqlArgs{"cook", "High"},
+		},
 	}
 
 	var interpreter = NewInterpreter()
