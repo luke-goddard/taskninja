@@ -5,6 +5,8 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/luke-goddard/taskninja/bus"
+	"github.com/luke-goddard/taskninja/events"
 	"github.com/luke-goddard/taskninja/tui/utils"
 )
 
@@ -12,6 +14,7 @@ type TextInput struct {
 	dimensions *utils.TerminalDimensions
 	txtInput   textinput.Model
 	enabled    bool
+	bus        *bus.Bus
 }
 
 func (t *TextInput) Enable() {
@@ -30,7 +33,7 @@ func (t *TextInput) Disabled() bool {
 	return !t.enabled
 }
 
-func NewTextInput(dimensions *utils.TerminalDimensions) *TextInput {
+func NewTextInput(dimensions *utils.TerminalDimensions, bus *bus.Bus) *TextInput {
 	var txtIn = textinput.New()
 	txtIn.Placeholder = "Type here..."
 	txtIn.Focus()
@@ -39,6 +42,7 @@ func NewTextInput(dimensions *utils.TerminalDimensions) *TextInput {
 		dimensions: dimensions,
 		txtInput:   txtIn,
 		enabled:    false,
+		bus:        bus,
 	}
 }
 
@@ -55,6 +59,7 @@ func (t *TextInput) Update(msg tea.Msg) (*TextInput, tea.Cmd) {
 			if t.Enabled() {
 				t.Disable()
 				t.txtInput.Blur()
+				t.submitProgram()
 			}
 		}
 
@@ -86,4 +91,10 @@ func (t *TextInput) View() string {
 
 func (t *TextInput) Init() tea.Cmd {
 	return textinput.Blink
+}
+
+func (t *TextInput) submitProgram() {
+	var program = t.txtInput.Value()
+	t.bus.Publish(events.NewRunProgramEvent(program))
+	t.txtInput.SetValue("")
 }
