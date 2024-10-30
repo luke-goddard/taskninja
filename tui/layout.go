@@ -5,6 +5,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/luke-goddard/taskninja/bus"
+	"github.com/luke-goddard/taskninja/events"
 	"github.com/luke-goddard/taskninja/tui/components"
 	"github.com/luke-goddard/taskninja/tui/utils"
 )
@@ -16,6 +18,7 @@ var baseStyle = lipgloss.
 
 type model struct {
 	tabs       *components.Tabs
+	bus        *bus.Bus
 	table      *components.TaskTable
 	input      *components.TextInput
 	doughnut   *components.Doughnut
@@ -39,7 +42,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		var newTabs, _ = m.tabs.Update(msg)
 		m.tabs = newTabs
 	}
-
 
 	var newInput, _ = m.input.Update(msg)
 	m.input = newInput
@@ -66,7 +68,13 @@ func (m model) View() string {
 	return document.String()
 }
 
+func (m model) Notify(e *events.Event) {
+	// Little adapter to allow tea's interface to be compatible with the bus
+	m.Update(e)
+}
+
 func (m model) Init() tea.Cmd {
+	m.bus.Subscribe(m)
 	return tea.Batch(
 		m.table.Init(),
 		m.tabs.Init(),
@@ -75,17 +83,18 @@ func (m model) Init() tea.Cmd {
 	)
 }
 
-func NewTui() error {
+func NewTui(bus *bus.Bus) (*tea.Program, error) {
 
 	var dimensions, err = utils.NewTerminalDimensions()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var theme = utils.NewTheme()
 
 	var tabs = components.NewTabs()
 	var model = model{
+		bus:        bus,
 		input:      components.NewTextInput(dimensions),
 		table:      components.NewTaskTable(baseStyle, dimensions, theme),
 		doughnut:   components.NewDonut(dimensions),
@@ -93,6 +102,6 @@ func NewTui() error {
 		dimensions: dimensions,
 	}
 
-	tea.NewProgram(model, tea.WithAltScreen()).Run()
-	return nil
+	var program = tea.NewProgram(model, tea.WithAltScreen())
+	return program, nil
 }

@@ -4,10 +4,10 @@ import (
 	"os"
 	"strings"
 
+	"github.com/luke-goddard/taskninja/bus"
 	"github.com/luke-goddard/taskninja/config"
 	"github.com/luke-goddard/taskninja/db"
 	"github.com/luke-goddard/taskninja/interpreter"
-	"github.com/luke-goddard/taskninja/interpreter/ast"
 	"github.com/luke-goddard/taskninja/tui"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -15,6 +15,7 @@ import (
 
 // This is going to be the main entry point for the application
 type Runner struct {
+	bus         *bus.Bus
 	args        string
 	config      *config.Config
 	interpreter *interpreter.Interpreter
@@ -35,6 +36,7 @@ func normalizeArgs(args []string) string {
 
 func NewRunner(args []string) *Runner {
 	return &Runner{
+		bus:         bus.NewBus(),
 		args:        normalizeArgs(args),
 		interpreter: interpreter.NewInterpreter(),
 	}
@@ -45,31 +47,11 @@ func (r *Runner) Run() {
 	r.loadConfigOrFail()
 	r.config.InitLogger()
 
-	if r.args == "" {
-		tui.NewTui()
-	}
-
-	var db, err = db.NewStore(&r.config.Connection)
+	var program, err = tui.NewTui(r.bus)
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create database store")
+		log.Fatal().Err(err).Msg("Failed to create TUI")
 	}
-	r.store = db
-
-	var cmd, errs = r.interpreter.ParserString(r.args)
-	if len(errs) > 0 {
-		for _, err := range errs {
-			log.Error().Msg(err.Error())
-		}
-		return
-	}
-
-	switch cmd.Kind {
-	case ast.CommandKindList:
-	default:
-		log.Fatal().
-			Str("kind", cmd.Kind.String()).
-			Msg("unsupported command kind")
-	}
+	program.Run()
 }
 
 func (r *Runner) configDefaultLogger() {
