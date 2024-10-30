@@ -11,10 +11,10 @@ type ErrorTranspilerVariant string  // What part of the pipeline the error occur
 type ErrorTranspilerSeverity string // How severe the error is
 
 const (
-	TranspilerErrorLex           ErrorTranspilerVariant = "Lexical Analysis Error"
-	TranspilerErrorParse         ErrorTranspilerVariant = "Syntax Analysis Error"
-	TranspilerErrorSemantic      ErrorTranspilerVariant = "Semantic Analysis Error"
-	TranspilerErrorTranspilation ErrorTranspilerVariant = "Transpilation Error"
+	TranspilerErrorLex           ErrorTranspilerVariant = "Lexical"
+	TranspilerErrorParse         ErrorTranspilerVariant = "Syntax"
+	TranspilerErrorSemantic      ErrorTranspilerVariant = "Semantic"
+	TranspilerErrorTranspilation ErrorTranspilerVariant = "Transpilation"
 )
 
 const (
@@ -29,7 +29,7 @@ type ErrorTranspiler struct {
 	Severity ErrorTranspilerSeverity
 	Message  string
 	Token    *token.Token
-	Node     *ast.Node
+	Node     ast.Node // Node is an interface so no pointer
 }
 
 // NewErrorTranspiler creates a new error transpiler
@@ -57,7 +57,7 @@ func (e *ErrorTranspiler) SetToken(token *token.Token) *ErrorTranspiler {
 	return e
 }
 
-func (e *ErrorTranspiler) SetNode(node *ast.Node) *ErrorTranspiler {
+func (e *ErrorTranspiler) SetNode(node ast.Node) *ErrorTranspiler {
 	e.Node = node
 	return e
 }

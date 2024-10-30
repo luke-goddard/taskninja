@@ -8,6 +8,7 @@ import (
 	"github.com/luke-goddard/taskninja/interpreter/lex"
 	"github.com/luke-goddard/taskninja/interpreter/manager"
 	"github.com/luke-goddard/taskninja/interpreter/parser"
+	"github.com/luke-goddard/taskninja/interpreter/semantic"
 	"github.com/luke-goddard/taskninja/interpreter/token"
 	"github.com/sanity-io/litter"
 )
@@ -16,6 +17,7 @@ type Interpreter struct {
 	input      string
 	lexer      *lex.Lexer
 	parser     *parser.Parser
+	semantic   *semantic.Analyzer
 	transpiler *ast.Transpiler
 	errs       *manager.ErrorManager
 }
@@ -25,6 +27,7 @@ func NewInterpreter() *Interpreter {
 	return &Interpreter{
 		lexer:      lex.NewLexer(manager),
 		parser:     parser.NewParser(manager),
+		semantic:   semantic.NewAnalyzer(manager),
 		transpiler: ast.NewTranspiler(),
 		errs:       manager,
 	}
@@ -34,6 +37,7 @@ func (interpreter *Interpreter) Reset() *Interpreter {
 	interpreter.input = ""
 	interpreter.lexer.Reset()
 	interpreter.parser.Reset()
+	interpreter.semantic.Reset()
 	interpreter.transpiler.Reset()
 	interpreter.errs.Reset()
 	return interpreter
@@ -89,8 +93,13 @@ func (interpreter *Interpreter) Execute(input string) (ast.SqlStatement, ast.Sql
 	litter.Dump(cmd)
 
 	if len(errs) > 0 {
-		var err = fmt.Errorf("failed to parse input: %v", errs)
-		return "", nil, err
+		var err = errs[0]
+		return "", nil, &err
+	}
+
+	var semErr = interpreter.semantic.Analyze(cmd)
+	if semErr != nil {
+		return "", nil, semErr
 	}
 
 	var tranErrors []ast.TranspileError

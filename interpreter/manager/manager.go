@@ -43,15 +43,15 @@ func (manager *ErrorManager) EmitParse(message string, token *token.Token) {
 }
 
 // EmitSemantic emits a semantic error
-func (manager *ErrorManager) EmitSemantic(message string, token *token.Token) {
+func (manager *ErrorManager) EmitSemantic(message string, node ast.Node) {
 	var err = NewSemanticError(message).
-		SetToken(token).
+		SetNode(node).
 		SetSeverityFatal()
 	manager.emit(err)
 }
 
 // EmitTranspilation emits a transpilation error
-func (manager *ErrorManager) EmitTranspilation(message string, node *ast.Node) {
+func (manager *ErrorManager) EmitTranspilation(message string, node ast.Node) {
 	var err = NewTranspilationError(message).
 		SetNode(node).
 		SetSeverityFatal()
