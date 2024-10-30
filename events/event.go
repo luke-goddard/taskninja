@@ -3,8 +3,8 @@ package events
 type EventType string
 
 const (
-	EventAddTask  EventType = "AddTask"
 	EventError EventType = "Error"
+	EventRunProgram EventType = "RunProgram"
 )
 
 type Event struct {
