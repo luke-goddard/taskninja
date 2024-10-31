@@ -15,6 +15,7 @@ type TextInput struct {
 	txtInput   textinput.Model
 	enabled    bool
 	bus        *bus.Bus
+	err        *error
 }
 
 func (t *TextInput) Enable() {
@@ -71,6 +72,15 @@ func (t *TextInput) Update(msg tea.Msg) (*TextInput, tea.Cmd) {
 				t.txtInput.SetValue("add \"")
 			}
 		}
+	case *events.Event:
+		switch msg.Type {
+		case events.EventError:
+			var err = msg.Data.(error)
+			t.err = &err
+			t.enabled = false
+		case events.EventRunProgram:
+			t.err = nil
+		}
 	}
 
 	if enabled {
@@ -80,6 +90,9 @@ func (t *TextInput) Update(msg tea.Msg) (*TextInput, tea.Cmd) {
 }
 
 func (t *TextInput) View() string {
+	if t.err != nil && !t.enabled {
+		return fmt.Sprintf("Error: %s\n", (*t.err).Error())
+	}
 	if !t.enabled {
 		return ""
 	}

@@ -10,7 +10,6 @@ import (
 	"github.com/luke-goddard/taskninja/interpreter/parser"
 	"github.com/luke-goddard/taskninja/interpreter/semantic"
 	"github.com/luke-goddard/taskninja/interpreter/token"
-	"github.com/sanity-io/litter"
 )
 
 type Interpreter struct {
@@ -89,8 +88,6 @@ func (interpreter *Interpreter) Execute(input string) (ast.SqlStatement, ast.Sql
 	cmd, errs = interpreter.parser.
 		Reset().
 		Parse(tokens)
-
-	litter.Dump(cmd)
 
 	if len(errs) > 0 {
 		var err = errs[0]
