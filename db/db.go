@@ -10,7 +10,7 @@ import (
 )
 
 type Store struct {
-	con *sqlx.DB
+	Con *sqlx.DB
 }
 
 func NewStore(conf *config.SqlConnectionConfig) (*Store, error) {
@@ -20,7 +20,7 @@ func NewStore(conf *config.SqlConnectionConfig) (*Store, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
-	var store = &Store{con: con}
+	var store = &Store{Con: con}
 	err = store.RunMigrations()
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func NewStore(conf *config.SqlConnectionConfig) (*Store, error) {
 
 func (store *Store) RunMigrations() error {
 	for i, migration := range Migrations {
-		_, err := store.con.Exec(migration)
+		_, err := store.Con.Exec(migration)
 		if err != nil {
 			return fmt.Errorf("failed to run migration (%d): %w", i, err)
 		}
