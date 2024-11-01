@@ -9,9 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type AssertData interface {
-	Dump() string
-}
+var TaskNinjaSkipAssert = "TASK_NINJA_SKIP_ASSERTS"
 
 func True(truth bool, msg string, data ...any) {
 	if !truth {
@@ -36,7 +34,7 @@ func NotNil(item any, msg string, data ...any) {
 	}
 }
 
-func Never(msg string, data ...any) {
+func Fail(msg string, data ...any) {
 	failAssert(msg, data...)
 }
 
@@ -48,12 +46,16 @@ func NoError(err error, msg string, data ...any) {
 }
 
 func failAssert(msg string, args ...interface{}) {
-	log.Warn().
+	var err = fmt.Errorf(msg, args...)
+	log.Error().
+		Str("stack", string(debug.Stack())).
+		Err(err).
 		Str("msg", msg).
 		Interface("args", args).
-		Str("stack", string(debug.Stack())).
 		Msg("Assert Failed")
 
+	if os.Getenv(TaskNinjaSkipAssert) == "true" {
+		return
+	}
 	os.Exit(1)
 }
-

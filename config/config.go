@@ -7,6 +7,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/rs/zerolog/pkgerrors"
 	"github.com/spf13/viper"
 )
 
@@ -208,5 +209,7 @@ func (c *Config) InitLogger() {
 		log.Fatal().Err(err).Msg("Failed to open log file")
 	}
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: file})
+	log.Logger = log.With().Caller().Logger()
 	zerolog.SetGlobalLevel(level)
+	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 }

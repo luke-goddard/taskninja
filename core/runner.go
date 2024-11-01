@@ -58,6 +58,8 @@ func (r *Runner) Run() {
 	var program *tea.Program
 
 	r.loadConfigOrFail()
+	r.configDefaultLogger()
+	r.config.InitLogger()
 
 	store, err = db.NewStore(&r.config.Connection)
 	defer store.Close()
@@ -68,8 +70,6 @@ func (r *Runner) Run() {
 	r.store = store
 	r.service = services.NewServiceHandler(r.interpreter, r.store)
 	r.handler = handler.NewEventHandler(r.service, r.bus)
-	r.configDefaultLogger()
-	r.config.InitLogger()
 	r.bus.Subscribe(r.handler)
 
 	program, err = tui.NewTui(r.bus)
