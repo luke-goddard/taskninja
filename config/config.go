@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/luke-goddard/taskninja/assert"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
@@ -109,11 +110,7 @@ func setDefaults() {
 
 func Bootstrap() *Config {
 	var home, err = os.UserHomeDir()
-	if err != nil {
-		log.Fatal().
-			Err(err).
-			Msg("Failed to get user home directory, cannot bootstrap config")
-	}
+	assert.Nil(err, "Failed to get user home directory")
 	var configDir = path.Join(home, ".config", "taskninja")
 
 	if _, err = os.Stat(configDir); os.IsNotExist(err) {
