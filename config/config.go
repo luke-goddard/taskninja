@@ -23,6 +23,8 @@ const (
 	LogLevelError LogLevel = "error"
 )
 
+const DefaultLogPath = "/tmp/taskninja.log"
+
 type LogMode string
 
 const (
@@ -57,6 +59,7 @@ func (c *SqlConnectionConfig) DSN() string {
 type Log struct {
 	Level string `yaml:"level"` // log level
 	Mode  string `yaml:"mode"`  // log mode
+	Path  string `yaml:"path"`  // log path
 }
 
 type Config struct {
@@ -111,10 +114,8 @@ func GetConfig() (*Config, *ConfigError) {
 		var err = fmt.Errorf("Failed to read config file: %v", err)
 		return nil, &ConfigError{Err: err, Variant: ConfigErrorReadFile}
 	}
-	viper.SetDefault("connection.mode", ConnectionModeInMemory)
-	viper.SetDefault("connection.path", "")
-	viper.SetDefault("log.level", LogLevelInfo)
-	viper.SetDefault("log.mode", LogModePretty)
+
+	setDefaults()
 
 	var config = Config{}
 	if err = viper.Unmarshal(&config); err != nil {
@@ -122,6 +123,14 @@ func GetConfig() (*Config, *ConfigError) {
 		return nil, &ConfigError{Err: err, Variant: ConfigErrorUnmarshal}
 	}
 	return &config, nil
+}
+
+func setDefaults() {
+	viper.SetDefault("connection.mode", ConnectionModeInMemory)
+	viper.SetDefault("connection.path", "")
+	viper.SetDefault("log.level", LogLevelInfo)
+	viper.SetDefault("log.mode", LogModePretty)
+	viper.SetDefault("log.path", DefaultLogPath)
 }
 
 func Bootstrap() *Config {
@@ -151,9 +160,6 @@ func Bootstrap() *Config {
 	}
 
 	viper.SetConfigFile(configLocation)
-	viper.SetDefault("connection.mode", ConnectionModeInMemory)
-	viper.SetDefault("connection.path", "")
-	viper.SetDefault("log.level", LogLevelInfo)
 
 	err = viper.WriteConfig()
 	if err != nil {
@@ -196,5 +202,11 @@ func (c *Config) InitLogger() {
 		log.Warn().Msg("Unknown log level set in config file, defaulting to info")
 		level = zerolog.InfoLevel
 	}
+
+	var file, err = os.OpenFile(c.Log.Path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to open log file")
+	}
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: file})
 	zerolog.SetGlobalLevel(level)
 }
