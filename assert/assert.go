@@ -23,13 +23,13 @@ func Nil(item any, msg string, data ...any) {
 		return
 	}
 
-	log.Error().Err(fmt.Errorf("Nil#not nil encountered")).Msg("Nil#not nil encountered")
+	log.Error().Interface("item", item).Msg("Is Nil Check Failed")
 	failAssert(msg, data...)
 }
 
 func NotNil(item any, msg string, data ...any) {
 	if item == nil || reflect.ValueOf(item).Kind() == reflect.Ptr && reflect.ValueOf(item).IsNil() {
-		log.Error().Err(fmt.Errorf("NotNil#nil encountered")).Msg("NotNil#nil encountered")
+		log.Error().Interface("item", item).Msg("Not Nil Check Failed")
 		failAssert(msg, data...)
 	}
 }
