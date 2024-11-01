@@ -110,12 +110,12 @@ func setDefaults() {
 
 func Bootstrap() *Config {
 	var home, err = os.UserHomeDir()
-	assert.Nil(err, "Failed to get user home directory")
+	assert.Nil(err, "Failed to get user home directory, cannot load/create config")
 	var configDir = path.Join(home, ".config", "taskninja")
 
 	if _, err = os.Stat(configDir); os.IsNotExist(err) {
 		log.Info().Str("directory", configDir).Msg("Creating inital config directory")
-		if err = os.MkdirAll(configDir, 0755); err != nil {
+		if err = os.MkdirAll(configDir, 0750); err != nil {
 			log.Fatal().
 				Err(err).
 				Msg("Failed to create config directory")
@@ -123,7 +123,7 @@ func Bootstrap() *Config {
 	}
 	var configLocation = path.Join(home, ".config", "taskninja", "config.yaml")
 	log.Info().Str("file", configLocation).Msg("Creating inital config file")
-	_, err = os.Create(configLocation)
+	_, err = os.Create(configLocation) // #nosec G304
 	if err != nil {
 		log.Fatal().
 			Err(err).

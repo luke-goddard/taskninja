@@ -4,7 +4,7 @@ import (
 	"github.com/huandu/go-sqlbuilder"
 )
 
-type AddError func(error) error
+type AddError func(error)
 type AddValue func(interface{})
 type AddCol func(string)
 

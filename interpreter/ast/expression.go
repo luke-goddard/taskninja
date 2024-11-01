@@ -156,13 +156,15 @@ func (l *Literal) ToValue(transpiler *Transpiler) interface{} {
 	if strings.Contains(l.Value, ".") {
 		var fl, err = strconv.ParseFloat(l.Value, 64)
 		if err != nil {
-			return transpiler.AddError(fmt.Errorf("Failed to parse float: %s %w ", l.Value, err), l)
+			transpiler.AddError(fmt.Errorf("Failed to parse float: %s %w ", l.Value, err), l)
+			return nil
 		}
 		return fl
 	}
 	var in, err = strconv.ParseInt(l.Value, 10, 64)
 	if err != nil {
-		return transpiler.AddError(fmt.Errorf("Failed to parse int: %s %w ", l.Value, err), l)
+		transpiler.AddError(fmt.Errorf("Failed to parse int: %s %w ", l.Value, err), l)
+		return nil
 	}
 	return in
 }
@@ -211,10 +213,12 @@ func (l *LogicalExpression) EvalSelect(builder *sqlbuilder.SelectBuilder, addErr
 		case LogicalOperatorOr:
 			return builder.Or(left.(string), right.(string))
 		default:
-			return addError(fmt.Errorf("Unknown logical operator: %d", l.Operator))
+			addError(fmt.Errorf("Unknown logical operator: %d", l.Operator))
+			return nil
 		}
 	}
-	return addError(fmt.Errorf("Expected string got %T", left))
+	addError(fmt.Errorf("Expected string got %T", left))
+	return nil
 }
 
 func (logical *LogicalExpression) EvalInsert(transpiler *Transpiler) interface{} {
@@ -246,6 +250,7 @@ func (key *Key) EvalInsert(transpiler *Transpiler) interface{} {
 		transpiler.AddCol("priority")
 		return key.Expr.EvalInsert(transpiler)
 	default:
-		return transpiler.AddError(fmt.Errorf("Unknown key: %s", key.Key), key)
+		transpiler.AddError(fmt.Errorf("Unknown key: %s", key.Key), key)
+	return nil
 	}
 }

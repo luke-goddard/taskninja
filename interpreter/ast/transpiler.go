@@ -36,12 +36,11 @@ func (transpiler *Transpiler) AddCol(col string) {
 	transpiler.cols = append(transpiler.cols, col)
 }
 
-func (transpiler *Transpiler) AddError(message error, node Node) error {
+func (transpiler *Transpiler) AddError(message error, node Node) {
 	transpiler.errors = append(transpiler.errors, TranspileError{
 		Message: message,
 		Node:    node,
 	})
-	return message
 }
 
 func (transpiler *Transpiler) Reset() *Transpiler {

@@ -8,7 +8,7 @@ func (handler *ServiceHandler) RunProgram(e *events.RunProgram) ([]*events.Event
 		return nil, err
 	}
 
-	handler.store.Con.MustExec(string(sql), args...)
+	_, err =handler.store.Con.Exec(string(sql), args...)
 
-	return nil, nil
+	return nil, err
 }

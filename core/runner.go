@@ -81,7 +81,10 @@ func (r *Runner) Run() {
 	assert.NotNil(r.handler, "Handler is nil")
 	assert.True(r.bus.HasSubscribers(), "Bus has no subscribers")
 
-	program.Run()
+	_, err = program.Run()
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to run program")
+	}
 }
 
 func (r *Runner) configDefaultLogger() {

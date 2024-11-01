@@ -59,7 +59,7 @@ func (c *Config) InitLogger() {
 		level = zerolog.InfoLevel
 	}
 
-	var file, err = os.OpenFile(c.Log.Path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	var file, err = os.OpenFile(c.Log.Path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	assert.NotNil(file, "Failed to open log file")
 
 	err = file.Truncate(0)

@@ -9,7 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var TaskNinjaSkipAssert = "TASK_NINJA_SKIP_ASSERTS"
+var TaskNinjaSkipAssert = "TASK_NINJA_SKIP_ASSERTS" // #nosec G101
 
 func True(truth bool, msg string, data ...any) {
 	if !truth {

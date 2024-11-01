@@ -41,7 +41,10 @@ func (store *Store) RunMigrations() error {
 
 func (store *Store) Close() {
 	assert.True(store.IsConnected(), "store is not connected")
-	store.Con.Close()
+	var err = store.Con.Close()
+	if err != nil {
+		assert.Fail("failed to close database connection %w", err)
+	}
 }
 
 func (store *Store) IsConnected() bool {
