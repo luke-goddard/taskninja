@@ -5,10 +5,11 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/luke-goddard/taskninja/assert"
 	"github.com/luke-goddard/taskninja/bus"
+	"github.com/luke-goddard/taskninja/bus/handler"
 	"github.com/luke-goddard/taskninja/config"
 	"github.com/luke-goddard/taskninja/db"
-	"github.com/luke-goddard/taskninja/bus/handler"
 	"github.com/luke-goddard/taskninja/interpreter"
 	"github.com/luke-goddard/taskninja/services"
 	"github.com/luke-goddard/taskninja/tui"
@@ -48,15 +49,21 @@ func NewRunner(args []string) *Runner {
 }
 
 func (r *Runner) Run() {
+	assert.NotNil(r.bus, "Bus is nil")
+	assert.NotNil(r.interpreter, "Interpreter is nil")
+	assert.NotNil(r.args, "Args is nil")
+
 	var err error
 	var store *db.Store
 	var program *tea.Program
 
 	r.loadConfigOrFail()
+
 	store, err = db.NewStore(&r.config.Connection)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create database store")
-	}
+	defer store.Close()
+
+	assert.NoError(err, "Failed to create database store")
+	assert.True(store.IsConnected(), "Store is not connected")
 
 	r.store = store
 	r.service = services.NewServiceHandler(r.interpreter, r.store)
@@ -66,9 +73,14 @@ func (r *Runner) Run() {
 	r.bus.Subscribe(r.handler)
 
 	program, err = tui.NewTui(r.bus)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create TUI")
-	}
+
+	assert.NoError(err, "Failed to create TUI")
+	assert.NotNil(program, "Program is nil")
+	assert.NotNil(r.store, "Store is nil")
+	assert.NotNil(r.service, "Service is nil")
+	assert.NotNil(r.handler, "Handler is nil")
+	assert.True(r.bus.HasSubscribers(), "Bus has no subscribers")
+
 	program.Run()
 }
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/luke-goddard/taskninja/assert"
 	"github.com/luke-goddard/taskninja/config"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/rs/zerolog/log"
@@ -36,4 +37,13 @@ func (store *Store) RunMigrations() error {
 		}
 	}
 	return nil
+}
+
+func (store *Store) Close() {
+	assert.True(store.IsConnected(), "store is not connected")
+	store.Con.Close()
+}
+
+func (store *Store) IsConnected() bool {
+	return store.Con != nil
 }

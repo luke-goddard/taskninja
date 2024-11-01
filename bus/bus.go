@@ -24,3 +24,7 @@ func (b *Bus) Publish(e *events.Event) {
 	}
 }
 
+
+func (b *Bus) HasSubscribers() bool {
+	return len(b.subscribers) > 0
+}

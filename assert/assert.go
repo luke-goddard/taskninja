@@ -13,7 +13,7 @@ type AssertData interface {
 	Dump() string
 }
 
-func Assert(truth bool, msg string, data ...any) {
+func True(truth bool, msg string, data ...any) {
 	if !truth {
 		failAssert(msg, data...)
 	}
@@ -56,3 +56,4 @@ func failAssert(msg string, args ...interface{}) {
 
 	os.Exit(1)
 }
+
