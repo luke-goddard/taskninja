@@ -1,5 +1,7 @@
 package ast
 
+import "github.com/luke-goddard/taskninja/assert"
+
 type Visitor interface {
 	Visit(node Node) Visitor
 }
@@ -29,7 +31,7 @@ func Walk(v Visitor, node Node) {
 		Walk(v, n.Right)
 
 	default:
-		panic("unreachable")
+		assert.Fail("unexpected node type %T", n)
 	}
 
 }

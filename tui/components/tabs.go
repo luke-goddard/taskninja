@@ -30,6 +30,18 @@ type Tabs struct {
 	ActiveTab int
 }
 
+func NewTabs() *Tabs {
+	return &Tabs{
+		ActiveTab: 0,
+		Tabs: []string{
+			"Tasks",
+			"Projects",
+			"Tags",
+			"Settings",
+		},
+	}
+}
+
 func (model Tabs) View() string {
 	var document strings.Builder
 	var renderedTabs []string
@@ -78,14 +90,3 @@ func (m Tabs) Update(msg tea.Msg) (*Tabs, tea.Cmd) {
 	return &m, cmd
 }
 
-func NewTabs() *Tabs {
-	return &Tabs{
-		ActiveTab: 0,
-		Tabs: []string{
-			"Tasks",
-			"Projects",
-			"Tags",
-			"Settings",
-		},
-	}
-}

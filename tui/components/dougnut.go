@@ -28,6 +28,7 @@ import (
 	"unsafe"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/luke-goddard/taskninja/assert"
 	"github.com/luke-goddard/taskninja/tui/utils"
 )
 
@@ -57,6 +58,7 @@ type Doughnut struct {
 type TickMsg struct{ id int }
 
 func NewDonut(dimensions *utils.TerminalDimensions) *Doughnut {
+	assert.NotNil(dimensions, "TerminalDimensions is nil")
 	var w = int(dimensions.Width) - 15
 	var h = int(dimensions.Height) - 15
 	var s = min(w, h)

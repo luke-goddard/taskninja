@@ -5,6 +5,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/luke-goddard/taskninja/assert"
 	"github.com/luke-goddard/taskninja/bus"
 	"github.com/luke-goddard/taskninja/events"
 	"github.com/luke-goddard/taskninja/tui/utils"
@@ -35,6 +36,8 @@ func (t *TextInput) Disabled() bool {
 }
 
 func NewTextInput(dimensions *utils.TerminalDimensions, bus *bus.Bus) *TextInput {
+	assert.NotNil(dimensions, "TerminalDimensions is nil")
+	assert.NotNil(bus, "Bus is nil")
 	var txtIn = textinput.New()
 	txtIn.Placeholder = "Type here..."
 	txtIn.Focus()

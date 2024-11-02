@@ -4,6 +4,7 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/luke-goddard/taskninja/assert"
 	"github.com/luke-goddard/taskninja/tui/utils"
 )
 
@@ -15,6 +16,9 @@ type TaskTable struct {
 }
 
 func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions, theme *utils.Theme) *TaskTable {
+	assert.NotNil(baseStyle, "baseStyle is nil")
+	assert.NotNil(dimensions, "dimensions is nil")
+	assert.NotNil(theme, "theme is nil")
 	var columns = []table.Column{
 		{Title: "ID", Width: dimensions.Width.PercentOrMin(0.02, 4)},
 		{Title: "Age", Width: dimensions.Width.PercentOrMin(0.02, 4)},
