@@ -46,6 +46,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var newInput, _ = m.input.Update(msg)
 	m.input = newInput
 
+	var newTasks, _ = m.table.Update(msg)
+	m.table = newTasks
+
 	var newDoughnut *components.Doughnut
 	newDoughnut, cmd = m.doughnut.Update(msg)
 	m.doughnut = newDoughnut
@@ -74,7 +77,10 @@ func (m model) Notify(e *events.Event) {
 }
 
 func (m model) Init() tea.Cmd {
+
 	m.bus.Subscribe(m)
+	m.bus.Publish(events.NewListTasksEvent())
+
 	return tea.Batch(
 		m.table.Init(),
 		m.tabs.Init(),

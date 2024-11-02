@@ -32,6 +32,8 @@ func (handler *EventHandler) handle(e *events.Event) []*events.Event {
 	switch e.Type {
 	case events.EventRunProgram:
 		return handler.runProgram(events.DecodeRunProgramEvent(e))
+	case events.EventListTasks:
+		return handler.listTasks(events.DecodeListTasksEvent(e))
 	}
 	return nil
 }

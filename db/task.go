@@ -24,11 +24,21 @@ const (
 
 type Task struct {
 	ID           int          `json:"id" db:"id"`
-	Description  string       `json:"description" db:"description"`
-	Due          string       `json:"due" db:"due"`
-	Completed    bool         `json:"completed" db:"completed"`
-	Priority     TaskPriority `json:"priority" db:"priority"`
-	CreatedUtc   string       `json:"createdUtc" db:"createdUtc"`
-	UpdatedAtUtc string       `json:"updatedAtUtc" db:"updatedAtUtc"`
-	CompletedUtc string       `json:"completedUtc" db:"completedUtc"`
+	Title        string       `json:"title" db:"title"`
+	Description  *string      `json:"description" db:"description"`
+	Due          *string       `json:"due" db:"dueUtc"`
+	Completed    *bool         `json:"completed" db:"completed"`
+	Priority     *TaskPriority `json:"priority" db:"priority"`
+	CreatedUtc   *string       `json:"createdUtc" db:"createdAtUtc"`
+	UpdatedAtUtc *string       `json:"updatedAtUtc" db:"updatedAtUtc"`
+	CompletedUtc *string       `json:"completedUtc" db:"completedAtUtc"`
+}
+
+func (store *Store) ListTasks() ([]Task, error) {
+	var tasks []Task
+	err := store.Con.Select(&tasks, "SELECT * FROM tasks")
+	if err != nil {
+		return nil, err
+	}
+	return tasks, nil
 }

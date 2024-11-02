@@ -1,11 +1,15 @@
 package components
 
 import (
+	"fmt"
+
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/luke-goddard/taskninja/assert"
+	"github.com/luke-goddard/taskninja/events"
 	"github.com/luke-goddard/taskninja/tui/utils"
+	"github.com/rs/zerolog/log"
 )
 
 type TaskTable struct {
@@ -29,8 +33,7 @@ func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions
 	}
 
 	var rows = []table.Row{
-		{"1", "23", "Buy groceries", "High", "Shopping", "food"},
-		{"1", "23", "Buy groceries", "High", "Shopping", "food"},
+		// {"1", "23", "Buy groceries", "High", "Shopping", "food"},
 	}
 	var tbl = table.New(
 		table.WithColumns(columns),
@@ -59,8 +62,9 @@ func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions
 	}
 }
 
-func (m TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
+func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 	var cmd tea.Cmd
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -71,13 +75,35 @@ func (m TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 				m.table.Focus()
 			}
 		case "enter":
-			return &m, tea.Batch(
+			return m, tea.Batch(
 				tea.Printf("Let's go to %s!", m.table.SelectedRow()[1]),
 			)
 		}
+	case *events.Event:
+		switch msg.Type {
+		case events.EventListTaskResponse:
+			m.handleListTasksResponse(events.DecodeListTasksResponseEvent(msg))
+			return m, cmd
+		}
 	}
 	m.table, cmd = m.table.Update(msg)
-	return &m, cmd
+	return m, cmd
+}
+
+func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
+	var rows = []table.Row{}
+	for _, task := range e.Tasks {
+		var columns = []string{}
+		columns = append(columns, fmt.Sprintf("%d", task.ID))
+		columns = append(columns, "")
+		columns = append(columns, task.Title)
+		columns = append(columns, "")
+		columns = append(columns, "")
+
+		rows = append(rows, columns)
+	}
+	log.Info().Msgf("Rows: %v", rows)
+	m.table.SetRows(rows)
 }
 
 func (m TaskTable) View() string {
