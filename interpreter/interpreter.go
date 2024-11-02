@@ -10,6 +10,7 @@ import (
 	"github.com/luke-goddard/taskninja/interpreter/parser"
 	"github.com/luke-goddard/taskninja/interpreter/semantic"
 	"github.com/luke-goddard/taskninja/interpreter/token"
+	"github.com/rs/zerolog/log"
 )
 
 type Interpreter struct {
@@ -105,5 +106,11 @@ func (interpreter *Interpreter) Execute(input string) (ast.SqlStatement, ast.Sql
 		var err = fmt.Errorf("failed to transpile input: %v", tranErrors)
 		return "", nil, err
 	}
+
+	log.Info().
+		Str("sql", string(sql)).
+		Interface("args", args).
+		Msg("transpiled sql statement")
+
 	return sql, args, nil
 }

@@ -62,7 +62,7 @@ func (c *Command) EvalInsert(transpiler *Transpiler) interface{} {
 		transpiler.AddError(fmt.Errorf("command %s requires a description parameter", c.Kind.String()), c)
 		return nil
 	}
-	transpiler.AddCol("description")
+	transpiler.AddCol("title")
 	transpiler.Inserter.InsertInto("tasks")
 	transpiler.AddValue(c.Param.Value)
 	for _, option := range c.Options {
