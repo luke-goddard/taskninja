@@ -1,14 +1,20 @@
 package services
 
-import "github.com/luke-goddard/taskninja/events"
+import (
+	"github.com/luke-goddard/taskninja/assert"
+	"github.com/luke-goddard/taskninja/events"
+	"github.com/luke-goddard/taskninja/interpreter/ast"
+)
 
-func (handler *ServiceHandler) RunProgram(e *events.RunProgram) error {
+func (handler *ServiceHandler) RunProgram(e *events.RunProgram) (*ast.Command, error) {
 	var sql, args, err = handler.interpreter.Execute(e.Program)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	var lastCmd = handler.interpreter.GetLastCmd()
+	assert.NotNil(lastCmd, "last command is nil")
 
-	_, err =handler.store.Con.Exec(string(sql), args...)
+	_, err = handler.store.Con.Exec(string(sql), args...)
 
-	return err
+	return lastCmd, err
 }

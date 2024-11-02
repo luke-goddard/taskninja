@@ -20,6 +20,7 @@ type Interpreter struct {
 	semantic   *semantic.Analyzer
 	transpiler *ast.Transpiler
 	errs       *manager.ErrorManager
+	lastCmd    *ast.Command
 }
 
 func NewInterpreter() *Interpreter {
@@ -68,8 +69,13 @@ func (interpreter *Interpreter) ParserString(input string) (*ast.Command, []mana
 	return interpreter.Parse(tokens)
 }
 
+func (interpreter *Interpreter) GetLastCmd() *ast.Command {
+	return interpreter.lastCmd
+}
+
 func (interpreter *Interpreter) Execute(input string) (ast.SqlStatement, ast.SqlArgs, error) {
 	interpreter.input = input
+	interpreter.lastCmd = nil
 
 	var tokens []token.Token
 	var cmd *ast.Command
@@ -112,5 +118,6 @@ func (interpreter *Interpreter) Execute(input string) (ast.SqlStatement, ast.Sql
 		Interface("args", args).
 		Msg("transpiled sql statement")
 
+	interpreter.lastCmd = cmd
 	return sql, args, nil
 }
