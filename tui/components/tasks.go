@@ -9,7 +9,6 @@ import (
 	"github.com/luke-goddard/taskninja/assert"
 	"github.com/luke-goddard/taskninja/events"
 	"github.com/luke-goddard/taskninja/tui/utils"
-	"github.com/rs/zerolog/log"
 )
 
 type TaskTable struct {
@@ -79,6 +78,7 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 				tea.Printf("Let's go to %s!", m.table.SelectedRow()[1]),
 			)
 		}
+		m.table, cmd = m.table.Update(msg)
 	case *events.Event:
 		switch msg.Type {
 		case events.EventListTaskResponse:
@@ -86,7 +86,6 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 			return m, cmd
 		}
 	}
-	m.table, cmd = m.table.Update(msg)
 	return m, cmd
 }
 
@@ -102,7 +101,6 @@ func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
 
 		rows = append(rows, columns)
 	}
-	log.Info().Msgf("Rows: %v", rows)
 	m.table.SetRows(rows)
 }
 

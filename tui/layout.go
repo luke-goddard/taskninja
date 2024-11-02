@@ -46,9 +46,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var newInput, _ = m.input.Update(msg)
 	m.input = newInput
 
-	var newTasks, _ = m.table.Update(msg)
-	m.table = newTasks
-
 	var newDoughnut *components.Doughnut
 	newDoughnut, cmd = m.doughnut.Update(msg)
 	m.doughnut = newDoughnut
