@@ -10,6 +10,7 @@ import (
 )
 
 var TaskNinjaSkipAssert = "TASK_NINJA_SKIP_ASSERTS" // #nosec G101
+var TotalPanics = 0
 
 func True(truth bool, msg string, data ...any) {
 	if !truth {
@@ -55,6 +56,7 @@ func failAssert(msg string, args ...interface{}) {
 		Msg("Assert Failed")
 
 	if os.Getenv(TaskNinjaSkipAssert) == "true" {
+		TotalPanics++
 		return
 	}
 	os.Exit(1)
