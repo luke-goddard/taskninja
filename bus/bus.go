@@ -27,7 +27,7 @@ func (b *Bus) Publish(e *events.Event) {
 	assert.True(b.HasSubscribers(), "no subscribers")
 
 	for _, s := range b.subscribers {
-		go s.Notify(e)
+		s.Notify(e)
 	}
 }
 
