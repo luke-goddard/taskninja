@@ -2,6 +2,7 @@ package components
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -17,7 +18,7 @@ type TaskTable struct {
 	baseStyle  lipgloss.Style
 	dimensions *utils.TerminalDimensions
 	theme      *utils.Theme
-	bus       *bus.Bus
+	bus        *bus.Bus
 }
 
 func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions, theme *utils.Theme, bus *bus.Bus) *TaskTable {
@@ -82,6 +83,10 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 				tea.Printf("Let's go to %s!", m.table.SelectedRow()[1]),
 			)
 		case "d":
+			var selectedRow = m.table.SelectedRow()
+			var strId = selectedRow[0]
+			var id, _ = strconv.Atoi(strId)
+			m.bus.Publish(events.NewDeleteTaskEvent(id))
 		}
 		m.table, cmd = m.table.Update(msg)
 	case *events.Event:
