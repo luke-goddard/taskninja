@@ -99,7 +99,7 @@ func NewTui(bus *bus.Bus) (*tea.Program, error) {
 	var model = model{
 		bus:        bus,
 		input:      components.NewTextInput(dimensions, bus),
-		table:      components.NewTaskTable(baseStyle, dimensions, theme),
+		table:      components.NewTaskTable(baseStyle, dimensions, theme, bus),
 		doughnut:   components.NewDonut(dimensions),
 		tabs:       tabs,
 		dimensions: dimensions,

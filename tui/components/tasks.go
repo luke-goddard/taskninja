@@ -7,6 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/luke-goddard/taskninja/assert"
+	"github.com/luke-goddard/taskninja/bus"
 	"github.com/luke-goddard/taskninja/events"
 	"github.com/luke-goddard/taskninja/tui/utils"
 )
@@ -16,9 +17,11 @@ type TaskTable struct {
 	baseStyle  lipgloss.Style
 	dimensions *utils.TerminalDimensions
 	theme      *utils.Theme
+	bus       *bus.Bus
 }
 
-func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions, theme *utils.Theme) *TaskTable {
+func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions, theme *utils.Theme, bus *bus.Bus) *TaskTable {
+	assert.NotNil(bus, "bus is nil")
 	assert.NotNil(baseStyle, "baseStyle is nil")
 	assert.NotNil(dimensions, "dimensions is nil")
 	assert.NotNil(theme, "theme is nil")
@@ -58,6 +61,7 @@ func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions
 	return &TaskTable{
 		table:     tbl,
 		baseStyle: baseStyle,
+		bus:       bus,
 	}
 }
 
@@ -77,6 +81,7 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 			return m, tea.Batch(
 				tea.Printf("Let's go to %s!", m.table.SelectedRow()[1]),
 			)
+		case "d":
 		}
 		m.table, cmd = m.table.Update(msg)
 	case *events.Event:
