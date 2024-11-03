@@ -75,22 +75,22 @@ func (e *ErrorTranspiler) SetSeverityWarning() *ErrorTranspiler {
 func (e *ErrorTranspiler) hasToken() bool { return e.Token != nil }
 func (e *ErrorTranspiler) hasNode() bool  { return e.Node != nil }
 
-// Occured during the Lexical Analysis phase
+// Occurred during the Lexical Analysis phase
 func NewLexError(message string) *ErrorTranspiler {
 	return NewErrorTranspiler(TranspilerErrorLex, message)
 }
 
-// Occured during the Syntax Analysis phase
+// Occurred during the Syntax Analysis phase
 func NewParseError(message string) *ErrorTranspiler {
 	return NewErrorTranspiler(TranspilerErrorParse, message)
 }
 
-// Occured during the Semantic Analysis phase
+// Occurred during the Semantic Analysis phase
 func NewSemanticError(message string) *ErrorTranspiler {
 	return NewErrorTranspiler(TranspilerErrorSemantic, message)
 }
 
-// Occured during the Transpilation phase
+// Occurred during the Transpilation phase
 func NewTranspilationError(message string) *ErrorTranspiler {
 	return NewErrorTranspiler(TranspilerErrorTranspilation, message)
 }
