@@ -6,6 +6,7 @@ const (
 	EventError      EventType = "Error"
 	EventRunProgram EventType = "RunProgram"
 	EventListTasks  EventType = "ListTasks"
+	EventDeleteTask EventType = "DeleteTask"
 	EventListTaskResponse EventType = "ListTaskResponse"
 )
 
