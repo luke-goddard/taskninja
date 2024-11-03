@@ -1,5 +1,7 @@
 package db
 
+import "database/sql"
+
 const M000_TaskSchema = `
 CREATE TABLE IF NOT EXISTS tasks (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,4 +43,19 @@ func (store *Store) ListTasks() ([]Task, error) {
 		return nil, err
 	}
 	return tasks, nil
+}
+
+func (store *Store) DeleteTaskById(id int) (bool, error) {
+	var err error
+	var res sql.Result
+	var rowsAffected int64
+	res, err = store.Con.Exec("DELETE FROM tasks WHERE id = ?", id)
+	if err != nil {
+		return false, err
+	}
+	rowsAffected, err  = res.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+	return rowsAffected > 0, nil
 }
