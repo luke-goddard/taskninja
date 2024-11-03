@@ -61,6 +61,7 @@ func (c *Config) InitLogger() {
 
 	var file, err = os.OpenFile(c.Log.Path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	assert.NotNil(file, "Failed to open log file")
+	assert.Nil(err, "Failed to open log file")
 
 	err = file.Truncate(0)
 	if err != nil {

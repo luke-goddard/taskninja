@@ -45,6 +45,8 @@ func TestParser(t *testing.T) {
 			var ast *ast.Command
 
 			tokens, errs = lex.NewLexer(errManager).SetInput(test.input).Tokenize()
+			assert.Empty(t, errs)
+
 			ast, errs = NewParser(errManager).Parse(tokens)
 
 			if !assert.Empty(t, errs) {
