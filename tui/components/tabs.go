@@ -89,4 +89,3 @@ func (m Tabs) Update(msg tea.Msg) (*Tabs, tea.Cmd) {
 	}
 	return &m, cmd
 }
-

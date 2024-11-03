@@ -8,7 +8,7 @@ import (
 
 type ServiceHandler struct {
 	Interprete *interpreter.Interpreter
-	Store       *db.Store
+	Store      *db.Store
 }
 
 func NewServiceHandler(
@@ -19,6 +19,6 @@ func NewServiceHandler(
 	assert.NotNil(store, "Store is nil")
 	return &ServiceHandler{
 		Interprete: interpreter,
-		Store:       store,
+		Store:      store,
 	}
 }

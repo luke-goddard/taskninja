@@ -57,7 +57,7 @@ func TestInterpreterBad(t *testing.T) {
 		},
 		{
 			input:       `add 1 project:Lol`,
-				expectedErr: "(Fatal) Syntax: Expected token type String, got Number: Number: 1",
+			expectedErr: "(Fatal) Syntax: Expected token type String, got Number: Number: 1",
 		},
 	}
 

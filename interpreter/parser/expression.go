@@ -20,12 +20,12 @@ func parsePrimaryExpression(parser *Parser) ast.Expression {
 		}
 	case token.Key:
 		var key = parser.consume().Value
-		if !parser.expectCurrent(token.Colon){
+		if !parser.expectCurrent(token.Colon) {
 			panic("TODO err handle")
 		}
 		parser.consume()
 		return &ast.Key{
-			Key: key,
+			Key:  key,
 			Expr: parseExpression(parser, BP_PRIMARY),
 		}
 	}

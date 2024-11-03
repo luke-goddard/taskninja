@@ -5,4 +5,3 @@ var Migrations = []string{
 	M001_TagSchema,
 	M002_TaskTagsSchema,
 }
-

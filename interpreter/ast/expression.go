@@ -251,6 +251,6 @@ func (key *Key) EvalInsert(transpiler *Transpiler) interface{} {
 		return key.Expr.EvalInsert(transpiler)
 	default:
 		transpiler.AddError(fmt.Errorf("Unknown key: %s", key.Key), key)
-	return nil
+		return nil
 	}
 }

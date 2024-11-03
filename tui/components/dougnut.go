@@ -123,8 +123,8 @@ func (d *Doughnut) View() string {
 }
 
 func (screen *Screen) clear() {
-	for i, _ := range screen.data {
-		for j, _ := range screen.data[i] {
+	for i := range screen.data {
+		for j := range screen.data[i] {
 			screen.data[i][j] = ' '
 		}
 	}

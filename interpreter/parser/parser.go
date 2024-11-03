@@ -40,7 +40,7 @@ type Parser struct {
 	tokens           []token.Token
 	position         int
 	hasCheckedExists bool // Token, not column/table
-	errors          *manager.ErrorManager
+	errors           *manager.ErrorManager
 }
 
 func NewParser(manager *manager.ErrorManager) *Parser {
@@ -48,7 +48,7 @@ func NewParser(manager *manager.ErrorManager) *Parser {
 	return &Parser{
 		position:         0,
 		hasCheckedExists: false,
-		errors:          manager,
+		errors:           manager,
 	}
 }
 
@@ -62,9 +62,9 @@ func (p *Parser) Parse(tokens []token.Token) (*ast.Command, []manager.ErrorTrans
 }
 
 func (p *Parser) Reset() *Parser {
-  p.position = 0
-  p.hasCheckedExists = false
-  return p
+	p.position = 0
+	p.hasCheckedExists = false
+	return p
 }
 
 func (p *Parser) hasTokens() bool {
