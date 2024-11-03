@@ -15,22 +15,22 @@ func TestInterpreterGood(t *testing.T) {
 	}{
 		{
 			input:        `add "do the dishes"`,
-			expectedSql:  "INSERT INTO tasks (description) VALUES (?)",
+			expectedSql:  "INSERT INTO tasks (title) VALUES (?)",
 			expectedArgs: ast.SqlArgs{"do the dishes"},
 		},
 		{
 			input:        `add "cook" priority:High`,
-			expectedSql:  `INSERT INTO tasks (description, priority) VALUES (?, ?)`,
+			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
 			expectedArgs: ast.SqlArgs{"cook", "High"},
 		},
 		{
 			input:        `add "cook" priority:Medium`,
-			expectedSql:  `INSERT INTO tasks (description, priority) VALUES (?, ?)`,
+			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
 			expectedArgs: ast.SqlArgs{"cook", "Medium"},
 		},
 		{
 			input:        `add "cook" priority:Low`,
-			expectedSql:  `INSERT INTO tasks (description, priority) VALUES (?, ?)`,
+			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
 			expectedArgs: ast.SqlArgs{"cook", "Low"},
 		},
 	}
