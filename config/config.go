@@ -114,7 +114,7 @@ func Bootstrap() *Config {
 	var configDir = path.Join(home, ".config", "taskninja")
 
 	if _, err = os.Stat(configDir); os.IsNotExist(err) {
-		log.Info().Str("directory", configDir).Msg("Creating inital config directory")
+		log.Info().Str("directory", configDir).Msg("Creating initial config directory")
 		if err = os.MkdirAll(configDir, 0750); err != nil {
 			log.Fatal().
 				Err(err).
@@ -122,7 +122,7 @@ func Bootstrap() *Config {
 		}
 	}
 	var configLocation = path.Join(home, ".config", "taskninja", "config.yaml")
-	log.Info().Str("file", configLocation).Msg("Creating inital config file")
+	log.Info().Str("file", configLocation).Msg("Creating initial config file")
 	_, err = os.Create(configLocation) // #nosec G304
 	if err != nil {
 		log.Fatal().
@@ -136,7 +136,7 @@ func Bootstrap() *Config {
 	if err != nil {
 		log.Fatal().
 			Err(err).
-			Msg("Failed to write intial config file")
+			Msg("Failed to write initial config file")
 	}
 	var conf *Config
 	var confErr *ConfigError
