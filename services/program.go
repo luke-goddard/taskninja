@@ -7,14 +7,14 @@ import (
 )
 
 func (handler *ServiceHandler) RunProgram(e *events.RunProgram) (*ast.Command, error) {
-	var sql, args, err = handler.interpreter.Execute(e.Program)
+	var sql, args, err = handler.Interprete.Execute(e.Program)
 	if err != nil {
 		return nil, err
 	}
-	var lastCmd = handler.interpreter.GetLastCmd()
+	var lastCmd = handler.Interprete.GetLastCmd()
 	assert.NotNil(lastCmd, "last command is nil")
 
-	_, err = handler.store.Con.Exec(string(sql), args...)
+	_, err = handler.Store.Con.Exec(string(sql), args...)
 
 	return lastCmd, err
 }

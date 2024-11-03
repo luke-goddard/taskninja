@@ -100,10 +100,6 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 			} else {
 				m.table.Focus()
 			}
-		case "enter":
-			return m, tea.Batch(
-				tea.Printf("Let's go to %s!", m.table.SelectedRow()[1]),
-			)
 		case "d":
 			var selectedRow = m.table.SelectedRow()
 			var id = TaskRows(selectedRow).ID()

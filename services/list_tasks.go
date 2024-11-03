@@ -5,5 +5,5 @@ import (
 )
 
 func (handler *ServiceHandler) ListTasks() ([]db.Task, error) {
-	return handler.store.ListTasks()
+	return handler.Store.ListTasks()
 }

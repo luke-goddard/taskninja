@@ -7,8 +7,8 @@ import (
 )
 
 type ServiceHandler struct {
-	interpreter *interpreter.Interpreter
-	store       *db.Store
+	Interprete *interpreter.Interpreter
+	Store       *db.Store
 }
 
 func NewServiceHandler(
@@ -18,7 +18,7 @@ func NewServiceHandler(
 	assert.NotNil(interpreter, "Interpreter is nil")
 	assert.NotNil(store, "Store is nil")
 	return &ServiceHandler{
-		interpreter: interpreter,
-		store:       store,
+		Interprete: interpreter,
+		Store:       store,
 	}
 }
