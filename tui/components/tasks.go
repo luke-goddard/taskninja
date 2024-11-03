@@ -13,12 +13,33 @@ import (
 	"github.com/luke-goddard/taskninja/tui/utils"
 )
 
+type TableRowIndex int
+
+const (
+	TableColumnID int = iota
+	TableColumnAge
+	TableColumnName
+	TableColumnPriority
+	TableColumnProject
+	TableColumnTags
+)
+
 type TaskTable struct {
 	table      table.Model
 	baseStyle  lipgloss.Style
 	dimensions *utils.TerminalDimensions
 	theme      *utils.Theme
 	bus        *bus.Bus
+}
+
+type TaskRows table.Row
+
+func (r TaskRows) ID() int {
+	assert.NotNil(r, "r is nil")
+	assert.True(len(r) > TableColumnID, "r does not have a column for ID")
+	var id, err = strconv.Atoi(r[TableColumnID])
+	assert.Nil(err, "failed to convert ID to int")
+	return id
 }
 
 func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions, theme *utils.Theme, bus *bus.Bus) *TaskTable {
@@ -84,8 +105,7 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 			)
 		case "d":
 			var selectedRow = m.table.SelectedRow()
-			var strId = selectedRow[0]
-			var id, _ = strconv.Atoi(strId)
+			var id = TaskRows(selectedRow).ID()
 			m.bus.Publish(events.NewDeleteTaskEvent(id))
 		}
 		m.table, cmd = m.table.Update(msg)
