@@ -25,9 +25,9 @@ const (
 )
 
 type Task struct {
-	ID           int          `json:"id" db:"id"`
-	Title        string       `json:"title" db:"title"`
-	Description  *string      `json:"description" db:"description"`
+	ID           int           `json:"id" db:"id"`
+	Title        string        `json:"title" db:"title"`
+	Description  *string       `json:"description" db:"description"`
 	Due          *string       `json:"due" db:"dueUtc"`
 	Completed    *bool         `json:"completed" db:"completed"`
 	Priority     *TaskPriority `json:"priority" db:"priority"`
@@ -45,7 +45,7 @@ func (store *Store) ListTasks() ([]Task, error) {
 	return tasks, nil
 }
 
-func (store *Store) DeleteTaskById(id int) (bool, error) {
+func (store *Store) DeleteTaskById(id int64) (bool, error) {
 	var err error
 	var res sql.Result
 	var rowsAffected int64
@@ -53,7 +53,7 @@ func (store *Store) DeleteTaskById(id int) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	rowsAffected, err  = res.RowsAffected()
+	rowsAffected, err = res.RowsAffected()
 	if err != nil {
 		return false, err
 	}

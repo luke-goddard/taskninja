@@ -5,7 +5,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (handler *EventHandler) listTasks(e *events.ListTasks) []*events.Event {
+func (handler *EventHandler) listTasks() []*events.Event {
 	var tasks, err = handler.services.ListTasks()
 	if err != nil {
 		log.Error().Err(err).Msg("error listing tasks")

@@ -34,10 +34,11 @@ type TaskTable struct {
 
 type TaskRows table.Row
 
-func (r TaskRows) ID() int {
+func (r TaskRows) ID() int64 {
 	assert.NotNil(r, "r is nil")
 	assert.True(len(r) > TableColumnID, "r does not have a column for ID")
-	var id, err = strconv.Atoi(r[TableColumnID])
+	var str = r[TableColumnID]
+	var id, err = strconv.ParseInt(str, 10, 64)
 	assert.Nil(err, "failed to convert ID to int")
 	return id
 }

@@ -14,6 +14,15 @@ type Store struct {
 	Con *sqlx.DB
 }
 
+func NewInMemoryStore() *Store {
+	var con, err = sqlx.Connect("sqlite3", ":memory:")
+	assert.Nil(err, "failed to connect to in-memory database")
+	var store = &Store{Con: con}
+	err = store.RunMigrations()
+	assert.Nil(err, "failed to run migrations")
+	return store
+}
+
 func NewStore(conf *config.SqlConnectionConfig) (*Store, error) {
 	var dsn = conf.DSN()
 	log.Debug().Str("dsn", dsn).Msg("connecting to database")

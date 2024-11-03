@@ -1,10 +1,10 @@
 package events
 
 type DeleteTaskById struct {
-	Id int // The ID of the task to delete
+	Id int64 // The ID of the task to delete
 }
 
-func NewDeleteTaskEvent(id int) *Event {
+func NewDeleteTaskEvent(id int64) *Event {
 	return &Event{
 		Type: EventDeleteTaskById,
 		Data: &DeleteTaskById{Id: id},
