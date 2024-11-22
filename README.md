@@ -4,14 +4,22 @@
 
 WIP TaskNinja is a command line task list utity program, inspired by [taskwarrior](https://github.com/GothenburgBitFactory/taskwarrior)
 
-## Run
+## Local Development
+
+### Run
 
 ```bash
 make run
 ```
 
-## Run the unit tests
+### Run the unit tests
 
 ```bash
 make tests
+```
+
+### View the database
+
+```bash
+make browse
 ```
