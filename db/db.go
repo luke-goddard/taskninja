@@ -41,21 +41,6 @@ func NewStore(conf *config.SqlConnectionConfig) (*Store, error) {
 	return store, nil
 }
 
-func (store *Store) RunMigrations() error {
-	var version = store.SchemaVersion()
-	for i, migration := range Migrations {
-		if i < version {
-			continue
-		}
-		_, err := store.Con.Exec(migration)
-		if err != nil {
-			log.Debug().Msg(migration)
-			return fmt.Errorf("failed to run migration (%d): %w", i, err)
-		}
-	}
-	return nil
-}
-
 func (store *Store) Close() {
 	assert.True(store.IsConnected(), "store is not connected")
 	var err = store.Con.Close()
@@ -68,13 +53,3 @@ func (store *Store) IsConnected() bool {
 	return store.Con != nil
 }
 
-func (store *Store) SchemaVersion() int {
-	var row, err = store.Con.Query("PRAGMA user_version")
-	assert.Nil(err, "failed to get schema version")
-	var version int
-	row.Next()
-	err = row.Scan(&version)
-	row.Close()
-	assert.Nil(err, "failed to scan schema version")
-	return version
-}

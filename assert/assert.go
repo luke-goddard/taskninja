@@ -19,7 +19,6 @@ func True(truth bool, msg string, data ...any) {
 }
 
 func Nil(item any, msg string, data ...any) {
-	log.Info().Interface("item", item).Msg("Nil Check")
 	if item == nil {
 		return
 	}

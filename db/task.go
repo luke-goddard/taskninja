@@ -1,6 +1,9 @@
 package db
 
-import "database/sql"
+import (
+	"database/sql"
+	"time"
+)
 
 const M000_TaskSchema = `
 CREATE TABLE IF NOT EXISTS tasks (
@@ -69,17 +72,14 @@ func (store *Store) DeleteTaskById(id int64) (bool, error) {
 	return rowsAffected > 0, nil
 }
 
-func (store *Store) StartTaskById(id int64) (bool, error) {
-	var err error
-	var res sql.Result
-	var rowsAffected int64
-	res, err = store.Con.Exec("UPDATE tasks SET completed = 0 WHERE id = ?", id)
+func (store *Store) StartTaskById(id int64) (*Task, error) {
+	var sql = "UPDATE tasks SET startedAtUtc = ? WHERE id = ? RETURNING *"
+	var task = &Task{}
+	var now = time.Now().UTC().String()
+	var row = store.Con.QueryRowx(sql, now, id)
+	var err = row.StructScan(task)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-	rowsAffected, err = res.RowsAffected()
-	if err != nil {
-		return false, err
-	}
-	return rowsAffected > 0, nil
+	return task, nil
 }
