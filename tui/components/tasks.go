@@ -101,9 +101,11 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 				m.table.Focus()
 			}
 		case "d":
-			var selectedRow = m.table.SelectedRow()
-			var id = TaskRows(selectedRow).ID()
+			var id = m.GetIdForCurrentRow()
 			m.bus.Publish(events.NewDeleteTaskEvent(id))
+		case "s":
+			var id = m.GetIdForCurrentRow()
+			m.bus.Publish(events.NewStartTaskEvent(id))
 		}
 		m.table, cmd = m.table.Update(msg)
 	case *events.Event:
@@ -114,6 +116,11 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 		}
 	}
 	return m, cmd
+}
+
+func (m *TaskTable) GetIdForCurrentRow() int64 {
+	var selectedRow = m.table.SelectedRow()
+	return TaskRows(selectedRow).ID()
 }
 
 func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {

@@ -5,7 +5,9 @@ CREATE TABLE IF NOT EXISTS taskTags (
 	taskID INTEGER NOT NULL,
 	tagID INTEGER NOT NULL,
 	PRIMARY KEY (taskID, tagID)
-);`
+);
+PRAGMA user_version = 2;
+`
 
 type TaskTag struct {
 	TaskID int `json:"taskID" db:"taskID"`

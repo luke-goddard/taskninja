@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS tags (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	name TEXT NOT NULL UNIQUE
 );
+PRAGMA user_version = 1;
 `
 
 type Tag struct {

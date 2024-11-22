@@ -13,7 +13,15 @@ CREATE TABLE IF NOT EXISTS tasks (
 	updatedAtUtc TEXT NOT NULL DEFAULT current_timestamp,
 	createdAtUtc TEXT NOT NULL DEFAULT current_timestamp,
 	completedAtUtc TEXT
-);`
+	startedAtUtc TEXT
+);
+PRAGMA user_version = 0;
+`
+
+const M003_TaskSchema = `
+ALTER TABLE tasks ADD COLUMN startedAtUtc TEXT;
+PRAGMA user_version = 3;
+`
 
 type TaskPriority int
 
@@ -34,6 +42,7 @@ type Task struct {
 	CreatedUtc   *string       `json:"createdUtc" db:"createdAtUtc"`
 	UpdatedAtUtc *string       `json:"updatedAtUtc" db:"updatedAtUtc"`
 	CompletedUtc *string       `json:"completedUtc" db:"completedAtUtc"`
+	StartedUtc   *string       `json:"startedUtc" db:"startedAtUtc"`
 }
 
 func (store *Store) ListTasks() ([]Task, error) {
@@ -50,6 +59,21 @@ func (store *Store) DeleteTaskById(id int64) (bool, error) {
 	var res sql.Result
 	var rowsAffected int64
 	res, err = store.Con.Exec("DELETE FROM tasks WHERE id = ?", id)
+	if err != nil {
+		return false, err
+	}
+	rowsAffected, err = res.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+	return rowsAffected > 0, nil
+}
+
+func (store *Store) StartTaskById(id int64) (bool, error) {
+	var err error
+	var res sql.Result
+	var rowsAffected int64
+	res, err = store.Con.Exec("UPDATE tasks SET completed = 0 WHERE id = ?", id)
 	if err != nil {
 		return false, err
 	}

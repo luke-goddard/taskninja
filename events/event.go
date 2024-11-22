@@ -7,6 +7,7 @@ const (
 	EventRunProgram       EventType = "RunProgram"
 	EventListTasks        EventType = "ListTasks"
 	EventDeleteTaskById   EventType = "DeleteTask"
+	EventStartTaskById   EventType = "StartTask"
 	EventListTaskResponse EventType = "ListTaskResponse"
 )
 
