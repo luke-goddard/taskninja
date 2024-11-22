@@ -23,4 +23,5 @@ make install
 ```bash make tests ```
 
 ### View the database
+Note that pressing `ctrl+r` will refresh the database
 ```bash make browse ```
