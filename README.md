@@ -2,7 +2,8 @@
 
 # TaskNinja
 
-WIP TaskNinja is a command line task list utity program, inspired by [taskwarrior](https://github.com/GothenburgBitFactory/taskwarrior)
+WIP TaskNinja is a command line task list utity program, inspired by
+[taskwarrior](https://github.com/GothenburgBitFactory/taskwarrior)
 
 ## Install
 
@@ -15,7 +16,24 @@ make build
 make install
 ```
 
+## Configuration
+
+Once TaskNinja has been installed, the first time you run the program it will
+create a configuration file in your home directory. This file is located at
+`~/.config/taskninja/config.yaml`. You can edit this file to change the default
+settings.
+
+
 ## Local Development
+
+### Install Optional Development Tools
+```bash
+go install github.com/air-verse/air@latest
+sudo add-apt-repository -y ppa:linuxgndu/sqlitebrowser-testing
+sudo apt-get update
+sudo apt-get install sqlitebrowser
+```
+
 ### Run
 ```bash make run ```
 
