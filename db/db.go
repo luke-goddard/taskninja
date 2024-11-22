@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/luke-goddard/taskninja/assert"
@@ -11,7 +12,8 @@ import (
 )
 
 type Store struct {
-	Con *sqlx.DB
+	Con      *sqlx.DB
+	writeMut sync.Mutex
 }
 
 func NewInMemoryStore() *Store {
@@ -33,15 +35,21 @@ func NewStore(conf *config.SqlConnectionConfig) (*Store, error) {
 	var store = &Store{Con: con}
 	err = store.RunMigrations()
 	if err != nil {
+		log.Error().Err(err).Msg("failed to run migrations")
 		return nil, err
 	}
 	return store, nil
 }
 
 func (store *Store) RunMigrations() error {
+	var version = store.SchemaVersion()
 	for i, migration := range Migrations {
+		if i < version {
+			continue
+		}
 		_, err := store.Con.Exec(migration)
 		if err != nil {
+			log.Debug().Msg(migration)
 			return fmt.Errorf("failed to run migration (%d): %w", i, err)
 		}
 	}
@@ -58,4 +66,15 @@ func (store *Store) Close() {
 
 func (store *Store) IsConnected() bool {
 	return store.Con != nil
+}
+
+func (store *Store) SchemaVersion() int {
+	var row, err = store.Con.Query("PRAGMA user_version")
+	assert.Nil(err, "failed to get schema version")
+	var version int
+	row.Next()
+	err = row.Scan(&version)
+	row.Close()
+	assert.Nil(err, "failed to scan schema version")
+	return version
 }
