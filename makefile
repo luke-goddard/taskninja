@@ -18,3 +18,9 @@ run-watch:
 # View the sqlite database using sqlitebrowser
 browse:
 	sqlitebrowser $(shell cat $$HOME/.config/taskninja/config.yaml | grep path | awk '{print $$2}' | xargs)&
+
+log:
+	cat /tmp/taskninja.log
+
+log-watch:
+	tail -f /tmp/taskninja.log
