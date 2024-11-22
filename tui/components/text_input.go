@@ -100,7 +100,7 @@ func (t *TextInput) View() string {
 		return ""
 	}
 	return fmt.Sprintf(
-		"What’s your favorite Pokémon?\n\n%s\n",
+		"Enter a test to add\n\n%s\n",
 		t.txtInput.View(),
 	) + "\n"
 }
