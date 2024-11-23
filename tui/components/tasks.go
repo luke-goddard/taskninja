@@ -50,8 +50,8 @@ func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions
 	assert.NotNil(theme, "theme is nil")
 	var columns = []table.Column{
 		{Title: "ID", Width: dimensions.Width.PercentOrMin(0.02, 4)},
-		{Title: "Age", Width: dimensions.Width.PercentOrMin(0.02, 4)},
-		{Title: "Name", Width: dimensions.Width.PercentOrMin(0.54, 10)},
+		{Title: "Age", Width: dimensions.Width.PercentOrMin(0.05, 4)},
+		{Title: "Name", Width: dimensions.Width.PercentOrMin(0.51, 10)},
 		{Title: "Priority", Width: dimensions.Width.PercentOrMin(0.06, 10)},
 		{Title: "Project", Width: dimensions.Width.PercentOrMin(0.137, 10)},
 		{Title: "Tags", Width: dimensions.Width.PercentOrMin(0.08, 5)},
@@ -127,7 +127,7 @@ func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
 	for _, task := range e.Tasks {
 		var columns = []string{}
 		columns = append(columns, fmt.Sprintf("%d", task.ID))
-		columns = append(columns, "")
+		columns = append(columns, task.AgeStr())
 		columns = append(columns, task.Title)
 		columns = append(columns, "")
 		columns = append(columns, "")

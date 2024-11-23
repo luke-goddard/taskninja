@@ -18,7 +18,6 @@ CREATE TABLE IF NOT EXISTS tasks (
 	updatedAtUtc TEXT NOT NULL DEFAULT current_timestamp,
 	createdAtUtc TEXT NOT NULL DEFAULT current_timestamp,
 	completedAtUtc TEXT
-	startedAtUtc TEXT
 );
 PRAGMA user_version = 0;
 `
@@ -44,7 +43,7 @@ type Task struct {
 	Due          *string        `json:"due" db:"dueUtc"`
 	Completed    bool           `json:"completed" db:"completed"`
 	Priority     TaskPriority   `json:"priority" db:"priority"`
-	CreatedUtc   *string        `json:"createdUtc" db:"createdAtUtc"`
+	CreatedUtc   string         `json:"createdUtc" db:"createdAtUtc"`
 	UpdatedAtUtc *string        `json:"updatedAtUtc" db:"updatedAtUtc"`
 	CompletedUtc *string        `json:"completedUtc" db:"completedAtUtc"`
 	StartedUtc   sql.NullString `json:"startedUtc" db:"startedAtUtc"`
@@ -58,7 +57,7 @@ func (task *Task) TimeSinceStarted() time.Duration {
 	if !task.IsStarted() {
 		return 0
 	}
-	var startedAt, err = time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", task.StartedUtc.String)
+	var startedAt, err = time.Parse("2006-01-02 15:04:05", task.StartedUtc.String)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to parse startedAt")
 		return 0
@@ -68,6 +67,19 @@ func (task *Task) TimeSinceStarted() time.Duration {
 
 func (task *Task) TimeSinceStartedStr() string {
 	return task.TimeSinceStarted().String()
+}
+
+func (task *Task) TaskAge() time.Duration {
+	var createdAt, err = time.Parse("2006-01-02 15:04:05", task.CreatedUtc)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to parse createdAt")
+		return 0
+	}
+	return time.Since(createdAt)
+}
+
+func (task *Task) AgeStr() string {
+	return task.TaskAge().String()
 }
 
 func (store *Store) ListTasks() ([]Task, error) {
@@ -99,13 +111,12 @@ func (store *Store) StartTimeToggleById(id int64) (*Task, error) {
 	UPDATE tasks
 	SET
 		updatedAtUtc = current_timestamp,
-		startedAtUtc = case when startedAtUtc is null then ? else null end
+		startedAtUtc = case when startedAtUtc is null then current_timestamp else null end
 	WHERE id = ?
 	RETURNING *
 	`
 	var task = &Task{}
-	var now = time.Now().UTC().String()
-	var row = store.Con.QueryRowx(sql, now, id)
+	var row = store.Con.QueryRowx(sql, id)
 	var err = row.StructScan(task)
 	if err != nil {
 		return nil, err
