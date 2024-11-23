@@ -9,7 +9,7 @@ import (
 func (handler *EventHandler) startTaskById(e *events.StartTask) []*events.Event {
 	log.Debug().Interface("event", e).Msg("starting task")
 	var newEvents = make([]*events.Event, 0)
-	var task, err = handler.services.StartTasksById(e.Id)
+	var task, err = handler.services.StartTimeToggleById(e.Id)
 	if err != nil {
 		log.Error().Err(err).Msg("error starting task")
 		newEvents = append(newEvents, events.NewErrorEvent(err))

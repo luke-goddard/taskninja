@@ -94,12 +94,12 @@ func (store *Store) DeleteTaskById(id int64) (bool, error) {
 	return rowsAffected > 0, nil
 }
 
-func (store *Store) StartTaskById(id int64) (*Task, error) {
+func (store *Store) StartTimeToggleById(id int64) (*Task, error) {
 	var sql = `
 	UPDATE tasks
 	SET
 		updatedAtUtc = current_timestamp,
-		startedAtUtc = case when startedAtUtc is null then ? else startedAtUtc end
+		startedAtUtc = case when startedAtUtc is null then ? else null end
 	WHERE id = ?
 	RETURNING *
 	`

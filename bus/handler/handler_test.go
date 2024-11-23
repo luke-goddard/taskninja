@@ -70,17 +70,15 @@ func TestStartTaskHandler(t *testing.T) {
 	assert.Empty(t, task.StartedUtc)
 	assert.Equal(t, "title", task.Title)
 
-	task, err = handler.services.StartTasksById(task.ID)
+	task, err = handler.services.StartTimeToggleById(task.ID)
 	assert.Nil(t, err)
 	assert.NotNil(t, task)
 	assert.NotNil(t, task.StartedUtc)
 
-	var before = task.StartedUtc
-	// NEW TEST to make sure that task in a started state cannot be started again
-	t.Run("StartTaskHandler", func(t *testing.T) {
-		task, err = handler.services.StartTasksById(task.ID)
+	t.Run("restarting-a-started-task", func(t *testing.T) {
+		task, err = handler.services.StartTimeToggleById(task.ID)
 		assert.Nil(t, err)
 		assert.NotNil(t, task)
-		assert.Equal(t, before, task.StartedUtc)
+		assert.Empty(t, task.StartedUtc) // Should be empty
 	})
 }
