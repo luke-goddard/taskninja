@@ -5,6 +5,9 @@
 WIP TaskNinja is a command line task list utity program, inspired by
 [taskwarrior](https://github.com/GothenburgBitFactory/taskwarrior)
 
+// assets/screenshot.png
+![Screenshot](assets/screenshot.png?raw=true "Terminal User Interface Screenshot")
+
 ## Install
 
 ### From Git
