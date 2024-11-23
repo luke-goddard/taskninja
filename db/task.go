@@ -3,6 +3,8 @@ package db
 import (
 	"database/sql"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 const M000_TaskSchema = `
@@ -36,16 +38,36 @@ const (
 )
 
 type Task struct {
-	ID           int           `json:"id" db:"id"`
-	Title        string        `json:"title" db:"title"`
-	Description  *string       `json:"description" db:"description"`
-	Due          *string       `json:"due" db:"dueUtc"`
-	Completed    *bool         `json:"completed" db:"completed"`
-	Priority     *TaskPriority `json:"priority" db:"priority"`
-	CreatedUtc   *string       `json:"createdUtc" db:"createdAtUtc"`
-	UpdatedAtUtc *string       `json:"updatedAtUtc" db:"updatedAtUtc"`
-	CompletedUtc *string       `json:"completedUtc" db:"completedAtUtc"`
-	StartedUtc   *string       `json:"startedUtc" db:"startedAtUtc"`
+	ID           int64          `json:"id" db:"id"`
+	Title        string         `json:"title" db:"title"`
+	Description  *string        `json:"description" db:"description"`
+	Due          *string        `json:"due" db:"dueUtc"`
+	Completed    bool           `json:"completed" db:"completed"`
+	Priority     TaskPriority   `json:"priority" db:"priority"`
+	CreatedUtc   *string        `json:"createdUtc" db:"createdAtUtc"`
+	UpdatedAtUtc *string        `json:"updatedAtUtc" db:"updatedAtUtc"`
+	CompletedUtc *string        `json:"completedUtc" db:"completedAtUtc"`
+	StartedUtc   sql.NullString `json:"startedUtc" db:"startedAtUtc"`
+}
+
+func (task *Task) IsStarted() bool {
+	return task.StartedUtc.Valid
+}
+
+func (task *Task) TimeSinceStarted() time.Duration {
+	if !task.IsStarted() {
+		return 0
+	}
+	var startedAt, err = time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", task.StartedUtc.String)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to parse startedAt")
+		return 0
+	}
+	return time.Since(startedAt)
+}
+
+func (task *Task) TimeSinceStartedStr() string {
+	return task.TimeSinceStarted().String()
 }
 
 func (store *Store) ListTasks() ([]Task, error) {
@@ -82,4 +104,30 @@ func (store *Store) StartTaskById(id int64) (*Task, error) {
 		return nil, err
 	}
 	return task, nil
+}
+
+func (store *Store) CreateTask(task *Task) (*Task, error) {
+	var sql = `
+	INSERT INTO tasks
+		(
+			title, description, dueUtc,
+			completed, priority, createdAtUtc,
+			updatedAtUtc, completedAtUtc, startedAtUtc
+		)
+	VALUES
+		(?, ?, ?, ?, ?, ?, ?, ?, ?)
+	RETURNING *
+	`
+	var newTask = &Task{}
+	var row = store.Con.QueryRowx(
+		sql,
+		task.Title, task.Description, task.Due,
+		task.Completed, task.Priority, time.Now().UTC().String(),
+		time.Now().UTC().String(), task.CompletedUtc, task.StartedUtc,
+	)
+	var err = row.StructScan(newTask)
+	if err != nil {
+		return nil, err
+	}
+	return newTask, nil
 }

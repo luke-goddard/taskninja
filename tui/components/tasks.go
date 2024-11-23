@@ -54,12 +54,11 @@ func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions
 		{Title: "Name", Width: dimensions.Width.PercentOrMin(0.54, 10)},
 		{Title: "Priority", Width: dimensions.Width.PercentOrMin(0.06, 10)},
 		{Title: "Project", Width: dimensions.Width.PercentOrMin(0.137, 10)},
-		{Title: "Tags", Width: dimensions.Width.PercentOrMin(0.16, 5)},
+		{Title: "Tags", Width: dimensions.Width.PercentOrMin(0.08, 5)},
+		{Title: "Started", Width: dimensions.Width.PercentOrMin(0.08, 4)},
 	}
 
-	var rows = []table.Row{
-		// {"1", "23", "Buy groceries", "High", "Shopping", "food"},
-	}
+	var rows = []table.Row{}
 	var tbl = table.New(
 		table.WithColumns(columns),
 		table.WithRows(rows),
@@ -132,6 +131,12 @@ func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
 		columns = append(columns, task.Title)
 		columns = append(columns, "")
 		columns = append(columns, "")
+		columns = append(columns, "")
+		var started = ""
+		if task.IsStarted() {
+			started = task.TimeSinceStartedStr()
+		}
+		columns = append(columns, started)
 
 		rows = append(rows, columns)
 	}
