@@ -60,8 +60,9 @@ func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions
 	assert.NotNil(theme, "theme is nil")
 	var columns = []table.Column{
 		{Title: "ID", Width: dimensions.Width.PercentOrMin(0.05, 4)},
+		{Title: "Urgency", Width: dimensions.Width.PercentOrMin(0.08, 4)},
 		{Title: "Started", Width: dimensions.Width.PercentOrMin(0.08, 4)},
-		{Title: "Name", Width: dimensions.Width.PercentOrMin(0.51, 10)},
+		{Title: "Name", Width: dimensions.Width.PercentOrMin(0.43, 10)},
 		{Title: "Age", Width: dimensions.Width.PercentOrMin(0.05, 4)},
 		{Title: "Priority", Width: dimensions.Width.PercentOrMin(0.06, 10)},
 		{Title: "Project", Width: dimensions.Width.PercentOrMin(0.134, 10)},
@@ -148,13 +149,14 @@ func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
 			started = task.TimeSinceStartedStr()
 			id = fmt.Sprintf("%s-⏰", id)
 		}
-		columns = append(columns, id)                 // ID
-		columns = append(columns, started)            // STARTED
-		columns = append(columns, task.Title)         // NAME
-		columns = append(columns, task.AgeStr())      // AGE
-		columns = append(columns, task.PriorityStr()) // PRIORITY
-		columns = append(columns, task.ProjectNames.String)  // PROJECT
-		columns = append(columns, "")                 // TAGS
+		columns = append(columns, id)                       // ID
+		columns = append(columns, task.UrgencyStr())         // URGENCY
+		columns = append(columns, started)                  // STARTED
+		columns = append(columns, task.Title)               // NAME
+		columns = append(columns, task.AgeStr())            // AGE
+		columns = append(columns, task.PriorityStr())       // PRIORITY
+		columns = append(columns, task.ProjectNames.String) // PROJECT
+		columns = append(columns, "")                       // TAGS
 
 		rows = append(rows, columns)
 	}

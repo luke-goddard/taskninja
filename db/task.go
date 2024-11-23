@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 	"time"
 
@@ -58,11 +59,40 @@ const (
 
 type UrgencyCoefficient float64
 
+// "# Urgency Coefficients\n"
+// "urgency.user.tag.next.coefficient=15.0         # Urgency coefficient for 'next' special tag\n"
+// "urgency.due.coefficient=12.0                   # Urgency coefficient for due dates\n"
+// "urgency.blocking.coefficient=8.0               # Urgency coefficient for blocking tasks\n"
+// "urgency.active.coefficient=4.0                 # Urgency coefficient for active tasks\n"
+// "urgency.scheduled.coefficient=5.0              # Urgency coefficient for scheduled tasks\n"
+// "urgency.age.coefficient=2.0                    # Urgency coefficient for age\n"
+// "urgency.annotations.coefficient=1.0            # Urgency coefficient for annotations\n"
+// "urgency.tags.coefficient=1.0                   # Urgency coefficient for tags\n"
+// "urgency.project.coefficient=1.0                # Urgency coefficient for projects\n"
+// "urgency.blocked.coefficient=-5.0               # Urgency coefficient for blocked tasks\n"
+// "urgency.waiting.coefficient=-3.0               # Urgency coefficient for waiting status\n"
+
+const URGENCY_MAX_AGES = time.Duration(365 * 24 * time.Hour)
 const (
-	URGENCY_PRIORITY_COEFFICIENT UrgencyCoefficient = 0.0
+	URGENCY_NEXT_TAG_COEFFICIENT        UrgencyCoefficient = 15.0 // +Next
+	URGENCY_PRIORITY_HIGH_COEFFICIENT   UrgencyCoefficient = 4.0  // P:High
+	URGENCY_PRIORITY_MEDIUM_COEFFICIENT UrgencyCoefficient = 2.0  // P:Med
+	URGENCY_PRIORITY_LOW_COEFFICIENT    UrgencyCoefficient = 1.0  // P:Low
+	URGENCY_PRIORITY_NONE_COEFFICENT    UrgencyCoefficient = 0.0  // P:None
+	URGENCY_DUE_COEFFICIENT             UrgencyCoefficient = 12.0 // Due:now
+	URGENCY_BLOCKING_COEFFICIENT        UrgencyCoefficient = 8.0  // Task Dependencies
+	URGENCY_ACTIVE_COEFFICIENT          UrgencyCoefficient = 4.0  // Task is started
+	URGENCY_SCHEDULED_COEFFICIENT       UrgencyCoefficient = 5.0  // Task is scheduled
+	URGENCY_AGE_COEFFICIENT             UrgencyCoefficient = 2.0  // Task age
+	URGENCY_ANNOTATIONS_COEFFICIENT     UrgencyCoefficient = 1.0  // Task has annotations
+	URGENCY_TAGS_COEFFICIENT            UrgencyCoefficient = 1.0  // Task has tags
+	URGENCY_PROJECT_COEFFICIENT         UrgencyCoefficient = 1.0  // Task has project
+	URGENCY_BLOCKED_COEFFICIENT         UrgencyCoefficient = -5.0 // Task is blocked
+	URGENCY_WAITING_COEFFICIENT         UrgencyCoefficient = -3.0 // Task is waiting
 )
 
 const EPSILION = 0.000001
+const SQLITE_TIME_FORMAT = "2006-01-02 15:04:05"
 
 type Task struct {
 	ID           int64          `json:"id" db:"id"`
@@ -80,8 +110,9 @@ type Task struct {
 type TaskDetailed struct {
 	Task
 
-	ProjectCount int            `json:"projectCount" db:"projectCount"`
-	ProjectNames sql.NullString `json:"projectNames" db:"projectNames"`
+	ProjectCount    int            `json:"projectCount" db:"projectCount"`
+	ProjectNames    sql.NullString `json:"projectNames" db:"projectNames"`
+	urgencyComputed float64
 }
 
 func (task *Task) PriorityStr() string {
@@ -105,7 +136,7 @@ func (task *Task) TimeSinceStarted() time.Duration {
 	if !task.IsStarted() {
 		return 0
 	}
-	var startedAt, err = time.Parse("2006-01-02 15:04:05", task.StartedUtc.String)
+	var startedAt, err = time.Parse(SQLITE_TIME_FORMAT, task.StartedUtc.String)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to parse startedAt")
 		return 0
@@ -131,8 +162,8 @@ func (task *Task) TimeSinceStartedStr() string {
 	return task.PrettyAge(task.TimeSinceStarted())
 }
 
-func (task *Task) TaskAge() time.Duration {
-	var createdAt, err = time.Parse("2006-01-02 15:04:05", task.CreatedUtc)
+func (task *Task) AgeTime() time.Duration {
+	var createdAt, err = time.Parse(SQLITE_TIME_FORMAT, task.CreatedUtc)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to parse createdAt")
 		return 0
@@ -141,21 +172,112 @@ func (task *Task) TaskAge() time.Duration {
 }
 
 func (task *Task) AgeStr() string {
-	return task.PrettyAge(task.TaskAge())
+	return task.PrettyAge(task.AgeTime())
 }
 
-func (task *Task) Ugency() float64 {
-	var urgency = 0.0
-	urgency += task.urgencyProject()
-	return urgency
+func (task *TaskDetailed) UrgencyStr() string {
+	return fmt.Sprintf("%.2f", task.Urgency())
 }
 
-func (task *Task) urgencyProject() float64 {
-	if URGENCY_PRIORITY_COEFFICIENT < EPSILION {
+func (task *TaskDetailed) Urgency() float64 {
+	if task.urgencyComputed == 0.0 {
+		task.urgencyComputed = task.urgency()
+	}
+	return task.urgencyComputed
+}
+
+func (task *TaskDetailed) urgency() float64 {
+	return task.urgencyProject() +
+		task.urgencyActive() +
+		task.urgencyScheduled() +
+		task.urgencyDue() +
+		task.urgencyAge() +
+		task.urgencyPriority()
+
+	// TODO add these when we have them
+	// task.urgencyWaiting() +
+	// task.urgencyBlocked() +
+	// task.urgencyBlocking() +
+	// task.urgencyTags() +
+	// task.urgencyAnnotations()
+}
+
+func (task *TaskDetailed) urgencyProject() float64 {
+	if URGENCY_PROJECT_COEFFICIENT < EPSILION || task.ProjectCount == 0 {
 		return 0
 	}
-	// if task has Project then 1
-	return 1
+	return float64(URGENCY_PROJECT_COEFFICIENT)
+}
+
+func (task *TaskDetailed) urgencyActive() float64 {
+	if URGENCY_ACTIVE_COEFFICIENT < EPSILION || !task.StartedUtc.Valid {
+		return 0
+	}
+	return float64(URGENCY_ACTIVE_COEFFICIENT)
+}
+
+func (task *TaskDetailed) urgencyScheduled() float64 {
+	if URGENCY_SCHEDULED_COEFFICIENT < EPSILION || task.Due == nil {
+		return 0.0
+	}
+	return float64(URGENCY_SCHEDULED_COEFFICIENT)
+}
+
+func (task *TaskDetailed) urgencyAge() float64 {
+	if URGENCY_DUE_COEFFICIENT < EPSILION {
+		return 0.0
+	}
+	var age = task.AgeTime()
+	var ageDays = age.Hours() / 24
+
+	if ageDays > URGENCY_MAX_AGES.Hours()/24 {
+		return 1.0
+	}
+	return 1.0 * ageDays / URGENCY_MAX_AGES.Hours() / 24
+}
+
+func (task *TaskDetailed) urgencyPriority() float64 {
+	switch task.Priority {
+	case TaskPriorityHigh:
+		return float64(URGENCY_PRIORITY_HIGH_COEFFICIENT)
+	case TaskPriorityMedium:
+		return float64(URGENCY_PRIORITY_MEDIUM_COEFFICIENT)
+	case TaskPriorityLow:
+		return float64(URGENCY_PRIORITY_LOW_COEFFICIENT)
+	default:
+		return float64(URGENCY_PRIORITY_NONE_COEFFICENT)
+	}
+}
+
+//	Past                  Present                              Future
+//	Overdue               Due                                     Due
+//
+//	-7 -6 -5 -4 -3 -2 -1  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 days
+//
+// <-- 1.0                         linear                            0.2 -->
+//
+//	capped                                                        capped
+//
+// Ported from https://github.com/GothenburgBitFactory/taskwarrior/blob/develop/src/Task.cpp#L1702
+func (task *TaskDetailed) urgencyDue() float64 {
+	if URGENCY_DUE_COEFFICIENT < EPSILION || task.Due == nil {
+		return 0.0
+	}
+	var due, err = time.Parse(SQLITE_TIME_FORMAT, *task.Due)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to parse due")
+		return 0.0
+	}
+	var duration = time.Since(due)
+	var daysOverDue = duration.Hours() / 24
+
+	if daysOverDue > 7 {
+		return 1.0
+	} else if daysOverDue >= -14 {
+		return ((daysOverDue + 14.0) * 0.8 / 21.0) + 0.2
+	} else {
+		return 0.2
+	}
 }
 
 func (store *Store) ListTasks() ([]TaskDetailed, error) {
