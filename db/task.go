@@ -82,7 +82,6 @@ func (task *Task) PriorityStr() string {
 }
 
 func (task *Task) IsStarted() bool {
-	log.Info().Str("startedAt", task.StartedUtc.String).Msg("IsStarted")
 	return task.StartedUtc.Valid
 }
 
@@ -99,7 +98,6 @@ func (task *Task) TimeSinceStarted() time.Duration {
 }
 
 func (task *Task) PrettyAge(duration time.Duration) string {
-	log.Info().Str("duration", duration.String()).Str("title", task.Title).Msg("PrettyAge")
 	if duration.Hours() == 0 {
 		duration = duration.Round(time.Minute)
 	}
