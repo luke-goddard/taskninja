@@ -12,12 +12,17 @@ type TranspileError struct {
 	Node    Node
 }
 
+type TranspilerContext struct {
+	isPriorityKey bool
+}
+
 type Transpiler struct {
 	errors   []TranspileError
 	values   []interface{}
 	cols     []string
 	Selecter *sqlbuilder.SelectBuilder
 	Inserter *sqlbuilder.InsertBuilder
+	ctx      *TranspilerContext
 }
 
 func NewTranspiler() *Transpiler {
@@ -25,6 +30,7 @@ func NewTranspiler() *Transpiler {
 		errors: make([]TranspileError, 0),
 		values: make([]interface{}, 0),
 		cols:   make([]string, 0),
+		ctx:    &TranspilerContext{},
 	}
 }
 
@@ -49,7 +55,18 @@ func (transpiler *Transpiler) Reset() *Transpiler {
 	transpiler.cols = make([]string, 0)
 	transpiler.Selecter = nil
 	transpiler.Inserter = nil
+	transpiler.ctx = &TranspilerContext{}
 	return transpiler
+}
+
+func (transpiler *Transpiler) getContext() TranspilerContext {
+	var ctx = *transpiler.ctx
+	transpiler.ctx = &TranspilerContext{}
+	return ctx
+}
+
+func (transpiler *Transpiler) setContext(ctx TranspilerContext) {
+	transpiler.ctx = &ctx
 }
 
 func (transpiler *Transpiler) Transpile(

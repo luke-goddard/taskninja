@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/huandu/go-sqlbuilder"
+	"github.com/luke-goddard/taskninja/db"
 )
 
 //=============================================================================
@@ -170,8 +171,32 @@ func (l *Literal) ToValue(transpiler *Transpiler) interface{} {
 }
 
 func (lit *Literal) EvalInsert(transpiler *Transpiler) interface{} {
+	if transpiler.getContext().isPriorityKey {
+		var priority, err = lit.ToPriorityInt()
+		if err != nil {
+			transpiler.AddError(err, lit)
+			return nil
+		}
+		transpiler.AddValue(priority)
+		return priority
+	}
 	transpiler.AddValue(lit.ToValue(transpiler))
 	return nil
+}
+
+func (lit *Literal) ToPriorityInt() (db.TaskPriority, error) {
+	switch strings.ToLower(lit.Value) {
+	case "none", "n":
+		return db.TaskPriorityNone, nil
+	case "low", "l":
+		return db.TaskPriorityLow, nil
+	case "medium", "m", "med":
+		return db.TaskPriorityMedium, nil
+	case "high", "h":
+		return db.TaskPriorityHigh, nil
+	}
+	var options = []string{"none", "low", "medium", "high"}
+	return db.TaskPriorityNone, fmt.Errorf("Unknown priority: %s, options are: %s", lit.Value, options)
 }
 
 //=============================================================================
@@ -223,34 +248,4 @@ func (l *LogicalExpression) EvalSelect(builder *sqlbuilder.SelectBuilder, addErr
 
 func (logical *LogicalExpression) EvalInsert(transpiler *Transpiler) interface{} {
 	panic("implement me")
-}
-
-// =============================================================================
-// Key
-// =============================================================================
-type Key struct {
-	Key  string
-	Expr Expression
-	NodePosition
-}
-
-func (key *Key) Expression() {}
-func (key *Key) Type() NodeType {
-	return NodeTypeBinaryExpression
-}
-
-func (key *Key) EvalSelect(builder *sqlbuilder.SelectBuilder, addError AddError) interface{} {
-	return key.Expr.EvalSelect(builder, addError)
-}
-
-func (key *Key) EvalInsert(transpiler *Transpiler) interface{} {
-	var lowerK = strings.ToLower(key.Key)
-	switch lowerK {
-	case "priority":
-		transpiler.AddCol("priority")
-		return key.Expr.EvalInsert(transpiler)
-	default:
-		transpiler.AddError(fmt.Errorf("Unknown key: %s", key.Key), key)
-		return nil
-	}
 }

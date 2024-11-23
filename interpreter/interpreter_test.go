@@ -3,6 +3,7 @@ package interpreter
 import (
 	"testing"
 
+	"github.com/luke-goddard/taskninja/db"
 	"github.com/luke-goddard/taskninja/interpreter/ast"
 	"github.com/stretchr/testify/assert"
 )
@@ -21,17 +22,62 @@ func TestInterpreterGood(t *testing.T) {
 		{
 			input:        `add "cook" priority:High`,
 			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
-			expectedArgs: ast.SqlArgs{"cook", "High"},
+			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityHigh},
 		},
 		{
 			input:        `add "cook" priority:Medium`,
 			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
-			expectedArgs: ast.SqlArgs{"cook", "Medium"},
+			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityMedium},
 		},
 		{
 			input:        `add "cook" priority:Low`,
 			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
-			expectedArgs: ast.SqlArgs{"cook", "Low"},
+			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityLow},
+		},
+		{
+			input:        `add "cook" priority:None`,
+			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityNone},
+		},
+		{
+			input:        `add "cook" priority:high`,
+			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityHigh},
+		},
+		{
+			input:        `add "cook" priority:medium`,
+			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityMedium},
+		},
+		{
+			input:        `add "cook" priority:low`,
+			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityLow},
+		},
+		{
+			input:        `add "cook" priority:none`,
+			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityNone},
+		},
+		{
+			input:        `add "cook" priority:h`,
+			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityHigh},
+		},
+		{
+			input:        `add "cook" priority:m`,
+			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityMedium},
+		},
+		{
+			input:        `add "cook" priority:l`,
+			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityLow},
+		},
+		{
+			input:        `add "cook" priority:n`,
+			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityNone},
 		},
 	}
 
