@@ -24,6 +24,20 @@ create a configuration file in your home directory. This file is located at
 settings.
 
 
+## TUI Shortcuts
+
+## TUI Shortcuts - Task Table
+
+| Key | Action |
+| --- | ------ |
+| `q` | Quit |
+| `a` | Add a new task |
+| `d` | Delete a task |
+| `e` | Edit a task |
+| `f` | Filter tasks |
+| `r` | Refresh the task list |
+| `s` | Start The current task |
+
 ## Local Development
 
 ### Install Optional Development Tools
