@@ -59,19 +59,6 @@ const (
 
 type UrgencyCoefficient float64
 
-// "# Urgency Coefficients\n"
-// "urgency.user.tag.next.coefficient=15.0         # Urgency coefficient for 'next' special tag\n"
-// "urgency.due.coefficient=12.0                   # Urgency coefficient for due dates\n"
-// "urgency.blocking.coefficient=8.0               # Urgency coefficient for blocking tasks\n"
-// "urgency.active.coefficient=4.0                 # Urgency coefficient for active tasks\n"
-// "urgency.scheduled.coefficient=5.0              # Urgency coefficient for scheduled tasks\n"
-// "urgency.age.coefficient=2.0                    # Urgency coefficient for age\n"
-// "urgency.annotations.coefficient=1.0            # Urgency coefficient for annotations\n"
-// "urgency.tags.coefficient=1.0                   # Urgency coefficient for tags\n"
-// "urgency.project.coefficient=1.0                # Urgency coefficient for projects\n"
-// "urgency.blocked.coefficient=-5.0               # Urgency coefficient for blocked tasks\n"
-// "urgency.waiting.coefficient=-3.0               # Urgency coefficient for waiting status\n"
-
 const URGENCY_MAX_AGES = time.Duration(365 * 24 * time.Hour)
 const (
 	URGENCY_NEXT_TAG_COEFFICIENT        UrgencyCoefficient = 15.0 // +Next
