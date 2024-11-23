@@ -9,6 +9,7 @@ import (
 	"github.com/luke-goddard/taskninja/bus"
 	"github.com/luke-goddard/taskninja/events"
 	"github.com/luke-goddard/taskninja/tui/utils"
+	"github.com/rs/zerolog/log"
 )
 
 type TextInput struct {
@@ -61,21 +62,25 @@ func (t *TextInput) Update(msg tea.Msg) (*TextInput, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
-		case tea.KeyCtrlC, tea.KeyEsc:
-			return t, tea.Quit
 		case tea.KeyEnter:
 			if t.Enabled() {
 				t.Disable()
 				t.txtInput.Blur()
 				t.submitProgram()
 			}
+			return t, cmd
+		case tea.KeyEscape:
+			if t.Enabled() {
+				t.Disable()
+				t.txtInput.Blur()
+			}
 		}
 
 		switch msg.String() {
 		case "a":
-			t.Enable()
-			t.txtInput.Focus()
 			if !enabled {
+				t.Enable()
+				t.txtInput.Focus()
 				t.txtInput.SetValue("add \"")
 			}
 		}
@@ -85,12 +90,15 @@ func (t *TextInput) Update(msg tea.Msg) (*TextInput, tea.Cmd) {
 			var err = msg.Data.(error)
 			t.err = &err
 			t.enabled = false
+			return t, cmd
 		case events.EventRunProgram:
 			t.err = nil
+			return t, cmd
 		}
 	}
 
 	if enabled {
+		log.Info().Interface("msg", msg).Msg("TextInput")
 		t.txtInput, cmd = t.txtInput.Update(msg)
 	}
 	return t, cmd
