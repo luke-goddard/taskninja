@@ -37,6 +37,8 @@ settings.
 | `f` | Filter tasks |
 | `r` | Refresh the task list |
 | `s` | Start The current task |
+| `+` | Increase Priority|
+| `-` | Decrease Priority|
 
 ## Local Development
 
