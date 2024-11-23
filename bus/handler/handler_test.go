@@ -61,7 +61,7 @@ func TestListHandler(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, incompleteTask)
 
-	var tasks []db.Task
+	var tasks []db.TaskDetailed
 	tasks, err = handler.services.ListTasks()
 	assert.Nil(t, err)
 	assert.Len(t, tasks, 1)

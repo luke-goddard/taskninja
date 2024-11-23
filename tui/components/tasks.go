@@ -153,7 +153,7 @@ func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
 		columns = append(columns, task.Title)         // NAME
 		columns = append(columns, task.AgeStr())      // AGE
 		columns = append(columns, task.PriorityStr()) // PRIORITY
-		columns = append(columns, "")                 // PROJECT
+		columns = append(columns, task.ProjectNames.String)  // PROJECT
 		columns = append(columns, "")                 // TAGS
 
 		rows = append(rows, columns)

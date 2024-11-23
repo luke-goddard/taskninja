@@ -16,10 +16,10 @@ func DecodeListTasksEvent(e *Event) *ListTasks {
 }
 
 type ListTasksResponse struct {
-	Tasks []db.Task
+	Tasks []db.TaskDetailed
 }
 
-func NewListTasksResponse(tasks []db.Task) *Event {
+func NewListTasksResponse(tasks []db.TaskDetailed) *Event {
 	return &Event{
 		Type: EventListTaskResponse,
 		Data: &ListTasksResponse{Tasks: tasks},

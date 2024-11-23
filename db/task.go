@@ -56,6 +56,14 @@ const (
 	TaskStateCompleted
 )
 
+type UrgencyCoefficient float64
+
+const (
+	URGENCY_PRIORITY_COEFFICIENT UrgencyCoefficient = 0.0
+)
+
+const EPSILION = 0.000001
+
 type Task struct {
 	ID           int64          `json:"id" db:"id"`
 	Title        string         `json:"title" db:"title"`
@@ -67,6 +75,13 @@ type Task struct {
 	CompletedUtc *string        `json:"completedUtc" db:"completedAtUtc"`
 	StartedUtc   sql.NullString `json:"startedUtc" db:"startedAtUtc"`
 	State        TaskState      `json:"state" db:"state"`
+}
+
+type TaskDetailed struct {
+	Task
+
+	ProjectCount int            `json:"projectCount" db:"projectCount"`
+	ProjectNames sql.NullString `json:"projectNames" db:"projectNames"`
 }
 
 func (task *Task) PriorityStr() string {
@@ -129,9 +144,33 @@ func (task *Task) AgeStr() string {
 	return task.PrettyAge(task.TaskAge())
 }
 
-func (store *Store) ListTasks() ([]Task, error) {
-	var sql = ` SELECT * FROM tasks WHERE state != ? `
-	var tasks []Task
+func (task *Task) Ugency() float64 {
+	var urgency = 0.0
+	urgency += task.urgencyProject()
+	return urgency
+}
+
+func (task *Task) urgencyProject() float64 {
+	if URGENCY_PRIORITY_COEFFICIENT < EPSILION {
+		return 0
+	}
+	// if task has Project then 1
+	return 1
+}
+
+func (store *Store) ListTasks() ([]TaskDetailed, error) {
+	var sql = `
+	SELECT
+	    tasks.*,
+	    COUNT(taskProjects.projectId) AS projectCount,
+	    GROUP_CONCAT(projects.title ORDER BY projects.title ASC) AS projectNames
+	FROM tasks
+	LEFT JOIN taskProjects ON taskProjects.taskId = tasks.id
+	LEFT JOIN projects ON projects.id = taskProjects.projectId
+	WHERE tasks.state != 2
+	GROUP BY tasks.id;
+	`
+	var tasks []TaskDetailed
 	err := store.Con.Select(&tasks, sql, TaskStateCompleted)
 	if err != nil {
 		return nil, err
