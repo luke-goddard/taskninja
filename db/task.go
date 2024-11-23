@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -83,8 +84,19 @@ func (task *Task) TimeSinceStarted() time.Duration {
 	return time.Since(startedAt)
 }
 
+func (task *Task) PrettyAge(duration time.Duration) string {
+	if duration.Hours() == 0 {
+		duration = duration.Round(time.Minute)
+	}
+	if duration.Hours() > 24 {
+		duration = duration.Truncate(time.Hour)
+	}
+	var pretty = duration.Truncate(time.Minute).String()
+	return strings.TrimSuffix(pretty, "0s")
+}
+
 func (task *Task) TimeSinceStartedStr() string {
-	return task.TimeSinceStarted().String()
+	return task.PrettyAge(task.TimeSinceStarted())
 }
 
 func (task *Task) TaskAge() time.Duration {
@@ -97,7 +109,7 @@ func (task *Task) TaskAge() time.Duration {
 }
 
 func (task *Task) AgeStr() string {
-	return task.TaskAge().String()
+	return task.PrettyAge(task.TaskAge())
 }
 
 func (store *Store) ListTasks() ([]Task, error) {
