@@ -233,6 +233,7 @@ func (store *Store) IncreasePriority(id int64) (bool, error) {
 			when priority = 0 then 1
 			when priority = 1 then 2
 			when priority = 2 then 3
+			when priority = 3 then 3
 			else 0
 		end
 	WHERE id = ?
@@ -253,6 +254,7 @@ func (store *Store) DecreasePriority(id int64) (bool, error) {
 	UPDATE tasks
 	SET
 		priority = case
+			when priority = 0 then 0
 			when priority = 1 then 0
 			when priority = 2 then 1
 			when priority = 3 then 2

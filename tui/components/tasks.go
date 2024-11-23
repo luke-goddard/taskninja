@@ -92,13 +92,16 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
+		var id = m.GetIdForCurrentRow()
 		switch msg.String() {
 		case "d":
-			var id = m.GetIdForCurrentRow()
 			m.bus.Publish(events.NewCompleteEvent(id))
 		case "s":
-			var id = m.GetIdForCurrentRow()
 			m.bus.Publish(events.NewStartTaskEvent(id))
+		case "+":
+			m.bus.Publish(events.NewIncreasePriorityEvent(id))
+		case "-":
+			m.bus.Publish(events.NewDecreasePriorityEvent(id))
 		}
 		m.table, cmd = m.table.Update(msg)
 	case *events.Event:
@@ -127,7 +130,7 @@ func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
 		columns = append(columns, fmt.Sprintf("%d", task.ID)) // ID
 		columns = append(columns, task.Title)                 // NAME
 		columns = append(columns, task.AgeStr())              // AGE
-		columns = append(columns, task.PriorityStr())                         // PRIORITY
+		columns = append(columns, task.PriorityStr())         // PRIORITY
 		columns = append(columns, "")                         // PROJECT
 		columns = append(columns, "")                         // TAGS
 		columns = append(columns, started)                    // STARTED
