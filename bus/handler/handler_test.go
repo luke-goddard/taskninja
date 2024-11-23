@@ -74,5 +74,13 @@ func TestStartTaskHandler(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, task)
 	assert.NotNil(t, task.StartedUtc)
-}
 
+	var before = task.StartedUtc
+	// NEW TEST to make sure that task in a started state cannot be started again
+	t.Run("StartTaskHandler", func(t *testing.T) {
+		task, err = handler.services.StartTasksById(task.ID)
+		assert.Nil(t, err)
+		assert.NotNil(t, task)
+		assert.Equal(t, before, task.StartedUtc)
+	})
+}

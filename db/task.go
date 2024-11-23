@@ -95,7 +95,14 @@ func (store *Store) DeleteTaskById(id int64) (bool, error) {
 }
 
 func (store *Store) StartTaskById(id int64) (*Task, error) {
-	var sql = "UPDATE tasks SET startedAtUtc = ? WHERE id = ? RETURNING *"
+	var sql = `
+	UPDATE tasks
+	SET
+		updatedAtUtc = current_timestamp,
+		startedAtUtc = case when startedAtUtc is null then ? else startedAtUtc end
+	WHERE id = ?
+	RETURNING *
+	`
 	var task = &Task{}
 	var now = time.Now().UTC().String()
 	var row = store.Con.QueryRowx(sql, now, id)
