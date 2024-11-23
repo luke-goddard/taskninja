@@ -68,6 +68,19 @@ type Task struct {
 	State        TaskState      `json:"state" db:"state"`
 }
 
+func (task *Task) PriorityStr() string {
+	switch task.Priority {
+	case TaskPriorityLow:
+		return "Low"
+	case TaskPriorityMedium:
+		return "Medium"
+	case TaskPriorityHigh:
+		return "High"
+	default:
+		return "None"
+	}
+}
+
 func (task *Task) IsStarted() bool {
 	log.Info().Str("startedAt", task.StartedUtc.String).Msg("IsStarted")
 	return task.StartedUtc.Valid

@@ -120,17 +120,17 @@ func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
 	var rows = []table.Row{}
 	for _, task := range e.Tasks {
 		var columns = []string{}
-		columns = append(columns, fmt.Sprintf("%d", task.ID))
-		columns = append(columns, task.Title)
-		columns = append(columns, task.AgeStr())
-		columns = append(columns, "")
-		columns = append(columns, "")
-		columns = append(columns, "")
 		var started = ""
 		if task.IsStarted() {
 			started = task.TimeSinceStartedStr()
 		}
-		columns = append(columns, started)
+		columns = append(columns, fmt.Sprintf("%d", task.ID)) // ID
+		columns = append(columns, task.Title)                 // NAME
+		columns = append(columns, task.AgeStr())              // AGE
+		columns = append(columns, task.PriorityStr())                         // PRIORITY
+		columns = append(columns, "")                         // PROJECT
+		columns = append(columns, "")                         // TAGS
+		columns = append(columns, started)                    // STARTED
 
 		rows = append(rows, columns)
 	}
