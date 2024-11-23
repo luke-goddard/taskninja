@@ -2,6 +2,7 @@ package tui
 
 import (
 	"strings"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -79,6 +80,7 @@ func (m model) Init() tea.Cmd {
 
 	m.bus.Subscribe(m)
 	m.bus.Publish(events.NewListTasksEvent())
+	go m.RefreshTaskListProgramatically()
 
 	return tea.Batch(
 		m.table.Init(),
@@ -86,6 +88,17 @@ func (m model) Init() tea.Cmd {
 		m.input.Init(),
 		m.doughnut.Init(),
 	)
+}
+
+func (m model) RefreshTaskListProgramatically() {
+	var sleep = time.Duration(10) * time.Second
+	for {
+		time.Sleep(sleep)
+		if m.tabs.ActiveTab != 0 {
+			continue
+		}
+		m.bus.Publish(events.NewListTasksEvent())
+	}
 }
 
 func NewTui(bus *bus.Bus) (*tea.Program, error) {
