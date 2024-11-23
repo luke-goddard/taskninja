@@ -35,6 +35,10 @@ func (t *TextInput) Disabled() bool {
 	return !t.enabled
 }
 
+func (t *TextInput) CanQuit() bool {
+	return t.Disabled()
+}
+
 func NewTextInput(dimensions *utils.TerminalDimensions, bus *bus.Bus) *TextInput {
 	assert.NotNil(dimensions, "TerminalDimensions is nil")
 	assert.NotNil(bus, "Bus is nil")
