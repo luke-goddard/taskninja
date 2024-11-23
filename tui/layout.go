@@ -46,7 +46,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.tabs = newTabs
 	}
 
-	var newInput, _ = m.input.Update(msg)
+	var newInput *components.TextInput
+	newInput, cmd = m.input.Update(msg)
 	m.input = newInput
 
 	var newDoughnut *components.Doughnut
@@ -63,7 +64,6 @@ func (m model) View() string {
 		document.WriteString("\n")
 		document.WriteString(m.doughnut.View() + "\n")
 	} else {
-
 		document.WriteString(m.table.View() + "\n")
 		document.WriteString(m.table.HelpView() + "\n")
 		document.WriteString(m.input.View() + "\n")

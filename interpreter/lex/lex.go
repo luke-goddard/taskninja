@@ -57,6 +57,7 @@ func (l *Lexer) SetInput(input string) *Lexer {
 }
 
 func (l *Lexer) Reset() *Lexer {
+	l.errors.Reset()
 	l.line = 1
 	l.start = 0
 	l.position = 0

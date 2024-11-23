@@ -64,6 +64,7 @@ func (p *Parser) Parse(tokens []token.Token) (*ast.Command, []manager.ErrorTrans
 func (p *Parser) Reset() *Parser {
 	p.position = 0
 	p.hasCheckedExists = false
+	p.errors.Reset()
 	return p
 }
 

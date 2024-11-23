@@ -63,6 +63,7 @@ func (t *TextInput) Update(msg tea.Msg) (*TextInput, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyEnter:
+			t.ClearErr()
 			if t.Enabled() {
 				t.Disable()
 				t.txtInput.Blur()
@@ -79,9 +80,11 @@ func (t *TextInput) Update(msg tea.Msg) (*TextInput, tea.Cmd) {
 		switch msg.String() {
 		case "a":
 			if !enabled {
+				t.ClearErr()
 				t.Enable()
 				t.txtInput.Focus()
 				t.txtInput.SetValue("add \"")
+				return t, cmd
 			}
 		}
 	case *events.Event:
@@ -92,13 +95,11 @@ func (t *TextInput) Update(msg tea.Msg) (*TextInput, tea.Cmd) {
 			t.enabled = false
 			return t, cmd
 		case events.EventRunProgram:
-			t.err = nil
 			return t, cmd
 		}
 	}
 
 	if enabled {
-		log.Info().Interface("msg", msg).Msg("TextInput")
 		t.txtInput, cmd = t.txtInput.Update(msg)
 	}
 	return t, cmd
@@ -112,7 +113,7 @@ func (t *TextInput) View() string {
 		return ""
 	}
 	return fmt.Sprintf(
-		"Enter a test to add\n\n%s\n",
+		"Enter a comamand:\n\n%s\n",
 		t.txtInput.View(),
 	) + "\n"
 }
@@ -122,7 +123,13 @@ func (t *TextInput) Init() tea.Cmd {
 }
 
 func (t *TextInput) submitProgram() {
+	log.Info().Str("program", t.txtInput.Value()).Msg("Submitting program")
+	t.err = nil
 	var program = t.txtInput.Value()
 	t.bus.Publish(events.NewRunProgramEvent(program))
 	t.txtInput.SetValue("")
+}
+
+func (t *TextInput) ClearErr() {
+	t.err = nil
 }
