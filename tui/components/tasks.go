@@ -33,10 +33,18 @@ type TaskTable struct {
 	bus        *bus.Bus
 }
 
-type TaskRows table.Row
+type TaskRow table.Row
 
-func (r TaskRows) ID() int64 {
+const NOID int64 = -1
+
+func (r TaskRow) ID() int64 {
 	assert.NotNil(r, "r is nil")
+	if len(r) == 0 {
+		return NOID
+	}
+	if len(r) <= TableColumnID {
+		return NOID
+	}
 	assert.True(len(r) > TableColumnID, "r does not have a column for ID")
 	var str = r[TableColumnID]
 	str = strings.TrimSuffix(str, "-⏰")
@@ -96,9 +104,17 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		var id = m.GetIdForCurrentRow()
+		if id == NOID {
+			break
+		}
 		switch msg.String() {
 		case "d":
 			m.bus.Publish(events.NewCompleteEvent(id))
+		case "D":
+			if m.table.Cursor() == len(m.table.Rows())-1 {
+				m.table.SetCursor(m.table.Cursor() - 1)
+			}
+			m.bus.Publish(events.NewDeleteTaskByIdEvent(id))
 		case "s":
 			m.bus.Publish(events.NewStartTaskEvent(id))
 		case "+":
@@ -119,7 +135,7 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 
 func (m *TaskTable) GetIdForCurrentRow() int64 {
 	var selectedRow = m.table.SelectedRow()
-	return TaskRows(selectedRow).ID()
+	return TaskRow(selectedRow).ID()
 }
 
 func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {

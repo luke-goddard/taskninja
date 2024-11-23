@@ -1,8 +1,7 @@
 package events
 
-type CompleteTaskById struct {
-	Id int64 // The ID of the task to delete
-}
+type CompleteTaskById struct { Id int64 }
+func DecodeCompletedTaskById(e *Event) *CompleteTaskById { return e.Data.(*CompleteTaskById) }
 
 func NewCompleteEvent(id int64) *Event {
 	return &Event{
@@ -11,6 +10,15 @@ func NewCompleteEvent(id int64) *Event {
 	}
 }
 
-func DecodeDeleteTaskEvent(e *Event) *CompleteTaskById {
-	return e.Data.(*CompleteTaskById)
+
+type DeleteTaskById struct { Id int64 }
+func DecodeDeleteTaskByIdEvent(e *Event) *DeleteTaskById { return e.Data.(*DeleteTaskById) }
+
+func NewDeleteTaskByIdEvent(id int64) *Event {
+	return &Event{
+		Type: EventDeleteTaskById,
+		Data: &DeleteTaskById{Id: id},
+	}
 }
+
+

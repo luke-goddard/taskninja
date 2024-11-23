@@ -35,7 +35,9 @@ func (handler *EventHandler) handle(e *events.Event) []*events.Event {
 	case events.EventListTasks:
 		return handler.listTasks()
 	case events.EventCompleteTaskById:
-		return handler.completeTaskById(events.DecodeDeleteTaskEvent(e))
+		return handler.completeTaskById(events.DecodeCompletedTaskById(e))
+	case events.EventDeleteTaskById:
+		return handler.deleteTaskById(events.DecodeDeleteTaskByIdEvent(e))
 	case events.EventStartTaskById:
 		return handler.startTaskById(events.DecodeStartTaskEvent(e))
 	case events.EventIncreasePriority:

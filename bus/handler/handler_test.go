@@ -30,7 +30,7 @@ func TestDeletehandler(t *testing.T) {
 	assert.NotNil(t, task)
 
 	var deleted bool
-	deleted, err = handler.services.DeleteTasks(task.ID)
+	deleted, err = handler.services.DeleteTaskById(task.ID)
 	assert.Nil(t, err)
 	assert.True(t, deleted)
 

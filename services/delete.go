@@ -1,5 +1,5 @@
 package services
 
-func (handler *ServiceHandler) DeleteTasks(id int64) (bool, error) {
+func (handler *ServiceHandler) DeleteTaskById(id int64) (bool, error) {
 	return handler.Store.DeleteTaskById(id)
 }
