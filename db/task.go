@@ -34,7 +34,7 @@ PRAGMA user_version = 4;
 
 const M005_TaskSchema = `
 ALTER TABLE tasks DROP COLUMN completed;
-PRAGMA user_version = 4;
+PRAGMA user_version = 5;
 `
 
 type TaskPriority int

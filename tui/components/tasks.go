@@ -93,12 +93,6 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "esc":
-			if m.table.Focused() {
-				m.table.Blur()
-			} else {
-				m.table.Focus()
-			}
 		case "d":
 			var id = m.GetIdForCurrentRow()
 			m.bus.Publish(events.NewCompleteEvent(id))
