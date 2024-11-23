@@ -101,7 +101,7 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 			}
 		case "d":
 			var id = m.GetIdForCurrentRow()
-			m.bus.Publish(events.NewDeleteTaskEvent(id))
+			m.bus.Publish(events.NewCompleteEvent(id))
 		case "s":
 			var id = m.GetIdForCurrentRow()
 			m.bus.Publish(events.NewStartTaskEvent(id))

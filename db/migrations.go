@@ -12,6 +12,7 @@ var Migrations = []string{
 	M001_TagSchema,
 	M002_TaskTagsSchema,
 	M003_TaskSchema,
+	M004_TaskSchema,
 }
 
 func (store *Store) RunMigrations() error {

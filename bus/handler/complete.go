@@ -2,8 +2,8 @@ package handler
 
 import "github.com/luke-goddard/taskninja/events"
 
-func (handler *EventHandler) deleteTaskById(e *events.DeleteTaskById) []*events.Event {
-	var affected, err = handler.services.DeleteTasks(e.Id)
+func (handler *EventHandler) completeTaskById(e *events.CompleteTaskById) []*events.Event {
+	var affected, err = handler.services.CompleteTaskById(e.Id)
 	if err != nil {
 		return []*events.Event{events.NewErrorEvent(err)}
 	}

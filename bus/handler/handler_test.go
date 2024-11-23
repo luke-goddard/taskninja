@@ -25,20 +25,19 @@ func newTestHandler() *EventHandler {
 func TestDeletehandler(t *testing.T) {
 	var handler = newTestHandler()
 
-	var res, err = handler.services.Store.Con.Exec("INSERT INTO tasks (id, title, description, completed) VALUES (1, 'title', 'description', 0)")
+	var task, err =handler.services.CreateTask(&db.Task{Title: "title"})
 	assert.Nil(t, err)
+	assert.NotNil(t, task)
 
-	var id int64
-	id, err = res.LastInsertId()
+	var deleted bool
+	deleted, err = handler.services.DeleteTasks(task.ID)
 	assert.Nil(t, err)
-
-	var e = events.NewDeleteTaskEvent(id)
-	handler.bus.Publish(e)
+	assert.True(t, deleted)
 
 	// COUNT
 	var count int64
 	var rows *sqlx.Rows
-	rows, err = handler.services.Store.Con.Queryx("SELECT COUNT(*) FROM tasks WHERE id = ?", id)
+	rows, err = handler.services.Store.Con.Queryx("SELECT COUNT(*) FROM tasks WHERE id = ?", task.ID)
 	assert.Nil(t, err)
 	rows.Next()
 	err = rows.Scan(&count)
@@ -81,4 +80,14 @@ func TestStartTaskHandler(t *testing.T) {
 		assert.NotNil(t, task)
 		assert.Empty(t, task.StartedUtc) // Should be empty
 	})
+}
+
+func TestCompleteHandler(t *testing.T) {
+	var handler = newTestHandler()
+	var task, err = handler.services.CreateTask(&db.Task{
+		Title: "title",
+	})
+	assert.Nil(t, err)
+	assert.NotNil(t, task)
+
 }

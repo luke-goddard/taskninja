@@ -27,13 +27,26 @@ ALTER TABLE tasks ADD COLUMN startedAtUtc TEXT;
 PRAGMA user_version = 3;
 `
 
+const M004_TaskSchema = `
+ALTER TABLE tasks ADD COLUMN state INTEGER NOT NULL DEFAULT 0 CHECK (state >= 0 AND state <= 3);
+PRAGMA user_version = 4;
+`
+
 type TaskPriority int
 
 const (
-	TaskPriorityNone TaskPriority = iota
+	TaskPriorityNone TaskPriority = iota // Default priority
 	TaskPriorityLow
 	TaskPriorityMedium
 	TaskPriorityHigh
+)
+
+type TaskState int
+
+const (
+	TaskStateIncomplete TaskState = iota // Default state
+	TaskStateStarted
+	TaskStateCompleted
 )
 
 type Task struct {
@@ -47,6 +60,7 @@ type Task struct {
 	UpdatedAtUtc *string        `json:"updatedAtUtc" db:"updatedAtUtc"`
 	CompletedUtc *string        `json:"completedUtc" db:"completedAtUtc"`
 	StartedUtc   sql.NullString `json:"startedUtc" db:"startedAtUtc"`
+	State        TaskState      `json:"state" db:"state"`
 }
 
 func (task *Task) IsStarted() bool {
@@ -148,4 +162,31 @@ func (store *Store) CreateTask(task *Task) (*Task, error) {
 		return nil, err
 	}
 	return newTask, nil
+}
+
+func (store *Store) CompletTaskById(taskId int64) (bool, error) {
+	var sql = `
+	UPDATE tasks
+	SET
+		state = ?,
+		completedAtUtc = case
+			when completedAtUtc is null
+			then current_timestamp
+			else completedAtUtc
+		end
+	WHERE id = ?
+	`
+	var res, err = store.Con.Exec(sql, TaskStateCompleted, taskId)
+	if err != nil {
+		return false, err
+	}
+
+	var affected int64
+	affected, err = res.RowsAffected()
+
+	if err != nil {
+		return false, err
+	}
+
+	return affected > 0, nil
 }

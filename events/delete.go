@@ -1,16 +1,16 @@
 package events
 
-type DeleteTaskById struct {
+type CompleteTaskById struct {
 	Id int64 // The ID of the task to delete
 }
 
-func NewDeleteTaskEvent(id int64) *Event {
+func NewCompleteEvent(id int64) *Event {
 	return &Event{
-		Type: EventDeleteTaskById,
-		Data: &DeleteTaskById{Id: id},
+		Type: EventCompleteTaskById,
+		Data: &CompleteTaskById{Id: id},
 	}
 }
 
-func DecodeDeleteTaskEvent(e *Event) *DeleteTaskById {
-	return e.Data.(*DeleteTaskById)
+func DecodeDeleteTaskEvent(e *Event) *CompleteTaskById {
+	return e.Data.(*CompleteTaskById)
 }
