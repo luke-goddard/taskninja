@@ -103,3 +103,22 @@ func TestCompleteHandler(t *testing.T) {
 	assert.NotNil(t, task)
 
 }
+
+func TestIncDecPriority(t *testing.T) {
+	var handler = newTestHandler()
+	var task, err = handler.services.CreateTask(&db.Task{
+		Title:    "title",
+		Priority: db.TaskPriorityMedium,
+	})
+	assert.Nil(t, err)
+	handler.services.IncreasePriority(task.ID) // High
+	handler.services.IncreasePriority(task.ID) // High
+	handler.services.DecreasePriority(task.ID) // Medium
+	handler.services.DecreasePriority(task.ID) // Low
+	handler.services.DecreasePriority(task.ID) // None
+	handler.services.DecreasePriority(task.ID) // None
+	handler.services.IncreasePriority(task.ID) // Low
+
+	task = handler.services.Store.GetTaskByIdOrPanic(task.ID)
+	assert.Equal(t, db.TaskPriorityLow, task.Priority)
+}

@@ -1,12 +1,10 @@
 package events
 
-type IncreasePriority struct {
-	ID int64 // The ID of the task to increase the priority of
-}
+type IncreasePriority struct { ID int64 }
+type DecreasePriority struct { ID int64 }
 
-type DecreasePriority struct {
-	ID int64 // The ID of the task to increase the priority of
-}
+func DecodeIncreasePriorityEvent(e *Event) *IncreasePriority { return e.Data.(*IncreasePriority) }
+func DecodeDecreasePriorityEvent(e *Event) *DecreasePriority { return e.Data.(*DecreasePriority) }
 
 func NewIncreasePriorityEvent(id int64) *Event {
 	return &Event{
@@ -25,3 +23,4 @@ func NewDecreasePriorityEvent(id int64) *Event {
 		},
 	}
 }
+

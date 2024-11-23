@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/luke-goddard/taskninja/assert"
 	"github.com/rs/zerolog/log"
 )
 
@@ -197,7 +198,7 @@ func (store *Store) CreateTask(task *Task) (*Task, error) {
 	return newTask, nil
 }
 
-func (store *Store) CompletTaskById(taskId int64) (bool, error) {
+func (store *Store) CompleteTaskById(taskId int64) (bool, error) {
 	var sql = `
 	UPDATE tasks
 	SET
@@ -222,4 +223,60 @@ func (store *Store) CompletTaskById(taskId int64) (bool, error) {
 	}
 
 	return affected > 0, nil
+}
+
+func (store *Store) IncreasePriority(id int64) (bool, error) {
+	var sql = `
+	UPDATE tasks
+	SET
+		priority = case
+			when priority = 0 then 1
+			when priority = 1 then 2
+			when priority = 2 then 3
+			else 0
+		end
+	WHERE id = ?
+	`
+	var res, err = store.Con.Exec(sql, id)
+	if err != nil {
+		return false, err
+	}
+
+	var affected int64
+	affected, err = res.RowsAffected()
+	assert.True(affected <= 1, "affected should be 0 or 1")
+	return affected == 1, err
+}
+
+func (store *Store) DecreasePriority(id int64) (bool, error) {
+	var sql = `
+	UPDATE tasks
+	SET
+		priority = case
+			when priority = 1 then 0
+			when priority = 2 then 1
+			when priority = 3 then 2
+			else 0
+		end
+	WHERE id = ?
+	`
+	var res, err = store.Con.Exec(sql, id)
+	if err != nil {
+		return false, err
+	}
+
+	var affected int64
+	affected, err = res.RowsAffected()
+	assert.True(affected <= 1, "affected should be 0 or 1")
+	return affected == 1, err
+}
+
+func (store *Store) GetTaskByIdOrPanic(id int64) *Task {
+	var sql = `SELECT * FROM tasks WHERE id = ?`
+	var task = &Task{}
+	var err = store.Con.Get(task, sql, id)
+	if err != nil {
+		assert.Nil(err, "failed to get task by id")
+	}
+	return task
 }
