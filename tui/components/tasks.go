@@ -3,6 +3,7 @@ package components
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -38,6 +39,7 @@ func (r TaskRows) ID() int64 {
 	assert.NotNil(r, "r is nil")
 	assert.True(len(r) > TableColumnID, "r does not have a column for ID")
 	var str = r[TableColumnID]
+	str = strings.TrimSuffix(str, "-⏰")
 	var id, err = strconv.ParseInt(str, 10, 64)
 	assert.Nil(err, "failed to convert ID to int")
 	return id
@@ -49,13 +51,13 @@ func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions
 	assert.NotNil(dimensions, "dimensions is nil")
 	assert.NotNil(theme, "theme is nil")
 	var columns = []table.Column{
-		{Title: "ID", Width: dimensions.Width.PercentOrMin(0.02, 4)},
+		{Title: "ID", Width: dimensions.Width.PercentOrMin(0.05, 4)},
+		{Title: "Started", Width: dimensions.Width.PercentOrMin(0.08, 4)},
 		{Title: "Name", Width: dimensions.Width.PercentOrMin(0.51, 10)},
 		{Title: "Age", Width: dimensions.Width.PercentOrMin(0.05, 4)},
 		{Title: "Priority", Width: dimensions.Width.PercentOrMin(0.06, 10)},
-		{Title: "Project", Width: dimensions.Width.PercentOrMin(0.137, 10)},
+		{Title: "Project", Width: dimensions.Width.PercentOrMin(0.134, 10)},
 		{Title: "Tags", Width: dimensions.Width.PercentOrMin(0.08, 5)},
-		{Title: "Started", Width: dimensions.Width.PercentOrMin(0.08, 4)},
 	}
 
 	var rows = []table.Row{}
@@ -84,6 +86,7 @@ func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions
 		table:     tbl,
 		baseStyle: baseStyle,
 		bus:       bus,
+		theme:     theme,
 	}
 }
 
@@ -124,16 +127,18 @@ func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
 	for _, task := range e.Tasks {
 		var columns = []string{}
 		var started = ""
+		var id = fmt.Sprintf("%d", task.ID)
 		if task.IsStarted() {
 			started = task.TimeSinceStartedStr()
+			id = fmt.Sprintf("%s-⏰", id)
 		}
-		columns = append(columns, fmt.Sprintf("%d", task.ID)) // ID
-		columns = append(columns, task.Title)                 // NAME
-		columns = append(columns, task.AgeStr())              // AGE
-		columns = append(columns, task.PriorityStr())         // PRIORITY
-		columns = append(columns, "")                         // PROJECT
-		columns = append(columns, "")                         // TAGS
-		columns = append(columns, started)                    // STARTED
+		columns = append(columns, id)                 // ID
+		columns = append(columns, started)            // STARTED
+		columns = append(columns, task.Title)         // NAME
+		columns = append(columns, task.AgeStr())      // AGE
+		columns = append(columns, task.PriorityStr()) // PRIORITY
+		columns = append(columns, "")                 // PROJECT
+		columns = append(columns, "")                 // TAGS
 
 		rows = append(rows, columns)
 	}

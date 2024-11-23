@@ -32,13 +32,14 @@ settings.
 | --- | ------ |
 | `q` | Quit |
 | `a` | Add a new task |
-| `d` | Delete a task |
+| `d` | Complete a task |
 | `e` | Edit a task |
 | `f` | Filter tasks |
 | `r` | Refresh the task list |
 | `s` | Start The current task |
 | `+` | Increase Priority|
 | `-` | Decrease Priority|
+| `Shift+D` | Delete a task |
 
 ## Local Development
 
