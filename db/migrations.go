@@ -13,12 +13,13 @@ var Migrations = []string{
 	M002_TaskTagsSchema,
 	M003_TaskSchema,
 	M004_TaskSchema,
+	M005_TaskSchema,
 }
 
 func (store *Store) RunMigrations() error {
 	var version = store.SchemaVersion()
 	for i, migration := range Migrations {
-		if i <= version && version != 0{
+		if i <= version && version != 0 {
 			continue
 		}
 		_, err := store.Con.Exec(migration)

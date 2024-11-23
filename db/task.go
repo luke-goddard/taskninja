@@ -28,7 +28,12 @@ PRAGMA user_version = 3;
 `
 
 const M004_TaskSchema = `
-ALTER TABLE tasks ADD COLUMN state INTEGER NOT NULL DEFAULT 0 CHECK (state >= 0 AND state <= 3);
+ALTER TABLE tasks ADD COLUMN state INTEGER NOT NULL DEFAULT 0 CHECK (state >= 0 AND state <= 2);
+PRAGMA user_version = 4;
+`
+
+const M005_TaskSchema = `
+ALTER TABLE tasks DROP COLUMN completed;
 PRAGMA user_version = 4;
 `
 
@@ -54,7 +59,6 @@ type Task struct {
 	Title        string         `json:"title" db:"title"`
 	Description  *string        `json:"description" db:"description"`
 	Due          *string        `json:"due" db:"dueUtc"`
-	Completed    bool           `json:"completed" db:"completed"`
 	Priority     TaskPriority   `json:"priority" db:"priority"`
 	CreatedUtc   string         `json:"createdUtc" db:"createdAtUtc"`
 	UpdatedAtUtc *string        `json:"updatedAtUtc" db:"updatedAtUtc"`
@@ -97,8 +101,9 @@ func (task *Task) AgeStr() string {
 }
 
 func (store *Store) ListTasks() ([]Task, error) {
+	var sql = ` SELECT * FROM tasks WHERE state != ? `
 	var tasks []Task
-	err := store.Con.Select(&tasks, "SELECT * FROM tasks")
+	err := store.Con.Select(&tasks, sql, TaskStateCompleted)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +148,7 @@ func (store *Store) CreateTask(task *Task) (*Task, error) {
 	INSERT INTO tasks
 		(
 			title, description, dueUtc,
-			completed, priority, createdAtUtc,
+			priority, createdAtUtc, state,
 			updatedAtUtc, completedAtUtc, startedAtUtc
 		)
 	VALUES
@@ -154,7 +159,7 @@ func (store *Store) CreateTask(task *Task) (*Task, error) {
 	var row = store.Con.QueryRowx(
 		sql,
 		task.Title, task.Description, task.Due,
-		task.Completed, task.Priority, time.Now().UTC().String(),
+		task.Priority, time.Now().UTC().String(), task.State,
 		time.Now().UTC().String(), task.CompletedUtc, task.StartedUtc,
 	)
 	var err = row.StructScan(newTask)

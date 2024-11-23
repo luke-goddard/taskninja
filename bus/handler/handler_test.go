@@ -6,9 +6,9 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/luke-goddard/taskninja/bus"
 	"github.com/luke-goddard/taskninja/db"
-	"github.com/luke-goddard/taskninja/events"
 	"github.com/luke-goddard/taskninja/interpreter"
 	"github.com/luke-goddard/taskninja/services"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,7 +25,7 @@ func newTestHandler() *EventHandler {
 func TestDeletehandler(t *testing.T) {
 	var handler = newTestHandler()
 
-	var task, err =handler.services.CreateTask(&db.Task{Title: "title"})
+	var task, err = handler.services.CreateTask(&db.Task{Title: "title"})
 	assert.Nil(t, err)
 	assert.NotNil(t, task)
 
@@ -48,15 +48,27 @@ func TestDeletehandler(t *testing.T) {
 
 func TestListHandler(t *testing.T) {
 	var handler = newTestHandler()
-
-	var res, err = handler.services.Store.Con.Exec("INSERT INTO tasks (id, title, description, completed) VALUES (1, 'title', 'description', 0)")
+	var incompleteTask, err = handler.services.CreateTask(&db.Task{Title: "title"})
 	assert.Nil(t, err)
+	assert.NotNil(t, incompleteTask)
 
-	_, err = res.LastInsertId()
+	var completed = "2024-11-23 13:58:09"
+	_, err = handler.services.CreateTask(&db.Task{
+		Title:        "title",
+		CompletedUtc: &completed,
+		State:        db.TaskStateCompleted,
+	})
 	assert.Nil(t, err)
+	assert.NotNil(t, incompleteTask)
 
-	var e = events.NewListTasksEvent()
-	handler.bus.Publish(e)
+	var tasks []db.Task
+	tasks, err = handler.services.ListTasks()
+	assert.Nil(t, err)
+	assert.Len(t, tasks, 1)
+	assert.Equal(t, incompleteTask.ID, tasks[0].ID)
+	for _, task := range tasks {
+		log.Info().Interface("task", task).Msg("task")
+	}
 }
 
 func TestStartTaskHandler(t *testing.T) {
