@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS taskTime (
 	startTimeUtc TEXT NOT NULL DEFAULT current_timestamp,
 	endTimeUtc TEXT,
 	totalTime TEXT,
-	FOREIGN KEY(taskId) REFERENCES task(id)
+	FOREIGN KEY(taskId) REFERENCES tasks(id)
 );
 PRAGMA user_version = 8;
 `
@@ -22,8 +22,9 @@ type TaskTime struct {
 	TotalTime    sql.NullString `db:"totalTime"`
 }
 
-func (store *Store) StartTask(id int64) (*TaskTime, error) {
-	var sql = ` INSERT INTO taskTime (taskId) VALUES (?) RETURNING *;`
+func (store *Store) StartTrackingTaskTime(id int64) (*TaskTime, error) {
+	// TODO: How to prevent started task from being started again?
+	var sql = `INSERT INTO taskTime (taskId) VALUES (?) RETURNING *;`
 	var row = store.Con.QueryRowx(sql, id)
 	var taskTime = &TaskTime{}
 	var err = row.StructScan(taskTime)
@@ -33,7 +34,7 @@ func (store *Store) StartTask(id int64) (*TaskTime, error) {
 	return taskTime, nil
 }
 
-func (store *Store) StopTask(id int64) (*TaskTime, error) {
+func (store *Store) StopTrackingTaskTime(id int64) (*TaskTime, error) {
 	var sql = `
 	UPDATE taskTime
 	SET

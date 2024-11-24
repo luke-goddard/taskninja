@@ -41,7 +41,7 @@ PRAGMA user_version = 5;
 `
 
 const M009_TaskSchema = `
-ALTER TABLE tasks ADD COLUMN inprogress INTEGER NOT NULL DEFAULT 0 CHECK (inprogress >= 0 AND inprogress <= 1);
+ALTER TABLE tasks DROP COLUMN startedAtUtc;
 PRAGMA user_version = 9;
 `
 
@@ -87,16 +87,15 @@ const EPSILION = 0.000001
 const SQLITE_TIME_FORMAT = "2006-01-02 15:04:05"
 
 type Task struct {
-	ID           int64          `json:"id" db:"id"`
-	Title        string         `json:"title" db:"title"`
-	Description  *string        `json:"description" db:"description"`
-	Due          *string        `json:"due" db:"dueUtc"`
-	Priority     TaskPriority   `json:"priority" db:"priority"`
-	CreatedUtc   string         `json:"createdUtc" db:"createdAtUtc"`
-	UpdatedAtUtc *string        `json:"updatedAtUtc" db:"updatedAtUtc"`
-	CompletedUtc *string        `json:"completedUtc" db:"completedAtUtc"`
-	StartedUtc   sql.NullString `json:"startedUtc" db:"startedAtUtc"`
-	State        TaskState      `json:"state" db:"state"`
+	ID           int64        `json:"id" db:"id"`
+	Title        string       `json:"title" db:"title"`
+	Description  *string      `json:"description" db:"description"`
+	Due          *string      `json:"due" db:"dueUtc"`
+	Priority     TaskPriority `json:"priority" db:"priority"`
+	CreatedUtc   string       `json:"createdUtc" db:"createdAtUtc"`
+	UpdatedAtUtc *string      `json:"updatedAtUtc" db:"updatedAtUtc"`
+	CompletedUtc *string      `json:"completedUtc" db:"completedAtUtc"`
+	State        TaskState    `json:"state" db:"state"`
 }
 
 type TaskDetailed struct {
@@ -104,6 +103,9 @@ type TaskDetailed struct {
 
 	ProjectCount    int            `json:"projectCount" db:"projectCount"`
 	ProjectNames    sql.NullString `json:"projectNames" db:"projectNames"`
+	FirstStartedUtc sql.NullString `json:"firstStartedUtc" db:"firstStartedUtc"`
+	CumulativeTime  sql.NullString `json:"cumulativeTime" db:"cumulativeTime"`
+	Inprogress      bool           `json:"inprogress" db:"inprogress"`
 	urgencyComputed float64
 }
 
@@ -118,22 +120,6 @@ func (task *Task) PriorityStr() string {
 	default:
 		return "None"
 	}
-}
-
-func (task *Task) IsStarted() bool {
-	return task.StartedUtc.Valid
-}
-
-func (task *Task) TimeSinceFirstStarted() time.Duration {
-	if !task.IsStarted() {
-		return 0
-	}
-	var startedAt, err = time.Parse(SQLITE_TIME_FORMAT, task.StartedUtc.String)
-	if err != nil {
-		log.Error().Err(err).Msg("failed to parse startedAt")
-		return 0
-	}
-	return time.Since(startedAt)
 }
 
 func (task *Task) PrettyAge(duration time.Duration) string {
@@ -160,10 +146,6 @@ func (task *Task) PrettyAge(duration time.Duration) string {
 	return strings.TrimSuffix(pretty, "0s")
 }
 
-func (task *Task) TimeSinceFirstStartedStr() string {
-	return task.PrettyAge(task.TimeSinceFirstStarted())
-}
-
 func (task *Task) AgeTime() time.Duration {
 	var createdAt, err = time.Parse(SQLITE_TIME_FORMAT, task.CreatedUtc)
 	if err != nil {
@@ -177,8 +159,24 @@ func (task *Task) AgeStr() string {
 	return task.PrettyAge(task.AgeTime())
 }
 
+func (task *TaskDetailed) IsStarted() bool {
+	return task.Inprogress
+}
+
 func (task *TaskDetailed) UrgencyStr() string {
 	return fmt.Sprintf("%.2f", task.Urgency())
+}
+
+func (task *TaskDetailed) PrettyCumTime() string {
+	if !task.CumulativeTime.Valid {
+		return ""
+	}
+	var duration, err = time.ParseDuration(task.CumulativeTime.String + "s")
+	if err != nil {
+		log.Error().Err(err).Msg("failed to parse cumulative time")
+		return ""
+	}
+	return task.PrettyAge(duration)
 }
 
 func (task *TaskDetailed) Urgency() float64 {
@@ -212,7 +210,7 @@ func (task *TaskDetailed) urgencyProject() float64 {
 }
 
 func (task *TaskDetailed) urgencyActive() float64 {
-	if URGENCY_ACTIVE_COEFFICIENT < EPSILION || !task.StartedUtc.Valid {
+	if URGENCY_ACTIVE_COEFFICIENT < EPSILION || !task.Inprogress {
 		return 0
 	}
 	return float64(URGENCY_ACTIVE_COEFFICIENT)
@@ -285,13 +283,27 @@ func (task *TaskDetailed) urgencyDue() float64 {
 func (store *Store) ListTasks() ([]TaskDetailed, error) {
 	var sql = `
 	SELECT
-	    tasks.*,
-	    COUNT(taskProjects.projectId) AS projectCount,
-	    GROUP_CONCAT(projects.title ORDER BY projects.title ASC) AS projectNames
+		tasks.*,
+		COUNT(taskProjects.projectId) AS projectCount,
+		GROUP_CONCAT(projects.title ORDER BY projects.title ASC) AS projectNames,
+		MIN(taskTime.startTimeUtc) AS firstStartedUtc,
+		CASE
+			WHEN SUM(CASE WHEN taskTime.endTimeUtc IS NULL THEN 1 ELSE 0 END) > 0 THEN 1
+			ELSE 0
+		END AS inprogress,
+		SUM(
+			CASE
+			    WHEN taskTime.endTimeUtc IS NULL THEN
+				(julianday(current_timestamp) - julianday(taskTime.startTimeUtc)) * 24 * 60 * 60
+			    ELSE taskTime.totalTime
+			END
+		) AS cumulativeTime
 	FROM tasks
 	LEFT JOIN taskProjects ON taskProjects.taskId = tasks.id
 	LEFT JOIN projects ON projects.id = taskProjects.projectId
-	WHERE tasks.state != 2
+	LEFT JOIN taskTime ON taskTime.taskId = tasks.id
+	WHERE
+		tasks.state != 2 -- COMPLETED
 	GROUP BY tasks.id;
 	`
 	var tasks []TaskDetailed
@@ -317,34 +329,16 @@ func (store *Store) DeleteTaskById(id int64) (bool, error) {
 	return rowsAffected > 0, nil
 }
 
-func (store *Store) StartTimeToggleById(id int64) (*Task, error) {
-	var sql = `
-	UPDATE tasks
-	SET
-		updatedAtUtc = current_timestamp,
-		startedAtUtc = case when startedAtUtc is null then current_timestamp else null end
-	WHERE id = ?
-	RETURNING *
-	`
-	var task = &Task{}
-	var row = store.Con.QueryRowx(sql, id)
-	var err = row.StructScan(task)
-	if err != nil {
-		return nil, err
-	}
-	return task, nil
-}
-
 func (store *Store) CreateTask(task *Task) (*Task, error) {
 	var sql = `
 	INSERT INTO tasks
 		(
 			title, description, dueUtc,
 			priority, createdAtUtc, state,
-			updatedAtUtc, completedAtUtc, startedAtUtc
+			updatedAtUtc, completedAtUtc
 		)
 	VALUES
-		(?, ?, ?, ?, ?, ?, ?, ?, ?)
+		(?, ?, ?, ?, ?, ?, ?, ?)
 	RETURNING *
 	`
 	var newTask = &Task{}
@@ -352,7 +346,7 @@ func (store *Store) CreateTask(task *Task) (*Task, error) {
 		sql,
 		task.Title, task.Description, task.Due,
 		task.Priority, time.Now().UTC().String(), task.State,
-		time.Now().UTC().String(), task.CompletedUtc, task.StartedUtc,
+		time.Now().UTC().String(), task.CompletedUtc,
 	)
 	var err = row.StructScan(newTask)
 	if err != nil {
@@ -444,4 +438,18 @@ func (store *Store) GetTaskByIdOrPanic(id int64) *Task {
 		assert.Nil(err, "failed to get task by id")
 	}
 	return task
+}
+
+func (store *Store) SetTaskStateToStarted(taskId int64) error {
+	return store.SetTaskState(taskId, TaskStateStarted)
+}
+
+func (store *Store) SetTaskStateToIncomplete(taskId int64) error {
+	return store.SetTaskState(taskId, TaskStateIncomplete)
+}
+
+func (store *Store) SetTaskState(taskId int64, state TaskState) error {
+	var sql = `UPDATE tasks SET state = ? WHERE id = ?; `
+	_, err := store.Con.Exec(sql, state, taskId)
+	return err
 }

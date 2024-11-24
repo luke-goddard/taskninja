@@ -2,6 +2,7 @@ package handler
 
 import (
 	"testing"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/luke-goddard/taskninja/bus"
@@ -78,20 +79,35 @@ func TestStartTaskHandler(t *testing.T) {
 	})
 	assert.Nil(t, err)
 	assert.NotNil(t, task)
-	assert.Empty(t, task.StartedUtc)
 	assert.Equal(t, "title", task.Title)
 
-	task, err = handler.services.StartTimeToggleById(task.ID)
+	err = handler.services.StartTimeToggleById(task.ID)
 	assert.Nil(t, err)
-	assert.NotNil(t, task)
-	assert.NotNil(t, task.StartedUtc)
+	time.Sleep(1 * time.Second)
 
-	t.Run("restarting-a-started-task", func(t *testing.T) {
-		task, err = handler.services.StartTimeToggleById(task.ID)
-		assert.Nil(t, err)
-		assert.NotNil(t, task)
-		assert.Empty(t, task.StartedUtc) // Should be empty
-	})
+	err = handler.services.StopTimeToggleById(task.ID)
+	assert.Nil(t, err)
+
+	tasks, err := handler.services.Store.ListTasks()
+	assert.Nil(t, err)
+	assert.Len(t, tasks, 1)
+	log.Info().Interface("tasks", tasks).Msg("tasks")
+
+	var detailedTask = tasks[0]
+	assert.True(t, detailedTask.CumulativeTime.Valid)
+	log.Info().Interface("detailedTask", detailedTask).Msg("detailedTask")
+	t.Fail()
+
+	// assert.Nil(t, err)
+	// assert.NotNil(t, task)
+	// assert.NotNil(t, task.StartedUtc)
+	//
+	// t.Run("restarting-a-started-task", func(t *testing.T) {
+	// 	task, err = handler.services.StartTimeToggleById(task.ID)
+	// 	assert.Nil(t, err)
+	// 	assert.NotNil(t, task)
+	// 	assert.Empty(t, task.StartedUtc) // Should be empty
+	// })
 }
 
 func TestCompleteHandler(t *testing.T) {

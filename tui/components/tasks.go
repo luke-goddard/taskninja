@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/luke-goddard/taskninja/assert"
 	"github.com/luke-goddard/taskninja/bus"
+	"github.com/luke-goddard/taskninja/db"
 	"github.com/luke-goddard/taskninja/events"
 	"github.com/luke-goddard/taskninja/tui/utils"
 )
@@ -18,8 +19,10 @@ type TableRowIndex int
 
 const (
 	TableColumnID int = iota
-	TableColumnAge
+	TableColumnUrgency
+	TableColumnStarted
 	TableColumnName
+	TableColumnAge
 	TableColumnPriority
 	TableColumnProject
 	TableColumnTags
@@ -51,6 +54,15 @@ func (r TaskRow) ID() int64 {
 	var id, err = strconv.ParseInt(str, 10, 64)
 	assert.Nil(err, "failed to convert ID to int")
 	return id
+}
+
+func (r TaskRow) Started() bool {
+	assert.NotNil(r, "r is nil")
+	if len(r) == 0 {
+		return false
+	}
+	var started = r[TableColumnStarted]
+	return started != ""
 }
 
 func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions, theme *utils.Theme, bus *bus.Bus) *TaskTable {
@@ -117,7 +129,11 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 			}
 			m.bus.Publish(events.NewDeleteTaskByIdEvent(id))
 		case "s":
-			m.bus.Publish(events.NewStartTaskEvent(id))
+			if !m.CurrentTaskStarted() {
+				m.bus.Publish(events.NewStartTaskEvent(id))
+			} else {
+				m.bus.Publish(events.NewStopTaskByIdEvent(id))
+			}
 		case "+":
 			m.bus.Publish(events.NewIncreasePriorityEvent(id))
 		case "-":
@@ -139,14 +155,19 @@ func (m *TaskTable) GetIdForCurrentRow() int64 {
 	return TaskRow(selectedRow).ID()
 }
 
+func (m *TaskTable) CurrentTaskStarted() bool {
+	var selectedRow = m.table.SelectedRow()
+	return TaskRow(selectedRow).Started()
+}
+
 func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
 	var rows = []table.Row{}
 	for _, task := range e.Tasks {
 		var columns = []string{}
 		var started = ""
 		var id = fmt.Sprintf("%d", task.ID)
-		if task.IsStarted() {
-			started = task.TimeSinceFirstStartedStr()
+		if task.State == db.TaskStateStarted {
+			started = task.PrettyCumTime()
 			id = fmt.Sprintf("%s-⏰", id)
 		}
 		columns = append(columns, id)                       // ID
