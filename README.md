@@ -48,6 +48,7 @@ settings.
 ### Install Optional Development Tools
 ```bash
 go install github.com/air-verse/air@latest
+go install github.com/onsi/ginkgo/v2/ginkgo
 sudo add-apt-repository -y ppa:linuxgndu/sqlitebrowser-testing
 sudo apt-get update
 sudo apt-get install sqlitebrowser

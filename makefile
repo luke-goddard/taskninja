@@ -1,7 +1,7 @@
 
 # Watch and run tests
 test:
-	gotestsum --format testname --watch ./... -v
+	ginkgo watch ./...
 
 # Build and run the development build
 run:

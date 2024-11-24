@@ -1,118 +1,127 @@
 package interpreter
 
 import (
-	"testing"
-
 	"github.com/luke-goddard/taskninja/db"
 	"github.com/luke-goddard/taskninja/interpreter/ast"
-	"github.com/stretchr/testify/assert"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	"testing"
 )
 
-func TestInterpreterGood(t *testing.T) {
-	var tc = []struct {
-		input        string
-		expectedSql  string
-		expectedArgs interface{}
-	}{
-		{
-			input:        `add "do the dishes"`,
-			expectedSql:  "INSERT INTO tasks (title) VALUES (?)",
-			expectedArgs: ast.SqlArgs{"do the dishes"},
-		},
-		{
-			input:        `add "cook" priority:High`,
-			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
-			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityHigh},
-		},
-		{
-			input:        `add "cook" priority:Medium`,
-			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
-			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityMedium},
-		},
-		{
-			input:        `add "cook" priority:Low`,
-			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
-			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityLow},
-		},
-		{
-			input:        `add "cook" priority:None`,
-			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
-			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityNone},
-		},
-		{
-			input:        `add "cook" priority:high`,
-			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
-			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityHigh},
-		},
-		{
-			input:        `add "cook" priority:medium`,
-			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
-			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityMedium},
-		},
-		{
-			input:        `add "cook" priority:low`,
-			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
-			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityLow},
-		},
-		{
-			input:        `add "cook" priority:none`,
-			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
-			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityNone},
-		},
-		{
-			input:        `add "cook" priority:h`,
-			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
-			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityHigh},
-		},
-		{
-			input:        `add "cook" priority:m`,
-			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
-			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityMedium},
-		},
-		{
-			input:        `add "cook" priority:l`,
-			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
-			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityLow},
-		},
-		{
-			input:        `add "cook" priority:n`,
-			expectedSql:  `INSERT INTO tasks (title, priority) VALUES (?, ?)`,
-			expectedArgs: ast.SqlArgs{"cook", db.TaskPriorityNone},
-		},
-	}
-
-	var interpreter = NewInterpreter()
-	for _, test := range tc {
-		t.Run(test.input, func(t *testing.T) {
-			var sql, args, err = interpreter.Execute(test.input)
-			assert.Nil(t, err)
-			assert.Equal(t, test.expectedSql, string(sql))
-			assert.Equal(t, test.expectedArgs, args)
-		})
-	}
+func TestServices(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Interpreter Suite")
 }
 
-func TestInterpreterBad(t *testing.T) {
-	var tc = []struct {
-		input       string
-		expectedErr string
-	}{
-		{
-			input:       `add "" project:Lol`,
-			expectedErr: "(Fatal) Semantic: Description cannot be empty",
-		},
-		{
-			input:       `add 1 project:Lol`,
-			expectedErr: "(Fatal) Syntax: Expected token type String, got Number: Number(1)",
-		},
-	}
-
+var _ = Describe("Transpiler should transpile", func() {
 	var interpreter = NewInterpreter()
-	for _, test := range tc {
-		t.Run(test.input, func(t *testing.T) {
-			var _, _, err = interpreter.Execute(test.input)
-			assert.NotNil(t, err)
-			assert.Equal(t, test.expectedErr, err.Error())
-		})
-	}
-}
+
+	DescribeTable("good",
+		func(input string, expectedSql string, expectedArgs interface{}) {
+			sql, args, err := interpreter.Execute(input)
+			Expect(err).To(BeNil())
+			Expect(string(sql)).To(Equal(expectedSql))
+			Expect(args).To(Equal(expectedArgs))
+		},
+		Entry(
+			"add 'do the dishes'",
+			`add "do the dishes"`,
+			"INSERT INTO tasks (title) VALUES (?)",
+			ast.SqlArgs{"do the dishes"},
+		),
+		Entry(
+			"add 'cook' priority:High",
+			`add "cook" priority:High`,
+			`INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			ast.SqlArgs{"cook", db.TaskPriorityHigh},
+		),
+		Entry(
+			"add 'cook' priority:Medium",
+			`add "cook" priority:Medium`,
+			`INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			ast.SqlArgs{"cook", db.TaskPriorityMedium},
+		),
+		Entry(
+			"add 'cook' priority:Low",
+			`add "cook" priority:Low`,
+			`INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			ast.SqlArgs{"cook", db.TaskPriorityLow},
+		),
+		Entry(
+			"add 'cook' priority:None",
+			`add "cook" priority:None`,
+			`INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			ast.SqlArgs{"cook", db.TaskPriorityNone},
+		),
+		Entry(
+			"add 'cook' priority:high",
+			`add "cook" priority:high`,
+			`INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			ast.SqlArgs{"cook", db.TaskPriorityHigh},
+		),
+		Entry(
+			"add 'cook' priority:medium",
+			`add "cook" priority:medium`,
+			`INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			ast.SqlArgs{"cook", db.TaskPriorityMedium},
+		),
+		Entry(
+			"add 'cook' priority:low",
+			`add "cook" priority:low`,
+			`INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			ast.SqlArgs{"cook", db.TaskPriorityLow},
+		),
+		Entry(
+			"add 'cook' priority:none",
+			`add "cook" priority:none`,
+			`INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			ast.SqlArgs{"cook", db.TaskPriorityNone},
+		),
+		Entry(
+			"add 'cook' priority:h",
+			`add "cook" priority:h`,
+			`INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			ast.SqlArgs{"cook", db.TaskPriorityHigh},
+		),
+		Entry(
+			"add 'cook' priority:m",
+			`add "cook" priority:m`,
+			`INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			ast.SqlArgs{"cook", db.TaskPriorityMedium},
+		),
+		Entry(
+			"add 'cook' priority:l",
+			`add "cook" priority:l`,
+			`INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			ast.SqlArgs{"cook", db.TaskPriorityLow},
+		),
+		Entry(
+			"add 'cook' priority:n",
+			`add "cook" priority:n`,
+			`INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			ast.SqlArgs{"cook", db.TaskPriorityNone},
+		),
+	)
+})
+
+var _ = Describe("Transpiler should fail", func() {
+	var interpreter = NewInterpreter()
+
+	DescribeTable("bad",
+		func(input string, expectedErr string) {
+			_, _, err := interpreter.Execute(input)
+			Expect(err).NotTo(BeNil())
+			Expect(err.Error()).To(Equal(expectedErr))
+		},
+		Entry(
+			`add "" project:Lol`,
+			`add "" project:Lol`,
+			`(Fatal) Semantic: Description cannot be empty`,
+		),
+		Entry(
+			`add 1 project:Lol`,
+			`add 1 project:Lol`,
+			`(Fatal) Syntax: Expected token type String, got Number: Number(1)`,
+		),
+	)
+})
