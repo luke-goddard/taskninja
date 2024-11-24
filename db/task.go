@@ -40,6 +40,11 @@ ALTER TABLE tasks DROP COLUMN completed;
 PRAGMA user_version = 5;
 `
 
+const M009_TaskSchema = `
+ALTER TABLE tasks ADD COLUMN inprogress INTEGER NOT NULL DEFAULT 0 CHECK (inprogress >= 0 AND inprogress <= 1);
+PRAGMA user_version = 9;
+`
+
 type TaskPriority int
 
 const (
@@ -119,7 +124,7 @@ func (task *Task) IsStarted() bool {
 	return task.StartedUtc.Valid
 }
 
-func (task *Task) TimeSinceStarted() time.Duration {
+func (task *Task) TimeSinceFirstStarted() time.Duration {
 	if !task.IsStarted() {
 		return 0
 	}
@@ -155,8 +160,8 @@ func (task *Task) PrettyAge(duration time.Duration) string {
 	return strings.TrimSuffix(pretty, "0s")
 }
 
-func (task *Task) TimeSinceStartedStr() string {
-	return task.PrettyAge(task.TimeSinceStarted())
+func (task *Task) TimeSinceFirstStartedStr() string {
+	return task.PrettyAge(task.TimeSinceFirstStarted())
 }
 
 func (task *Task) AgeTime() time.Duration {

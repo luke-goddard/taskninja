@@ -146,11 +146,11 @@ func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
 		var started = ""
 		var id = fmt.Sprintf("%d", task.ID)
 		if task.IsStarted() {
-			started = task.TimeSinceStartedStr()
+			started = task.TimeSinceFirstStartedStr()
 			id = fmt.Sprintf("%s-⏰", id)
 		}
 		columns = append(columns, id)                       // ID
-		columns = append(columns, task.UrgencyStr())         // URGENCY
+		columns = append(columns, task.UrgencyStr())        // URGENCY
 		columns = append(columns, started)                  // STARTED
 		columns = append(columns, task.Title)               // NAME
 		columns = append(columns, task.AgeStr())            // AGE
