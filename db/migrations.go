@@ -18,6 +18,7 @@ var Migrations = []string{
 	M007_TaskProjectsSchema,
 	M008_TimeTrackingSchema,
 	M009_TaskSchema,
+	"PRAGMA foreign_keys = ON",
 }
 
 func (store *Store) RunMigrations() error {

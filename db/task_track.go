@@ -1,6 +1,9 @@
 package db
 
-import "database/sql"
+import (
+	"database/sql"
+	"fmt"
+)
 
 const M008_TimeTrackingSchema = `
 CREATE TABLE IF NOT EXISTS taskTime (
@@ -9,7 +12,7 @@ CREATE TABLE IF NOT EXISTS taskTime (
 	startTimeUtc TEXT NOT NULL DEFAULT current_timestamp,
 	endTimeUtc TEXT,
 	totalTime TEXT,
-	FOREIGN KEY(taskId) REFERENCES tasks(id)
+	FOREIGN KEY(taskId) REFERENCES tasks(id) ON DELETE CASCADE
 );
 PRAGMA user_version = 8;
 `
@@ -22,34 +25,81 @@ type TaskTime struct {
 	TotalTime    sql.NullString `db:"totalTime"`
 }
 
-func (store *Store) StartTrackingTaskTime(id int64) (*TaskTime, error) {
-	// TODO: How to prevent started task from being started again?
-	var sql = `INSERT INTO taskTime (taskId) VALUES (?) RETURNING *;`
-	var row = store.Con.QueryRowx(sql, id)
-	var taskTime = &TaskTime{}
-	var err = row.StructScan(taskTime)
+func (store *Store) StartTrackingTaskTime(taskId int64) error {
+	// 1. Set the task state to started
+	// 2. If there are no times for the task, insert a new time
+	// 3. If there are times for the task, do not insert a new time
+
+	var tx, err = store.Con.Beginx()
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("error starting task: %w", err)
 	}
-	return taskTime, nil
+	defer tx.Rollback()
+
+	var sql = `UPDATE tasks SET state = ? WHERE id = ?;`
+	_, err = tx.Exec(sql, TaskStateStarted, taskId)
+	if err != nil {
+		return fmt.Errorf("error updating task state while starting task: %w", err)
+	}
+
+	sql = `
+	  INSERT INTO taskTime (taskId)
+	  SELECT ?
+	  WHERE NOT EXISTS (SELECT 1 FROM taskTime WHERE taskId = ? AND endTimeUtc IS NULL);
+	`
+	_, err = tx.Exec(sql, taskId, taskId)
+	if err != nil {
+		return fmt.Errorf("error inserting task time while starting task: %w", err)
+	}
+
+	return tx.Commit()
 }
 
-func (store *Store) StopTrackingTaskTime(id int64) (*TaskTime, error) {
-	var sql = `
+func (store *Store) StopTrackingTaskTime(id int64) error {
+	var sql = `UPDATE tasks SET state = 0 WHERE id = ?;`
+	var tx, err = store.Con.Beginx()
+	defer tx.Rollback()
+	if err != nil {
+		return fmt.Errorf("error starting transaction: %w", err)
+	}
+
+	_, err = tx.Exec(sql, id)
+	if err != nil {
+		return fmt.Errorf("error updating task state while stopping task: %w", err)
+	}
+
+	sql = `
 	UPDATE taskTime
 	SET
 		endTimeUtc = current_timestamp,
 		totalTime = (julianDay(current_timestamp) - julianDay(startTimeUtc)) * 24 * 60 * 60
 	WHERE
-		taskId = ? AND endTimeUtc IS NULL RETURNING *;
+		taskId = ? AND endTimeUtc IS NULL;
 	`
-	var row = store.Con.QueryRowx(sql, id)
-	var taskTime = &TaskTime{}
-	var err = row.StructScan(taskTime)
+	_, err = tx.Exec(sql, id)
+	if err != nil {
+		return fmt.Errorf("error updating task time while stopping task: %w", err)
+	}
+
+	return tx.Commit()
+}
+
+func (store *Store) GetTaskTimes(taskId int64) ([]TaskTime, error) {
+	var sql = `SELECT * FROM taskTime WHERE taskId = ?;`
+	var rows, err = store.Con.Queryx(sql, taskId)
 	if err != nil {
 		return nil, err
 	}
-	return taskTime, nil
+	var taskTimes = []TaskTime{}
+	for rows.Next() {
+		var taskTime = TaskTime{}
+		err = rows.StructScan(&taskTime)
+		if err != nil {
+			return nil, err
+		}
+		taskTimes = append(taskTimes, taskTime)
+	}
+	return taskTimes, nil
 }
 
 func (store *Store) GetCumTime(taskId int64) (int64, error) {

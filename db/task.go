@@ -87,15 +87,15 @@ const EPSILION = 0.000001
 const SQLITE_TIME_FORMAT = "2006-01-02 15:04:05"
 
 type Task struct {
-	ID           int64        `json:"id" db:"id"`
-	Title        string       `json:"title" db:"title"`
-	Description  *string      `json:"description" db:"description"`
-	Due          *string      `json:"due" db:"dueUtc"`
-	Priority     TaskPriority `json:"priority" db:"priority"`
-	CreatedUtc   string       `json:"createdUtc" db:"createdAtUtc"`
-	UpdatedAtUtc *string      `json:"updatedAtUtc" db:"updatedAtUtc"`
-	CompletedUtc *string      `json:"completedUtc" db:"completedAtUtc"`
-	State        TaskState    `json:"state" db:"state"`
+	ID           int64          `json:"id" db:"id"`
+	Title        string         `json:"title" db:"title"`
+	Priority     TaskPriority   `json:"priority" db:"priority"`
+	CreatedUtc   string         `json:"createdUtc" db:"createdAtUtc"`
+	State        TaskState      `json:"state" db:"state"`
+	Description  sql.NullString `json:"description" db:"description"`
+	Due          sql.NullString `json:"due" db:"dueUtc"`
+	UpdatedAtUtc sql.NullString `json:"updatedAtUtc" db:"updatedAtUtc"`
+	CompletedUtc sql.NullString `json:"completedUtc" db:"completedAtUtc"`
 }
 
 type TaskDetailed struct {
@@ -217,7 +217,7 @@ func (task *TaskDetailed) urgencyActive() float64 {
 }
 
 func (task *TaskDetailed) urgencyScheduled() float64 {
-	if URGENCY_SCHEDULED_COEFFICIENT < EPSILION || task.Due == nil {
+	if URGENCY_SCHEDULED_COEFFICIENT < EPSILION || task.Due.Valid == false {
 		return 0.0
 	}
 	return float64(URGENCY_SCHEDULED_COEFFICIENT)
@@ -260,10 +260,10 @@ func (task *TaskDetailed) urgencyPriority() float64 {
 //
 // Ported from https://github.com/GothenburgBitFactory/taskwarrior/blob/develop/src/Task.cpp#L1702
 func (task *TaskDetailed) urgencyDue() float64 {
-	if URGENCY_DUE_COEFFICIENT < EPSILION || task.Due == nil {
+	if URGENCY_DUE_COEFFICIENT < EPSILION || task.Due.Valid == false {
 		return 0.0
 	}
-	var due, err = time.Parse(SQLITE_TIME_FORMAT, *task.Due)
+	var due, err = time.Parse(SQLITE_TIME_FORMAT, *&task.Due.String)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to parse due")
 		return 0.0
@@ -280,6 +280,16 @@ func (task *TaskDetailed) urgencyDue() float64 {
 	}
 }
 
+func (store *Store) CountTasks() (int64, error) {
+	var sql = `SELECT COUNT(*) FROM tasks`
+	var count int64
+	err := store.Con.Get(&count, sql)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to count tasks")
+		return -1, err
+	}
+	return count, nil
+}
 func (store *Store) ListTasks() ([]TaskDetailed, error) {
 	var sql = `
 	SELECT
@@ -452,4 +462,14 @@ func (store *Store) SetTaskState(taskId int64, state TaskState) error {
 	var sql = `UPDATE tasks SET state = ? WHERE id = ?; `
 	_, err := store.Con.Exec(sql, state, taskId)
 	return err
+}
+
+func (store *Store) GetTaskById(taskId int64) (*Task, error) {
+	var sql = `SELECT * FROM tasks WHERE id = ?`
+	var task = &Task{}
+	var err = store.Con.Get(task, sql, taskId)
+	if err != nil {
+		return nil, err
+	}
+	return task, err
 }

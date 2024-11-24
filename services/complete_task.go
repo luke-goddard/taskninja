@@ -1,10 +1,14 @@
 package services
 
+import "fmt"
+
 func (handler *ServiceHandler) CompleteTaskById(taskId int64) (bool, error) {
 	// TODO: Convert to transaction
-	var _, err = handler.Store.StopTrackingTaskTime(taskId)
+	var err = handler.Store.StopTrackingTaskTime(taskId)
 	if err != nil {
-		return false, err
+		if err.Error() != "sql: no rows in result set" {
+			return false, fmt.Errorf("Error stopping task time: %v", err)
+		}
 	}
 	return handler.Store.CompleteTaskById(taskId)
 }

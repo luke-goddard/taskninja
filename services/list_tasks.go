@@ -23,3 +23,11 @@ func (handler *ServiceHandler) SortTasksByUrgency(tasks []db.TaskDetailed) {
 		}
 	}
 }
+
+func (handler *ServiceHandler) CountTasks() (int64, error) {
+	return handler.Store.CountTasks()
+}
+
+func (handler *ServiceHandler) GetTaskById(taskId int64) (*db.Task, error) {
+	return handler.Store.GetTaskById(taskId)
+}

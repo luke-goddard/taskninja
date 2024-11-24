@@ -2,12 +2,11 @@ package services
 
 import (
 	"github.com/luke-goddard/taskninja/assert"
-	"github.com/luke-goddard/taskninja/events"
 	"github.com/luke-goddard/taskninja/interpreter/ast"
 )
 
-func (handler *ServiceHandler) RunProgram(e *events.RunProgram) (*ast.Command, error) {
-	var sql, args, err = handler.Interprete.Execute(e.Program)
+func (handler *ServiceHandler) RunProgram(program string) (*ast.Command, error) {
+	var sql, args, err = handler.Interprete.Execute(program)
 	if err != nil {
 		return nil, err
 	}
