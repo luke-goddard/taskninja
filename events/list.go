@@ -2,8 +2,11 @@ package events
 
 import "github.com/luke-goddard/taskninja/db"
 
+// ============================================================================
+// LIST
+// ============================================================================
 type ListTasks struct{}
-
+func DecodeListTasksEvent(e *Event) *ListTasks { return e.Data.(*ListTasks) }
 func NewListTasksEvent() *Event {
 	return &Event{
 		Type: EventListTasks,
@@ -11,14 +14,12 @@ func NewListTasksEvent() *Event {
 	}
 }
 
-func DecodeListTasksEvent(e *Event) *ListTasks {
-	return e.Data.(*ListTasks)
-}
 
-type ListTasksResponse struct {
-	Tasks []db.TaskDetailed
-}
-
+// ============================================================================
+// LIST RESPONSE
+// ============================================================================
+type ListTasksResponse struct { Tasks []db.TaskDetailed }
+func DecodeListTasksResponseEvent(e *Event) *ListTasksResponse { return e.Data.(*ListTasksResponse) }
 func NewListTasksResponse(tasks []db.TaskDetailed) *Event {
 	return &Event{
 		Type: EventListTaskResponse,
@@ -26,6 +27,3 @@ func NewListTasksResponse(tasks []db.TaskDetailed) *Event {
 	}
 }
 
-func DecodeListTasksResponseEvent(e *Event) *ListTasksResponse {
-	return e.Data.(*ListTasksResponse)
-}

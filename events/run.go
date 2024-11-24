@@ -1,8 +1,10 @@
 package events
 
-type RunProgram struct {
-	Program string
-}
+// ============================================================================
+// RUN PROGRAM
+// ============================================================================
+type RunProgram struct { Program string }
+func DecodeRunProgramEvent(e *Event) *RunProgram { return e.Data.(*RunProgram) }
 
 func NewRunProgramEvent(program string) *Event {
 	return &Event{
@@ -13,6 +15,3 @@ func NewRunProgramEvent(program string) *Event {
 	}
 }
 
-func DecodeRunProgramEvent(e *Event) *RunProgram {
-	return e.Data.(*RunProgram)
-}

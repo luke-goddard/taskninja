@@ -1,11 +1,11 @@
 package events
 
+
+// ============================================================================
+// INCREASE PRIORITY
+// ============================================================================
 type IncreasePriority struct { ID int64 }
-type DecreasePriority struct { ID int64 }
-
 func DecodeIncreasePriorityEvent(e *Event) *IncreasePriority { return e.Data.(*IncreasePriority) }
-func DecodeDecreasePriorityEvent(e *Event) *DecreasePriority { return e.Data.(*DecreasePriority) }
-
 func NewIncreasePriorityEvent(id int64) *Event {
 	return &Event{
 		Type: EventIncreasePriority,
@@ -15,6 +15,12 @@ func NewIncreasePriorityEvent(id int64) *Event {
 	}
 }
 
+// ============================================================================
+// DECREASE PRIORITY
+// ============================================================================
+
+type DecreasePriority struct { ID int64 }
+func DecodeDecreasePriorityEvent(e *Event) *DecreasePriority { return e.Data.(*DecreasePriority) }
 func NewDecreasePriorityEvent(id int64) *Event {
 	return &Event{
 		Type: EventDecreasePriority,

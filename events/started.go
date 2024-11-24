@@ -1,8 +1,10 @@
 package events
 
-type StartTask struct {
-	Id int64 // The ID of the task to start
-}
+// ============================================================================
+// START
+// ============================================================================
+type StartTask struct{ Id int64 }
+func DecodeStartTaskEvent(e *Event) *StartTask { return e.Data.(*StartTask) }
 
 // Used to start a new task
 func NewStartTaskEvent(id int64) *Event {
@@ -12,8 +14,4 @@ func NewStartTaskEvent(id int64) *Event {
 			Id: id,
 		},
 	}
-}
-
-func DecodeStartTaskEvent(e *Event) *StartTask {
-	return e.Data.(*StartTask)
 }
