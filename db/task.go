@@ -135,9 +135,19 @@ func (task *Task) PrettyAge(duration time.Duration) string {
 	if duration.Hours() == 0 {
 		duration = duration.Round(time.Minute)
 	}
-	if duration.Hours() > 24 {
-		duration = duration.Truncate(time.Hour)
+
+	if duration.Hours() >= 24*7 {
+		var weeks = duration.Hours() / (24 * 7)
+		var days = int(duration.Hours()) % (24 * 7) / 7
+		return fmt.Sprintf("%dw%dd", int(weeks), int(days))
 	}
+
+	if duration.Hours() >= 24 {
+		var days = duration.Hours() / 24
+		var hours = int(duration.Hours()) % 24
+		return fmt.Sprintf("%dd%dh", int(days), int(hours))
+	}
+
 	if duration.Minutes() < 1 {
 		return "0m"
 	}
