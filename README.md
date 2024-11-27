@@ -33,6 +33,10 @@ make install
 | `s` | Start The current task |
 | `+` | Increase Priority|
 | `-` | Decrease Priority|
+| `H` | Set Priority to HIGH|
+| `M` | Set Priority to MED|
+| `L` | Set Priority to LOW|
+| `N` | Set Priority to NONE|
 | `Shift+D` | Delete a task |
 
 ## Configuration
