@@ -4,7 +4,8 @@ import (
 	"testing"
 
 	"github.com/luke-goddard/taskninja/events"
-	"github.com/stretchr/testify/assert"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 type SubscriberMock struct {
@@ -16,18 +17,34 @@ func (s *SubscriberMock) Notify(e *events.Event) {
 }
 
 func TestBus(t *testing.T) {
-	var bus = NewBus()
-	assert.NotNil(t, bus, "bus is nil")
-	assert.False(t, bus.HasSubscribers(), "bus has subscribers")
-
-	var subscriber = &SubscriberMock{}
-	assert.False(t, subscriber.called, "subscriber has been called")
-
-	bus.Subscribe(subscriber)
-	assert.True(t, bus.HasSubscribers(), "bus has no subscribers")
-
-	bus.Publish(events.NewListTasksEvent())
-	assert.True(t, subscriber.called, "subscriber has not been called")
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Bus Suite")
 }
 
+var _ = Describe("Bus", func() {
+	var bus *Bus
 
+	BeforeEach(func() {
+		bus = NewBus()
+	})
+
+	It("should be created", func() {
+		Expect(bus).ToNot(BeNil())
+	})
+
+	It("should not have subscribers", func() {
+		Expect(bus.HasSubscribers()).To(BeFalse())
+	})
+
+	It("should have subscribers", func() {
+		bus.Subscribe(&SubscriberMock{})
+		Expect(bus.HasSubscribers()).To(BeTrue())
+	})
+
+	It("should publish", func() {
+		var subscriber = &SubscriberMock{}
+		bus.Subscribe(subscriber)
+		bus.Publish(events.NewListTasksEvent())
+		Expect(subscriber.called).To(BeTrue())
+	})
+})
