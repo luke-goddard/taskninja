@@ -20,8 +20,9 @@ const (
 )
 
 type SqlConnectionConfig struct {
-	Mode ConnectionMode `yaml:"mode"`       // in-memory, file, http
-	Path string         `yaml:"connection"` // connection string
+	Mode       ConnectionMode `yaml:"mode"`       // in-memory, file, http
+	Path       string         `yaml:"connection"` // connection string
+	BackupPath string         `yaml:"backupPath"` // Location to backup the database (sqlite disk only)
 }
 
 func (c *SqlConnectionConfig) DSN() string {

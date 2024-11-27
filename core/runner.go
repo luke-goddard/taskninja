@@ -61,6 +61,13 @@ func (r *Runner) Run() {
 	r.configDefaultLogger()
 	r.config.InitLogger()
 
+	err = db.BackupDatabase(r.config.Connection.Path, r.config.Connection.BackupPath)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to backup database")
+		log.Error().Msg("Halting program to prevent accidential data loss")
+		return
+	}
+
 	store, err = db.NewStore(&r.config.Connection)
 	defer store.Close()
 

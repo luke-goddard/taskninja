@@ -1,7 +1,10 @@
 package db
 
 import (
+	"errors"
 	"fmt"
+	"io"
+	"os"
 	"sync"
 
 	"github.com/jmoiron/sqlx"
@@ -53,3 +56,38 @@ func (store *Store) IsConnected() bool {
 	return store.Con != nil
 }
 
+func BackupDatabase(input, output string) error {
+
+	if _, err := os.Stat(input); errors.Is(err, os.ErrNotExist) {
+		// Nothing to backup
+		return nil
+	}
+
+	var sourceFileStat, err = os.Stat(input)
+	if err != nil {
+		return err
+	}
+
+	if !sourceFileStat.Mode().IsRegular() {
+		return fmt.Errorf("%s is not a regular file", input)
+	}
+
+	source, err := os.Open(input)
+	if err != nil {
+		return err
+	}
+	defer source.Close()
+
+	var destination = output
+	if destination == "" {
+		destination = input + ".bk"
+	}
+	var bk *os.File
+	bk, err = os.Create(destination)
+	if err != nil {
+		return err
+	}
+	defer bk.Close()
+	_, err = io.Copy(bk, source)
+	return err
+}
