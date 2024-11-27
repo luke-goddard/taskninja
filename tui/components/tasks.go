@@ -29,7 +29,7 @@ const (
 )
 
 type TaskTable struct {
-	table      table.Model
+	Table      table.Model
 	baseStyle  lipgloss.Style
 	dimensions *utils.TerminalDimensions
 	theme      *utils.Theme
@@ -63,6 +63,50 @@ func (r TaskRow) Started() bool {
 	}
 	var started = r[TableColumnStarted]
 	return started != ""
+}
+
+func (r TaskRow) Title() string {
+	assert.NotNil(r, "r is nil")
+	if len(r) == 0 {
+		return ""
+	}
+	if len(r) <= TableColumnName {
+		return ""
+	}
+	return r[TableColumnName]
+}
+
+func (r TaskRow) UrgencyStr() string {
+	assert.NotNil(r, "r is nil")
+	if len(r) == 0 {
+		return ""
+	}
+	if len(r) <= TableColumnUrgency {
+		return ""
+	}
+	return r[TableColumnUrgency]
+}
+
+func (r TaskRow) Urgency() float64 {
+	assert.NotNil(r, "r is nil")
+	if len(r) == 0 {
+		return 0
+	}
+	var urgencyStr = r.UrgencyStr()
+	var urgency, err = strconv.ParseFloat(urgencyStr, 64)
+	assert.Nil(err, "failed to convert urgency to float")
+	return urgency
+}
+
+func (r TaskRow) PriorityStr() string {
+	assert.NotNil(r, "r is nil")
+	if len(r) == 0 {
+		return ""
+	}
+	if len(r) <= TableColumnPriority {
+		return ""
+	}
+	return r[TableColumnPriority]
 }
 
 func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions, theme *utils.Theme, bus *bus.Bus) *TaskTable {
@@ -104,11 +148,16 @@ func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions
 
 	tbl.SetStyles(style)
 	return &TaskTable{
-		table:     tbl,
+		Table:     tbl,
 		baseStyle: baseStyle,
 		bus:       bus,
 		theme:     theme,
 	}
+}
+
+func (m *TaskTable) Notify(e *events.Event) {
+	// Little adapter to allow tea's interface to be compatible with the bus
+	m.Update(e)
 }
 
 func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
@@ -124,8 +173,8 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 		case "d":
 			m.bus.Publish(events.NewCompleteEvent(id))
 		case "D":
-			if m.table.Cursor() == len(m.table.Rows())-1 {
-				m.table.SetCursor(m.table.Cursor() - 1)
+			if m.Table.Cursor() == len(m.Table.Rows())-1 {
+				m.Table.SetCursor(m.Table.Cursor() - 1)
 			}
 			m.bus.Publish(events.NewDeleteTaskByIdEvent(id))
 		case "s":
@@ -139,7 +188,7 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 		case "-":
 			m.bus.Publish(events.NewDecreasePriorityEvent(id))
 		}
-		m.table, cmd = m.table.Update(msg)
+		m.Table, cmd = m.Table.Update(msg)
 	case *events.Event:
 		switch msg.Type {
 		case events.EventListTaskResponse:
@@ -151,13 +200,23 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 }
 
 func (m *TaskTable) GetIdForCurrentRow() int64 {
-	var selectedRow = m.table.SelectedRow()
+	var selectedRow = m.Table.SelectedRow()
 	return TaskRow(selectedRow).ID()
 }
 
 func (m *TaskTable) CurrentTaskStarted() bool {
-	var selectedRow = m.table.SelectedRow()
+	var selectedRow = m.Table.SelectedRow()
 	return TaskRow(selectedRow).Started()
+}
+
+func (m *TaskTable) GetCurrentRow() TaskRow {
+	var selectedRow = m.Table.SelectedRow()
+	return TaskRow(selectedRow)
+}
+
+func (m *TaskTable) GetRowAtPos(pos int) TaskRow {
+	var selectedRow = m.Table.Rows()[pos]
+	return TaskRow(selectedRow)
 }
 
 func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
@@ -181,11 +240,11 @@ func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
 
 		rows = append(rows, columns)
 	}
-	m.table.SetRows(rows)
+	m.Table.SetRows(rows)
 }
 
 func (m TaskTable) View() string {
-	return m.baseStyle.Render(m.table.View()) + "\n"
+	return m.baseStyle.Render(m.Table.View()) + "\n"
 }
 
 func (m TaskTable) Init() tea.Cmd {
@@ -193,5 +252,5 @@ func (m TaskTable) Init() tea.Cmd {
 }
 
 func (m TaskTable) HelpView() string {
-	return m.table.HelpView()
+	return m.Table.HelpView()
 }
