@@ -33,7 +33,7 @@ func (s *SubscriberMock) HasEventOfType(eventType events.EventType) bool {
 	return false
 }
 
-func Test(t *testing.T) {
+func TestTasksTable(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Task Table Suite")
 }
@@ -92,9 +92,20 @@ var _ = Describe("Task Table", func() {
 			var row = table.GetCurrentRow()
 			Expect(row.Title()).To(Equal("T2"))
 		})
+		It("Pressing Down Arrow should move selected row down", func() {
+			table.Update(tea.KeyMsg{Type: tea.KeyDown})
+			var row = table.GetCurrentRow()
+			Expect(row.Title()).To(Equal("T2"))
+		})
 		It("Pressing k should move selected row up", func() {
 			table.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'j'}}) // down
 			table.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'k'}}) // up
+			var row = table.GetCurrentRow()
+			Expect(row.Title()).To(Equal("T1"))
+		})
+		It("Pressing Up Arrow should move selected row up", func() {
+			table.Update(tea.KeyMsg{Type: tea.KeyDown})
+			table.Update(tea.KeyMsg{Type: tea.KeyUp})
 			var row = table.GetCurrentRow()
 			Expect(row.Title()).To(Equal("T1"))
 		})

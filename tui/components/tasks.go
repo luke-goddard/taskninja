@@ -40,74 +40,9 @@ type TaskRow table.Row
 
 const NOID int64 = -1
 
-func (r TaskRow) ID() int64 {
-	assert.NotNil(r, "r is nil")
-	if len(r) == 0 {
-		return NOID
-	}
-	if len(r) <= TableColumnID {
-		return NOID
-	}
-	assert.True(len(r) > TableColumnID, "r does not have a column for ID")
-	var str = r[TableColumnID]
-	str = strings.TrimSuffix(str, "-⏰")
-	var id, err = strconv.ParseInt(str, 10, 64)
-	assert.Nil(err, "failed to convert ID to int")
-	return id
-}
-
-func (r TaskRow) Started() bool {
-	assert.NotNil(r, "r is nil")
-	if len(r) == 0 {
-		return false
-	}
-	var started = r[TableColumnStarted]
-	return started != ""
-}
-
-func (r TaskRow) Title() string {
-	assert.NotNil(r, "r is nil")
-	if len(r) == 0 {
-		return ""
-	}
-	if len(r) <= TableColumnName {
-		return ""
-	}
-	return r[TableColumnName]
-}
-
-func (r TaskRow) UrgencyStr() string {
-	assert.NotNil(r, "r is nil")
-	if len(r) == 0 {
-		return ""
-	}
-	if len(r) <= TableColumnUrgency {
-		return ""
-	}
-	return r[TableColumnUrgency]
-}
-
-func (r TaskRow) Urgency() float64 {
-	assert.NotNil(r, "r is nil")
-	if len(r) == 0 {
-		return 0
-	}
-	var urgencyStr = r.UrgencyStr()
-	var urgency, err = strconv.ParseFloat(urgencyStr, 64)
-	assert.Nil(err, "failed to convert urgency to float")
-	return urgency
-}
-
-func (r TaskRow) PriorityStr() string {
-	assert.NotNil(r, "r is nil")
-	if len(r) == 0 {
-		return ""
-	}
-	if len(r) <= TableColumnPriority {
-		return ""
-	}
-	return r[TableColumnPriority]
-}
+// ===========================================================================
+// Task Table
+// ===========================================================================
 
 func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions, theme *utils.Theme, bus *bus.Bus) *TaskTable {
 	assert.NotNil(bus, "bus is nil")
@@ -253,4 +188,77 @@ func (m TaskTable) Init() tea.Cmd {
 
 func (m TaskTable) HelpView() string {
 	return m.Table.HelpView()
+}
+
+// ===========================================================================
+// TaskRow
+// ===========================================================================
+
+func (r TaskRow) ID() int64 {
+	assert.NotNil(r, "r is nil")
+	if len(r) == 0 {
+		return NOID
+	}
+	if len(r) <= TableColumnID {
+		return NOID
+	}
+	assert.True(len(r) > TableColumnID, "r does not have a column for ID")
+	var str = r[TableColumnID]
+	str = strings.TrimSuffix(str, "-⏰")
+	var id, err = strconv.ParseInt(str, 10, 64)
+	assert.Nil(err, "failed to convert ID to int")
+	return id
+}
+
+func (r TaskRow) Started() bool {
+	assert.NotNil(r, "r is nil")
+	if len(r) == 0 {
+		return false
+	}
+	var started = r[TableColumnStarted]
+	return started != ""
+}
+
+func (r TaskRow) Title() string {
+	assert.NotNil(r, "r is nil")
+	if len(r) == 0 {
+		return ""
+	}
+	if len(r) <= TableColumnName {
+		return ""
+	}
+	return r[TableColumnName]
+}
+
+func (r TaskRow) UrgencyStr() string {
+	assert.NotNil(r, "r is nil")
+	if len(r) == 0 {
+		return ""
+	}
+	if len(r) <= TableColumnUrgency {
+		return ""
+	}
+	return r[TableColumnUrgency]
+}
+
+func (r TaskRow) Urgency() float64 {
+	assert.NotNil(r, "r is nil")
+	if len(r) == 0 {
+		return 0
+	}
+	var urgencyStr = r.UrgencyStr()
+	var urgency, err = strconv.ParseFloat(urgencyStr, 64)
+	assert.Nil(err, "failed to convert urgency to float")
+	return urgency
+}
+
+func (r TaskRow) PriorityStr() string {
+	assert.NotNil(r, "r is nil")
+	if len(r) == 0 {
+		return ""
+	}
+	if len(r) <= TableColumnPriority {
+		return ""
+	}
+	return r[TableColumnPriority]
 }
