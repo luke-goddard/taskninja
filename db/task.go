@@ -335,9 +335,6 @@ func (store *Store) ListTasks() ([]TaskDetailed, error) {
 	if err != nil {
 		return nil, err
 	}
-	for i := range tasks {
-		log.Info().Interface("task", tasks[i]).Msg("task")
-	}
 	return tasks, nil
 }
 
