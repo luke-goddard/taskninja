@@ -6,6 +6,8 @@ import (
 	"github.com/luke-goddard/taskninja/events"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 type SubscriberMock struct {
@@ -19,6 +21,7 @@ func (s *SubscriberMock) Notify(e *events.Event) {
 func TestBus(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Bus Suite")
+	log.Logger = log.Output(zerolog.Nop())
 }
 
 var _ = Describe("Bus", func() {

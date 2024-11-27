@@ -14,6 +14,8 @@ import (
 	"github.com/luke-goddard/taskninja/tui/utils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 type SubscriberMock struct {
@@ -34,6 +36,7 @@ func (s *SubscriberMock) HasEventOfType(eventType events.EventType) bool {
 }
 
 func TestTasksTable(t *testing.T) {
+	log.Logger = log.Output(zerolog.Nop())
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Task Table Suite")
 }

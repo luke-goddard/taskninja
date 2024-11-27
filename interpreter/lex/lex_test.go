@@ -7,9 +7,12 @@ import (
 	"github.com/luke-goddard/taskninja/interpreter/token"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func TestLexer(t *testing.T) {
+	log.Logger = log.Output(zerolog.Nop())
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Lexer Suite")
 }
