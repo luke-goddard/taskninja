@@ -187,14 +187,6 @@ func (task *TaskDetailed) Urgency() float64 {
 }
 
 func (task *TaskDetailed) urgency() float64 {
-	log.Info().
-		Float64("project", task.urgencyProject()).
-		Float64("active", task.urgencyActive()).
-		Float64("scheduled", task.urgencyScheduled()).
-		Float64("due", task.urgencyDue()).
-		Float64("age", task.urgencyAge()).
-		Float64("priority", task.urgencyPriority()).
-		Msg("urgency")
 	return task.urgencyProject() +
 		task.urgencyActive() +
 		task.urgencyScheduled() +
