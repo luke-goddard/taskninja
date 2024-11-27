@@ -46,6 +46,8 @@ func (handler *EventHandler) handle(e *events.Event) []*events.Event {
 		return handler.increasePriority(events.DecodeIncreasePriorityEvent(e))
 	case events.EventDecreasePriority:
 		return handler.decreasePriority(events.DecodeDecreasePriorityEvent(e))
+	case events.EventSetPriority:
+		return handler.setPriority(events.DecodeSetPriorityEvent(e))
 	}
 	return nil
 }

@@ -36,6 +36,15 @@ func (s *SubscriberMock) HasEventOfType(eventType events.EventType) bool {
 	return false
 }
 
+func (s *SubscriberMock) GetEventOfType(eventType events.EventType) *events.Event {
+	for _, e := range s.events {
+		if e.Type == eventType {
+			return &e
+		}
+	}
+	return nil
+}
+
 func TestTasksTable(t *testing.T) {
 	log.Logger = log.Output(zerolog.Nop())
 	RegisterFailHandler(Fail)
@@ -132,6 +141,26 @@ var _ = Describe("Task Table", func() {
 		It("Pressing - should decrease the priority of the selected row", func() {
 			table.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'-'}})
 			Expect(sub.HasEventOfType(events.EventDecreasePriority)).To(BeTrue())
+		})
+		It("Pressing 'H' should set the priority of the selected row to high", func() {
+			table.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'H'}})
+			Expect(sub.HasEventOfType(events.EventSetPriority)).To(BeTrue())
+			Expect(sub.events[len(sub.events)-1].Data.(*events.SetPriority).Priority).To(Equal(db.TaskPriorityHigh))
+		})
+		It("Pressing 'M' should set the priority of the selected row to medium", func() {
+			table.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'M'}})
+			Expect(sub.HasEventOfType(events.EventSetPriority)).To(BeTrue())
+			Expect(sub.events[len(sub.events)-1].Data.(*events.SetPriority).Priority).To(Equal(db.TaskPriorityMedium))
+		})
+		It("Pressing 'L' should set the priority of the selected row to low", func() {
+			table.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'L'}})
+			Expect(sub.HasEventOfType(events.EventSetPriority)).To(BeTrue())
+			Expect(sub.events[len(sub.events)-1].Data.(*events.SetPriority).Priority).To(Equal(db.TaskPriorityLow))
+		})
+		It("Pressing 'N' should set the priority of the selected row to None", func() {
+			table.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'N'}})
+			Expect(sub.HasEventOfType(events.EventSetPriority)).To(BeTrue())
+			Expect(sub.events[len(sub.events)-1].Data.(*events.SetPriority).Priority).To(Equal(db.TaskPriorityNone))
 		})
 		It("Should have a zero urgency", func() {
 			var row = table.GetCurrentRow()

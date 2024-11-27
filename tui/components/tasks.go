@@ -122,6 +122,14 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 			m.bus.Publish(events.NewIncreasePriorityEvent(id))
 		case "-":
 			m.bus.Publish(events.NewDecreasePriorityEvent(id))
+		case "H":
+			m.bus.Publish(events.NewSetPriorityEvent(id, db.TaskPriorityHigh))
+		case "M":
+			m.bus.Publish(events.NewSetPriorityEvent(id, db.TaskPriorityMedium))
+		case "L":
+			m.bus.Publish(events.NewSetPriorityEvent(id, db.TaskPriorityLow))
+		case "N":
+			m.bus.Publish(events.NewSetPriorityEvent(id, db.TaskPriorityNone))
 		}
 		m.Table, cmd = m.Table.Update(msg)
 	case *events.Event:

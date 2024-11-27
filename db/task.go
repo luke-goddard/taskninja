@@ -448,6 +448,19 @@ func (store *Store) DecreasePriority(ctx context.Context, id int64) (bool, error
 	return affected == 1, err
 }
 
+func (store *Store) SetPriority(ctx context.Context, id int64, priority TaskPriority) (bool, error) {
+	var sql = `UPDATE tasks SET priority = ? WHERE id = ?`
+	var res, err = store.Con.ExecContext(ctx, sql, priority, id)
+	if err != nil {
+		return false, err
+	}
+
+	var affected int64
+	affected, err = res.RowsAffected()
+	assert.True(affected <= 1, "affected should be 0 or 1")
+	return affected == 1, err
+}
+
 func (store *Store) GetTaskByIdOrPanic(id int64) *Task {
 	var sql = `SELECT * FROM tasks WHERE id = ?`
 	var task = &Task{}

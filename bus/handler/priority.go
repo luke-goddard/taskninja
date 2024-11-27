@@ -27,3 +27,16 @@ func (handler *EventHandler) decreasePriority(e *events.DecreasePriority) []*eve
 	}
 	return newEvents
 }
+
+func (handler *EventHandler) setPriority(e *events.SetPriority) []*events.Event {
+	var newEvents = make([]*events.Event, 0)
+	var applied, err = handler.services.SetPriority(e.ID, e.Priority)
+	if err != nil {
+		newEvents = append(newEvents, events.NewErrorEvent(err))
+		return newEvents
+	}
+	if applied {
+		newEvents = append(newEvents, events.NewListTasksEvent())
+	}
+	return newEvents
+}

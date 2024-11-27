@@ -89,6 +89,15 @@ var _ = Describe("DecreasePriority", func() {
 	})
 })
 
+var _ = Describe("SetPriority", func() {
+	var event = NewSetPriorityEvent(1, db.TaskPriorityHigh)
+
+	It("should decode", func() {
+		Expect(DecodeSetPriorityEvent(event).ID).To(Equal(int64(1)))
+		Expect(DecodeSetPriorityEvent(event).Priority).To(Equal(db.TaskPriorityHigh))
+	})
+})
+
 // ============================================================================
 // RUN.go
 // ============================================================================

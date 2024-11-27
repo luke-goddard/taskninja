@@ -327,6 +327,39 @@ var _ = Describe("Decreasing the priority of a task", func() {
 })
 
 // ============================================================================
+// SET PRIORITY
+// ============================================================================
+var _ = Describe("Setting the priority of a task", func() {
+	var services *services.ServiceHandler
+	var task *db.Task
+	var err error
+	Context("When the task has a HIGH priority", func() {
+		BeforeEach(func() {
+			services = newTestHandler()
+			task, _ = services.CreateTask(&db.Task{Title: "title", Priority: db.TaskPriorityHigh})
+		})
+		It("should set the priority of a task to NONE", func() {
+			services.SetPriority(task.ID, db.TaskPriorityNone)
+			task, err = services.GetTaskById(task.ID)
+			Expect(err).To(BeNil())
+			Expect(task.Priority).To(Equal(db.TaskPriorityNone))
+		})
+		It("should set the priority of a task to MED", func() {
+			services.SetPriority(task.ID, db.TaskPriorityMedium)
+			task, err = services.GetTaskById(task.ID)
+			Expect(err).To(BeNil())
+			Expect(task.Priority).To(Equal(db.TaskPriorityMedium))
+		})
+		It("should set the priority of a task to LOW", func() {
+			services.SetPriority(task.ID, db.TaskPriorityLow)
+			task, err = services.GetTaskById(task.ID)
+			Expect(err).To(BeNil())
+			Expect(task.Priority).To(Equal(db.TaskPriorityLow))
+		})
+	})
+})
+
+// ============================================================================
 // RUN PROGRAM
 // ============================================================================
 var _ = Describe("Running a program", func() {

@@ -13,6 +13,7 @@ const (
 	EventListTaskResponse EventType = "ListTaskResponse"
 	EventIncreasePriority EventType = "IncreaseTaskPriority"
 	EventDecreasePriority EventType = "DecreaseTaskPriority"
+	EventSetPriority EventType = "SetTaskPriority"
 )
 
 type Event struct {
