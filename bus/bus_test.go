@@ -29,3 +29,5 @@ func TestBus(t *testing.T) {
 	bus.Publish(events.NewListTasksEvent())
 	assert.True(t, subscriber.called, "subscriber has not been called")
 }
+
+
