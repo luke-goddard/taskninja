@@ -18,17 +18,9 @@ make build
 make install
 ```
 
-## Configuration
-
-Once TaskNinja has been installed, the first time you run the program it will
-create a configuration file in your home directory. This file is located at
-`~/.config/taskninja/config.yaml`. You can edit this file to change the default
-settings.
-
-
 ## TUI Shortcuts
 
-## TUI Shortcuts - Task Table
+### TUI Shortcuts - Task Table
 
 | Key | Action |
 | --- | ------ |
@@ -42,6 +34,37 @@ settings.
 | `+` | Increase Priority|
 | `-` | Decrease Priority|
 | `Shift+D` | Delete a task |
+
+## Configuration
+
+Once TaskNinja has been installed, the first time you run the program it will
+create a configuration file in your home directory. This file is located at
+`~/.config/taskninja/config.yaml`. You can edit this file to change the default
+settings.
+
+### Sample Config
+
+```yaml
+connection:
+    # File (sqlite), memory (sqlite)
+    mode: file
+
+    # Path to the database
+    path: "/home/taskninaja/Documents/taskninja.db"
+
+    # Default = path + ".bk"
+    backupPath: "/home/taskninaja/Documents/taskninja.db.bk"
+
+log:
+    # debug, info, warn, error
+    level: debug
+
+    # Pretty, Json
+    mode: json
+
+    # Path to the log file: Default = /tmp/taskninja.log
+    path: "/home/taskninja/Documents/taskninja.log"
+```
 
 ## Local Development
 
@@ -63,3 +86,4 @@ sudo apt-get install sqlitebrowser
 ### View the database
 Note that pressing `ctrl+r` will refresh the database
 ```bash make browse ```
+
