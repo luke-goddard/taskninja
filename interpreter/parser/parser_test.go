@@ -81,7 +81,6 @@ func FuzzParser(f *testing.F) {
 		for _, token := range tokens {
 			t.Logf("Token: %v", token.Type.String())
 		}
-		tokens = append(tokens, token.Token{Type: token.Eof, Value: ""})
 		parser.Reset().Parse(tokens)
 	})
 }

@@ -7,7 +7,6 @@ func lexStart(l *Lexer) StateFn {
 
 	var peek = l.peek()
 	if peek == EOF {
-		l.emit(token.Eof)
 		return nil
 	}
 

@@ -69,15 +69,8 @@ func (p *Parser) Reset() *Parser {
 }
 
 func (p *Parser) hasTokens() bool {
-	if p.hasCheckedExists {
-		return true
-	}
 	p.hasCheckedExists = true
 	if p.position > len(p.tokens)-1 {
-		return false
-	}
-	if p.current().Type == token.Eof {
-		p.consume()
 		return false
 	}
 	return true
@@ -93,9 +86,10 @@ func (parser *Parser) current() *token.Token {
 	}
 	if parser.position >= len(parser.tokens) {
 		var err = fmt.Errorf(
-			"Position is greater than the number of tokens Position: %d total: %d\n",
+			"Position is greater than the number of tokens Position: %d total: %d\n, : %v",
 			parser.position,
 			len(parser.tokens),
+			parser.tokens,
 		)
 		panic(err)
 	}
@@ -115,6 +109,7 @@ func (parser *Parser) consume() *token.Token {
 	if parser.position < 0 {
 		panic("Position is less than 0")
 	}
+	parser.hasCheckedExists = false
 	parser.position++
 	return &parser.tokens[parser.position-1]
 }

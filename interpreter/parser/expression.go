@@ -2,8 +2,10 @@ package parser
 
 import (
 	"fmt"
+
 	"github.com/luke-goddard/taskninja/interpreter/ast"
 	"github.com/luke-goddard/taskninja/interpreter/token"
+	"github.com/rs/zerolog/log"
 )
 
 func parsePrimaryExpression(parser *Parser) ast.Expression {
@@ -20,8 +22,13 @@ func parsePrimaryExpression(parser *Parser) ast.Expression {
 		}
 	case token.Key:
 		var key = parser.consume().Value
+		if parser.hasNoTokens() {
+			parser.errors.EmitParse("Expected more tokens", parser.current())
+			return nil
+		}
 		if !parser.expectCurrent(token.Colon) {
-			panic("TODO err handle")
+			parser.errors.EmitParse("Missing Colon in key", parser.current())
+			return nil
 		}
 		parser.consume()
 		return &ast.Key{
@@ -35,7 +42,7 @@ func parsePrimaryExpression(parser *Parser) ast.Expression {
 }
 
 func parseExpression(parser *Parser, bp BindingPower) ast.Expression {
-	if parser.hasNoTokens() || parser.current().Type == token.Eof {
+	if parser.hasNoTokens() {
 		return nil
 	}
 	var tokenKind = parser.current().Type
@@ -48,8 +55,13 @@ func parseExpression(parser *Parser, bp BindingPower) ast.Expression {
 	}
 
 	var left = nudHandler(parser)
+	if left == nil || parser.hasNoTokens() {
+		return left
+	}
 
+		log.Info().Msgf("Current: %s", parser.current().String())
 	for BindingPowerTable[parser.current().Type] > bp {
+		log.Info().Msgf("Current: %s", parser.current().String())
 		var tokenKind = parser.current().Type
 		var ledHandler, exists = LedTable[tokenKind]
 		if !exists {
@@ -59,6 +71,12 @@ func parseExpression(parser *Parser, bp BindingPower) ast.Expression {
 			return nil
 		}
 		left = ledHandler(parser, left, bp)
+		if left == nil {
+			return nil
+		}
+		if parser.hasNoTokens() {
+			return left
+		}
 	}
 	return left
 }

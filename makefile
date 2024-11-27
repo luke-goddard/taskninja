@@ -1,7 +1,7 @@
 
 # Watch and run tests
 test:
-	ginkgo watch ./...
+	ginkgo watch --fail-fast ./...
 
 # Build and run the development build
 run:

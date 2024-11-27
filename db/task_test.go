@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func TestTasksTable(t *testing.T) {
+func TestTaskStruct(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Task Database Suite")
 }

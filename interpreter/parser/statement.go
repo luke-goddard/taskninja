@@ -57,7 +57,12 @@ func parseListCommand(parser *Parser) *ast.Command {
 }
 
 func parseExpressionStatement(parser *Parser) *ast.ExpressionStatement {
-	return &ast.ExpressionStatement{Expr: parseExpression(parser, BP_DEFAULT)}
+	var expression = parseExpression(parser, BP_DEFAULT)
+	if expression == nil {
+		parser.errors.EmitParse("Expected an expression", parser.current())
+		return nil
+	}
+	return &ast.ExpressionStatement{Expr: expression}
 }
 
 func parseParam(parser *Parser) *ast.Param {
@@ -107,10 +112,14 @@ func parseStatments(parser *Parser) []ast.Statement {
 	var statements []ast.Statement
 
 	for {
-		if parser.hasNoTokens() || parser.current().Type == token.Eof {
+		if parser.hasNoTokens() {
 			break
 		}
-		statements = append(statements, parseStatment(parser))
+		var statement = parseStatment(parser)
+		if statement == nil {
+			break
+		}
+		statements = append(statements, statement)
 	}
 
 	return statements
@@ -122,5 +131,9 @@ func parseStatment(parser *Parser) ast.Statement {
 		return handler(parser)
 	}
 	var statement = parseExpressionStatement(parser)
+	if statement == nil {
+		parser.errors.EmitParse("Expected a statement", parser.current())
+		return nil
+	}
 	return statement
 }

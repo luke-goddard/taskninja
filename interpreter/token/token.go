@@ -15,7 +15,6 @@ type Token struct {
 
 const (
 	// SIGNALS
-	Eof   TokenType = iota // Raised when the end of the input is reached
 	Error TokenType = iota // Raised when an error occurs
 
 	// TOKENS
@@ -54,8 +53,6 @@ func (t *Token) String() string {
 
 func (t *TokenType) String() string {
 	switch *t {
-	case Eof:
-		return "EOF"
 
 	case Error:
 		return "Error"

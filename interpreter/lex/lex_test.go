@@ -3,58 +3,63 @@ package lex
 import (
 	"testing"
 
-	"github.com/luke-goddard/taskninja/interpreter/manager"
+	man "github.com/luke-goddard/taskninja/interpreter/manager"
 	"github.com/luke-goddard/taskninja/interpreter/token"
-	"github.com/stretchr/testify/assert"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-func TestLexStart(t *testing.T) {
-
-	var tc = []struct {
-		input     string
-		tokenType token.TokenType
-		value     string
-	}{
-		{"", token.Eof, ""},
-		{"hello hello", token.String, "hello"},
-		{"add hello", token.Command, "add"},
-		{"all", token.Command, "all"},
-		{"delete", token.Command, "delete"},
-		{"done", token.Command, "done"},
-		{"list", token.Command, "list"},
-		{"modify", token.Command, "modify"},
-		{"ready", token.Command, "ready"},
-		{"start", token.Command, "start"},
-		{"stop", token.Command, "stop"},
-		{"tags", token.Command, "tags"},
-		{"1", token.Number, "1"},
-		{"1.1", token.Number, "1.1"},
-		{"-1.1", token.Number, "-1.1"},
-		{"+", token.Plus, "+"},
-		{"-", token.Minus, "-"},
-		{"/", token.Slash, "/"},
-		{"/2", token.Slash, "/"},
-		{"*", token.Star, "*"},
-		{`"string"`, token.String, "string"},
-		{`'string'`, token.String, "string"},
-		{`"string\""`, token.String, `string\"`},
-		{`+Tag`, token.Tag, "+Tag"},
-		{`-Tag`, token.Tag, "-Tag"},
-		{`project:home`, token.Key, "project"},
-		{`:home`, token.Colon, ":"},
-		{`(`, token.LeftParen, "("},
-		{`)`, token.RightParen, ")"},
-		{`<`, token.LessThan, "<"},
-	}
-
-	for _, c := range tc {
-		t.Run(c.input, func(t *testing.T) {
-			var manager = manager.NewErrorManager()
-			var tokens, errs = NewLexer(manager).SetInput(c.input).Tokenize()
-			assert.Len(t, errs, 0, "Expected no errors")
-			assert.True(t, len(tokens) != 0, "Expected to recive a token")
-			assert.Equal(t, c.tokenType, tokens[0].Type, "Expected token type to be %s, got %s", c.tokenType.String(), tokens[0].Type.String())
-			assert.Equal(t, c.value, tokens[0].Value, "Expected token value to be %s, got %s", c.value, tokens[0].Value)
-		})
-	}
+func TestLexer(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Lexer Suite")
 }
+
+var _ = Describe("Lexer", func() {
+	var manager *man.ErrorManager
+	var lexer *Lexer
+
+	BeforeEach(func() {
+		manager = man.NewErrorManager()
+		lexer = NewLexer(manager)
+	})
+
+	DescribeTable("Tokenize should return tokens for",
+		func(input string, firstTyp token.TokenType, length int) {
+			var tokens, _ = lexer.SetInput(input).Tokenize()
+			Expect(tokens).To(HaveLen(length))
+			Expect(tokens[0].Type).To(Equal(firstTyp))
+
+		},
+		Entry("String", "hello hello", token.String, 2),
+		Entry("double String", "hello hello", token.String, 2),
+		Entry("Command", "add hello", token.Command, 2),
+		Entry("Command", "all", token.Command, 1),
+		Entry("Command", "delete", token.Command, 1),
+		Entry("Command", "done", token.Command, 1),
+		Entry("Command", "list", token.Command, 1),
+		Entry("Command", "modify", token.Command, 1),
+		Entry("Command", "ready", token.Command, 1),
+		Entry("Command", "start", token.Command, 1),
+		Entry("Command", "stop", token.Command, 1),
+		Entry("Command", "tags", token.Command, 1),
+		Entry("Number", "1", token.Number, 1),
+		Entry("Number", "1.1", token.Number, 1),
+		Entry("Number", "-1.1", token.Number, 1),
+		Entry("Plus", "+", token.Plus, 1),
+		Entry("Minus", "-", token.Minus, 1),
+		Entry("Slash", "/", token.Slash, 1),
+		Entry("Slash with numb", "/1", token.Slash, 2),
+		Entry("Star", "*", token.Star, 1),
+		Entry("Double Quoted String", `"string"`, token.String, 1),
+		Entry("Single Quoted String", `'string'`, token.String, 1),
+		Entry("Double Quoted String with escape", `"string\""`, token.String, 1),
+		Entry("Tag", `+Tag`, token.Tag, 1),
+		Entry("Tag", `-Tag`, token.Tag, 1),
+		Entry("Key", `project:home`, token.Key, 3),
+		Entry("Colon", `:home`, token.Colon, 2),
+		Entry("LeftParen", `(`, token.LeftParen, 1),
+		Entry("RightParen", `)`, token.RightParen, 1),
+		Entry("LessThan", `<`, token.LessThan, 1),
+	)
+
+})
