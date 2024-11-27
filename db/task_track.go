@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 )
@@ -25,7 +26,7 @@ type TaskTime struct {
 	TotalTime    sql.NullString `db:"totalTime"`
 }
 
-func (store *Store) StartTrackingTaskTime(taskId int64) error {
+func (store *Store) StartTrackingTaskTime(ctx context.Context, taskId int64) error {
 	// 1. Set the task state to started
 	// 2. If there are no times for the task, insert a new time
 	// 3. If there are times for the task, do not insert a new time
@@ -37,7 +38,7 @@ func (store *Store) StartTrackingTaskTime(taskId int64) error {
 	defer tx.Rollback()
 
 	var sql = `UPDATE tasks SET state = ? WHERE id = ?;`
-	_, err = tx.Exec(sql, TaskStateStarted, taskId)
+	_, err = tx.ExecContext(ctx, sql, TaskStateStarted, taskId)
 	if err != nil {
 		return fmt.Errorf("error updating task state while starting task: %w", err)
 	}
@@ -47,7 +48,7 @@ func (store *Store) StartTrackingTaskTime(taskId int64) error {
 	  SELECT ?
 	  WHERE NOT EXISTS (SELECT 1 FROM taskTime WHERE taskId = ? AND endTimeUtc IS NULL);
 	`
-	_, err = tx.Exec(sql, taskId, taskId)
+	_, err = tx.ExecContext(ctx, sql, taskId, taskId)
 	if err != nil {
 		return fmt.Errorf("error inserting task time while starting task: %w", err)
 	}
@@ -55,7 +56,7 @@ func (store *Store) StartTrackingTaskTime(taskId int64) error {
 	return tx.Commit()
 }
 
-func (store *Store) StopTrackingTaskTime(id int64) error {
+func (store *Store) StopTrackingTaskTime(ctx context.Context, id int64) error {
 	var sql = `UPDATE tasks SET state = 0 WHERE id = ?;`
 	var tx, err = store.Con.Beginx()
 	defer tx.Rollback()
@@ -76,7 +77,7 @@ func (store *Store) StopTrackingTaskTime(id int64) error {
 	WHERE
 		taskId = ? AND endTimeUtc IS NULL;
 	`
-	_, err = tx.Exec(sql, id)
+	_, err = tx.ExecContext(ctx, sql, id)
 	if err != nil {
 		return fmt.Errorf("error updating task time while stopping task: %w", err)
 	}
@@ -84,9 +85,9 @@ func (store *Store) StopTrackingTaskTime(id int64) error {
 	return tx.Commit()
 }
 
-func (store *Store) GetTaskTimes(taskId int64) ([]TaskTime, error) {
+func (store *Store) GetTaskTimes(ctx context.Context, taskId int64) ([]TaskTime, error) {
 	var sql = `SELECT * FROM taskTime WHERE taskId = ?;`
-	var rows, err = store.Con.Queryx(sql, taskId)
+	var rows, err = store.Con.QueryxContext(ctx, sql, taskId)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +103,7 @@ func (store *Store) GetTaskTimes(taskId int64) ([]TaskTime, error) {
 	return taskTimes, nil
 }
 
-func (store *Store) GetCumTime(taskId int64) (int64, error) {
+func (store *Store) GetCumTime(ctx context.Context, taskId int64) (int64, error) {
 	var sql = `
 	SELECT
 	    SUM(
@@ -115,7 +116,7 @@ func (store *Store) GetCumTime(taskId int64) (int64, error) {
 	FROM taskTime
 	WHERE taskId = ?;
 	`
-	var row = store.Con.QueryRowx(sql, taskId)
+	var row = store.Con.QueryRowxContext(ctx, sql, taskId)
 	var totalTime int64
 	var err = row.Scan(&totalTime)
 	if err != nil {

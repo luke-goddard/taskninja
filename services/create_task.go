@@ -1,7 +1,13 @@
 package services
 
-import "github.com/luke-goddard/taskninja/db"
+import (
+	"context"
+
+	"github.com/luke-goddard/taskninja/db"
+)
 
 func (handler *ServiceHandler) CreateTask(task *db.Task) (*db.Task, error){
-	return handler.Store.CreateTask(task)
+	var ctx, cancle = context.WithDeadline(context.Background(), handler.timeout())
+	defer cancle()
+	return handler.Store.CreateTask(ctx, task)
 }

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"strings"
@@ -280,17 +281,17 @@ func (task *TaskDetailed) urgencyDue() float64 {
 	}
 }
 
-func (store *Store) CountTasks() (int64, error) {
+func (store *Store) CountTasks(ctx context.Context) (int64, error) {
 	var sql = `SELECT COUNT(*) FROM tasks`
 	var count int64
-	err := store.Con.Get(&count, sql)
+	err := store.Con.GetContext(ctx, &count, sql)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to count tasks")
 		return -1, err
 	}
 	return count, nil
 }
-func (store *Store) ListTasks() ([]TaskDetailed, error) {
+func (store *Store) ListTasks(ctx context.Context) ([]TaskDetailed, error) {
 	var sql = `
 	SELECT
 		tasks.*,
@@ -323,18 +324,18 @@ func (store *Store) ListTasks() ([]TaskDetailed, error) {
 	GROUP BY tasks.id;
 	`
 	var tasks []TaskDetailed
-	err := store.Con.Select(&tasks, sql, TaskStateCompleted)
+	err := store.Con.SelectContext(ctx, &tasks, sql, TaskStateCompleted)
 	if err != nil {
 		return nil, err
 	}
 	return tasks, nil
 }
 
-func (store *Store) DeleteTaskById(id int64) (bool, error) {
+func (store *Store) DeleteTaskById(ctx context.Context, id int64) (bool, error) {
 	var err error
 	var res sql.Result
 	var rowsAffected int64
-	res, err = store.Con.Exec("DELETE FROM tasks WHERE id = ?", id)
+	res, err = store.Con.ExecContext(ctx, "DELETE FROM tasks WHERE id = ?", id)
 	if err != nil {
 		return false, err
 	}
@@ -345,7 +346,7 @@ func (store *Store) DeleteTaskById(id int64) (bool, error) {
 	return rowsAffected > 0, nil
 }
 
-func (store *Store) CreateTask(task *Task) (*Task, error) {
+func (store *Store) CreateTask(ctx context.Context, task *Task) (*Task, error) {
 	var sql = `
 	INSERT INTO tasks
 		(
@@ -358,7 +359,8 @@ func (store *Store) CreateTask(task *Task) (*Task, error) {
 	RETURNING *
 	`
 	var newTask = &Task{}
-	var row = store.Con.QueryRowx(
+	var row = store.Con.QueryRowxContext(
+		ctx,
 		sql,
 		task.Title, task.Description, task.Due,
 		task.Priority, time.Now().UTC().String(), task.State,
@@ -398,7 +400,7 @@ func (store *Store) CompleteTaskById(taskId int64) (bool, error) {
 	return affected > 0, nil
 }
 
-func (store *Store) IncreasePriority(id int64) (bool, error) {
+func (store *Store) IncreasePriority(ctx context.Context, id int64) (bool, error) {
 	var sql = `
 	UPDATE tasks
 	SET
@@ -411,7 +413,7 @@ func (store *Store) IncreasePriority(id int64) (bool, error) {
 		end
 	WHERE id = ?
 	`
-	var res, err = store.Con.Exec(sql, id)
+	var res, err = store.Con.ExecContext(ctx, sql, id)
 	if err != nil {
 		return false, err
 	}
@@ -422,7 +424,7 @@ func (store *Store) IncreasePriority(id int64) (bool, error) {
 	return affected == 1, err
 }
 
-func (store *Store) DecreasePriority(id int64) (bool, error) {
+func (store *Store) DecreasePriority(ctx context.Context, id int64) (bool, error) {
 	var sql = `
 	UPDATE tasks
 	SET
@@ -435,7 +437,7 @@ func (store *Store) DecreasePriority(id int64) (bool, error) {
 		end
 	WHERE id = ?
 	`
-	var res, err = store.Con.Exec(sql, id)
+	var res, err = store.Con.ExecContext(ctx, sql, id)
 	if err != nil {
 		return false, err
 	}
@@ -470,10 +472,10 @@ func (store *Store) SetTaskState(taskId int64, state TaskState) error {
 	return err
 }
 
-func (store *Store) GetTaskById(taskId int64) (*Task, error) {
+func (store *Store) GetTaskById(ctx context.Context, taskId int64) (*Task, error) {
 	var sql = `SELECT * FROM tasks WHERE id = ?`
 	var task = &Task{}
-	var err = store.Con.Get(task, sql, taskId)
+	var err = store.Con.GetContext(ctx, task, sql, taskId)
 	if err != nil {
 		return nil, err
 	}

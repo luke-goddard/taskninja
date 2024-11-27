@@ -1,9 +1,15 @@
 package services
 
+import "context"
+
 func (handler *ServiceHandler) StartTimeToggleById(id int64) error {
-	return handler.Store.StartTrackingTaskTime(id)
+	var ctx, cancle = context.WithDeadline(context.Background(), handler.timeout())
+	defer cancle()
+	return handler.Store.StartTrackingTaskTime(ctx, id)
 }
 
 func (handler *ServiceHandler) StopTimeToggleById(id int64) error {
-	return handler.Store.StopTrackingTaskTime(id)
+	var ctx, cancle = context.WithDeadline(context.Background(), handler.timeout())
+	defer cancle()
+	return handler.Store.StopTrackingTaskTime(ctx, id)
 }

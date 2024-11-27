@@ -1,6 +1,7 @@
 package components
 
 import (
+	"context"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -146,14 +147,14 @@ var _ = Describe("Task Table", func() {
 
 	Describe("When it has a task that is started", func() {
 		BeforeEach(func() {
-			var t, err = service.Store.CreateTask(&db.Task{
+			var t, err = service.Store.CreateTask(context.TODO(), &db.Task{
 				Title: "T1",
 				State: db.TaskStateStarted,
 			})
 			Expect(err).To(BeNil())
 			var tid = t.ID
 
-			err = service.Store.StartTrackingTaskTime(tid)
+			err = service.Store.StartTrackingTaskTime(context.TODO(), tid)
 			Expect(err).To(BeNil())
 			bus_.Publish(events.NewListTasksEvent())
 		})
@@ -172,10 +173,10 @@ var _ = Describe("Task Table", func() {
 
 	Describe("When a task has a priority", func() {
 		BeforeEach(func() {
-			service.Store.CreateTask(&db.Task{Title: "T4", Priority: db.TaskPriorityHigh})
-			service.Store.CreateTask(&db.Task{Title: "T3", Priority: db.TaskPriorityMedium})
-			service.Store.CreateTask(&db.Task{Title: "T2", Priority: db.TaskPriorityLow})
-			service.Store.CreateTask(&db.Task{Title: "T1", Priority: db.TaskPriorityNone})
+			service.Store.CreateTask(context.TODO(), &db.Task{Title: "T4", Priority: db.TaskPriorityHigh})
+			service.Store.CreateTask(context.TODO(), &db.Task{Title: "T3", Priority: db.TaskPriorityMedium})
+			service.Store.CreateTask(context.TODO(), &db.Task{Title: "T2", Priority: db.TaskPriorityLow})
+			service.Store.CreateTask(context.TODO(), &db.Task{Title: "T1", Priority: db.TaskPriorityNone})
 			bus_.Publish(events.NewListTasksEvent())
 		})
 		It("should show the task as high priority", func() {
