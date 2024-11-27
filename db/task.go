@@ -73,7 +73,7 @@ const (
 	URGENCY_PRIORITY_NONE_COEFFICENT    UrgencyCoefficient = 0.0  // P:None
 	URGENCY_DUE_COEFFICIENT             UrgencyCoefficient = 12.0 // Due:now
 	URGENCY_BLOCKING_COEFFICIENT        UrgencyCoefficient = 8.0  // Task Dependencies
-	URGENCY_ACTIVE_COEFFICIENT          UrgencyCoefficient = 4.0  // Task is started
+	URGENCY_ACTIVE_COEFFICIENT          UrgencyCoefficient = 20.0 // Task is started
 	URGENCY_SCHEDULED_COEFFICIENT       UrgencyCoefficient = 5.0  // Task is scheduled
 	URGENCY_AGE_COEFFICIENT             UrgencyCoefficient = 2.0  // Task age
 	URGENCY_ANNOTATIONS_COEFFICIENT     UrgencyCoefficient = 1.0  // Task has annotations
@@ -187,6 +187,14 @@ func (task *TaskDetailed) Urgency() float64 {
 }
 
 func (task *TaskDetailed) urgency() float64 {
+	log.Info().
+		Float64("project", task.urgencyProject()).
+		Float64("active", task.urgencyActive()).
+		Float64("scheduled", task.urgencyScheduled()).
+		Float64("due", task.urgencyDue()).
+		Float64("age", task.urgencyAge()).
+		Float64("priority", task.urgencyPriority()).
+		Msg("urgency")
 	return task.urgencyProject() +
 		task.urgencyActive() +
 		task.urgencyScheduled() +
@@ -298,7 +306,13 @@ func (store *Store) ListTasks() ([]TaskDetailed, error) {
 		GROUP_CONCAT(projects.title ORDER BY projects.title ASC) AS projectNames,
 		MIN(taskTime.startTimeUtc) AS firstStartedUtc,
 		CASE
-			WHEN SUM(CASE WHEN taskTime.endTimeUtc IS NULL THEN 1 ELSE 0 END) > 0 THEN 1
+			WHEN SUM(
+				CASE
+					WHEN taskTime.endTimeUtc IS NULL
+					AND taskTime.startTimeUtc IS NOT NULL
+					THEN 1
+					ELSE 0
+					END) > 0 THEN 1
 			ELSE 0
 		END AS inprogress,
 		SUM(
@@ -320,6 +334,9 @@ func (store *Store) ListTasks() ([]TaskDetailed, error) {
 	err := store.Con.Select(&tasks, sql, TaskStateCompleted)
 	if err != nil {
 		return nil, err
+	}
+	for i := range tasks {
+		log.Info().Interface("task", tasks[i]).Msg("task")
 	}
 	return tasks, nil
 }
