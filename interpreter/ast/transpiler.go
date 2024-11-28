@@ -31,7 +31,7 @@ type Transpiler struct {
 	ctx       *TranspilerContext
 	tx        *sqlx.Tx
 	store     *db.Store
-	callbacks []TranspileCallback
+	callbacks []TranspileCallback // When multiple transactions are needed
 }
 
 func NewTranspiler(store *db.Store) *Transpiler {

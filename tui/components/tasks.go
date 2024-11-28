@@ -202,13 +202,18 @@ func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
 			Background(lipgloss.Color(task.UrgencyColourAnsiBackground())).
 			Foreground(lipgloss.Color(task.UrgencyColourAnsiForeground()))
 
+		var priority = task.PriorityStr()
+		if task.Priority == db.TaskPriorityNone {
+			priority = "❌"
+		}
+
 		urgency = urgencyStyle.Render(urgency)
 
 		columns = append(columns, id)                       // ID
 		columns = append(columns, started)                  // STARTED
 		columns = append(columns, task.Title)               // NAME
 		columns = append(columns, task.AgeStr())            // AGE
-		columns = append(columns, task.PriorityStr())       // PRIORITY
+		columns = append(columns, priority)                 // PRIORITY
 		columns = append(columns, task.ProjectNames.String) // PROJECT
 		columns = append(columns, "")                       // TAGS
 		columns = append(columns, urgency)                  // URGENCY

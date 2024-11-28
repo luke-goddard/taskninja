@@ -25,7 +25,7 @@ func newTestHandler() *services.ServiceHandler {
 }
 
 // ============================================================================
-// COMPLETE
+// TASK COMPLETE
 // ============================================================================
 var _ = Describe("Completing an incomplete task", func() {
 	var services *services.ServiceHandler
@@ -73,7 +73,7 @@ var _ = Describe("Completing an incomplete task", func() {
 })
 
 // ============================================================================
-// DELETE
+// TASK DELETE
 // ============================================================================
 var _ = Describe("Delete Task", func() {
 	var services *services.ServiceHandler
@@ -140,7 +140,7 @@ var _ = Describe("Delete Task", func() {
 })
 
 // ============================================================================
-// CREATE
+// TASK CREATE
 // ============================================================================
 var _ = Describe("Creating a task", func() {
 	var services *services.ServiceHandler
@@ -164,7 +164,7 @@ var _ = Describe("Creating a task", func() {
 })
 
 // ============================================================================
-// LIST
+// TASK LIST
 // ============================================================================
 var _ = Describe("Listing tasks", func() {
 	var services *services.ServiceHandler
@@ -189,7 +189,7 @@ var _ = Describe("Listing tasks", func() {
 })
 
 // ============================================================================
-// COUNT
+// TASK COUNT
 // ============================================================================
 var _ = Describe("Counting tasks", func() {
 	var services *services.ServiceHandler
@@ -209,7 +209,7 @@ var _ = Describe("Counting tasks", func() {
 })
 
 // ============================================================================
-// GET BY ID
+// TASK GET BY ID
 // ============================================================================
 var _ = Describe("Getting a task by ID", func() {
 	var services *services.ServiceHandler
@@ -232,7 +232,7 @@ var _ = Describe("Getting a task by ID", func() {
 })
 
 // ============================================================================
-// INCREASE PRIORITY
+// TASK INCREASE PRIORITY
 // ============================================================================
 var _ = Describe("Increasing the priority of a task", func() {
 	var services *services.ServiceHandler
@@ -289,7 +289,7 @@ var _ = Describe("Increasing the priority of a task", func() {
 })
 
 // ============================================================================
-// DECREASE PRIORITY
+// TASK DECREASE PRIORITY
 // ============================================================================
 var _ = Describe("Decreasing the priority of a task", func() {
 	var services *services.ServiceHandler
@@ -346,7 +346,7 @@ var _ = Describe("Decreasing the priority of a task", func() {
 })
 
 // ============================================================================
-// SET PRIORITY
+// TASK SET PRIORITY
 // ============================================================================
 var _ = Describe("Setting the priority of a task", func() {
 	var services *services.ServiceHandler
@@ -397,7 +397,7 @@ var _ = Describe("Running a program", func() {
 })
 
 // ============================================================================
-// START TASK
+// TASK START
 // ============================================================================
 var _ = Describe("Starting a task", func() {
 	var services *services.ServiceHandler
@@ -450,7 +450,7 @@ var _ = Describe("Starting a task", func() {
 })
 
 // ============================================================================
-// STOP TASK
+// TASK STOP
 // ============================================================================
 var _ = Describe("Stopping a task", func() {
 	var services *services.ServiceHandler
@@ -499,7 +499,7 @@ var _ = Describe("Stopping a task", func() {
 })
 
 // ============================================================================
-// GET TIMES
+// TASK GET TIMES
 // ============================================================================
 var _ = Describe("Getting task times", func() {
 	var services *services.ServiceHandler
@@ -564,3 +564,6 @@ var _ = Describe("Getting task times", func() {
 		})
 	})
 })
+
+// ============================================================================
+// PROJECT LIST
