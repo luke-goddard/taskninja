@@ -46,7 +46,7 @@ ALTER TABLE tasks DROP COLUMN startedAtUtc;
 PRAGMA user_version = 9;
 `
 
-type TaskPriority int
+type TaskPriority int // Task priority levels
 
 const (
 	TaskPriorityNone TaskPriority = iota // Default priority
@@ -55,7 +55,7 @@ const (
 	TaskPriorityHigh
 )
 
-type TaskState int
+type TaskState int // e.g Incomplete, Started, Completed
 
 const (
 	TaskStateIncomplete TaskState = iota // Default state
@@ -63,7 +63,7 @@ const (
 	TaskStateCompleted
 )
 
-type UrgencyCoefficient float64
+type UrgencyCoefficient float64 // Used to calculate task urgency
 
 const URGENCY_MAX_AGES = time.Duration(365 * 24 * time.Hour)
 const (
@@ -85,31 +85,34 @@ const (
 )
 
 const EPSILION = 0.000001
-const SQLITE_TIME_FORMAT = "2006-01-02 15:04:05"
+const SQLITE_TIME_FORMAT = "2006-01-02 15:04:05" // SQLite's default timestamp format
 
+// Task represents a task in the database
 type Task struct {
-	ID           int64          `json:"id" db:"id"`
-	Title        string         `json:"title" db:"title"`
-	Priority     TaskPriority   `json:"priority" db:"priority"`
-	CreatedUtc   string         `json:"createdUtc" db:"createdAtUtc"`
-	State        TaskState      `json:"state" db:"state"`
-	Description  sql.NullString `json:"description" db:"description"`
-	Due          sql.NullString `json:"due" db:"dueUtc"`
-	UpdatedAtUtc sql.NullString `json:"updatedAtUtc" db:"updatedAtUtc"`
-	CompletedUtc sql.NullString `json:"completedUtc" db:"completedAtUtc"`
+	ID           int64          `json:"id" db:"id"`                       // ID of the task
+	Title        string         `json:"title" db:"title"`                 // Title of the task
+	Priority     TaskPriority   `json:"priority" db:"priority"`           // Priority of the task
+	CreatedUtc   string         `json:"createdUtc" db:"createdAtUtc"`     // Created timestamp
+	State        TaskState      `json:"state" db:"state"`                 // State of the task
+	Description  sql.NullString `json:"description" db:"description"`     // Optional Description of the task (this is not the title)
+	Due          sql.NullString `json:"due" db:"dueUtc"`                  // Optional Due Date
+	UpdatedAtUtc sql.NullString `json:"updatedAtUtc" db:"updatedAtUtc"`   // Optional UpdatedAtUtc
+	CompletedUtc sql.NullString `json:"completedUtc" db:"completedAtUtc"` // Set once the task is marked as complete
 }
 
+// TaskDetailed represents a task with additional information from other tables
 type TaskDetailed struct {
 	Task
 
-	ProjectCount    int            `json:"projectCount" db:"projectCount"`
-	ProjectNames    sql.NullString `json:"projectNames" db:"projectNames"`
-	FirstStartedUtc sql.NullString `json:"firstStartedUtc" db:"firstStartedUtc"`
-	CumulativeTime  sql.NullString `json:"cumulativeTime" db:"cumulativeTime"`
-	Inprogress      bool           `json:"inprogress" db:"inprogress"`
+	ProjectCount    int            `json:"projectCount" db:"projectCount"`       // The number of projects the task is associated with
+	ProjectNames    sql.NullString `json:"projectNames" db:"projectNames"`       // The names of projects the task is associated joined using commas
+	FirstStartedUtc sql.NullString `json:"firstStartedUtc" db:"firstStartedUtc"` // When the task was first started (if it ever was)
+	CumulativeTime  sql.NullString `json:"cumulativeTime" db:"cumulativeTime"`   // Total time spent on task throughout multiple sessions
+	Inprogress      bool           `json:"inprogress" db:"inprogress"`           // If the task is inprogress
 	urgencyComputed float64
 }
 
+// PriorityStr returns the string version of the Priority Int
 func (task *Task) PriorityStr() string {
 	switch task.Priority {
 	case TaskPriorityLow:
@@ -123,6 +126,7 @@ func (task *Task) PriorityStr() string {
 	}
 }
 
+// PrettyAge returns the pretty version of the time.Duration
 func (task *Task) PrettyAge(duration time.Duration) string {
 	if duration.Hours() == 0 {
 		duration = duration.Round(time.Minute)

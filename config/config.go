@@ -14,30 +14,31 @@ import (
 type ConnectionMode string
 
 const (
-	ConnectionModeInMemory ConnectionMode = "in-memory"
-	ConnectionModeFile     ConnectionMode = "file"
-	ConnectionModeHTTP     ConnectionMode = "http"
+	ConnectionModeInMemory ConnectionMode = "in-memory" // SQLITE in-memory database
+	ConnectionModeFile     ConnectionMode = "file"      // SQLITE file database
 )
 
+// Contains the SQL connection configuration
 type SqlConnectionConfig struct {
 	Mode       ConnectionMode `yaml:"mode"`       // in-memory, file, http
 	Path       string         `yaml:"connection"` // connection string
 	BackupPath string         `yaml:"backupPath"` // Location to backup the database (sqlite disk only)
 }
 
+// DSN returns the data source name for the connection e.g "sqlite://:memory:",
+// or "sqlite:///path/to/file.db", Defaults to in-memory if not set
 func (c *SqlConnectionConfig) DSN() string {
 	switch c.Mode {
 	case ConnectionModeInMemory:
 		return ":memory:"
 	case ConnectionModeFile:
 		return c.Path
-	case ConnectionModeHTTP:
-		return c.Path
 	default:
 		return ":memory:"
 	}
 }
 
+// Contains the user configuration
 type Config struct {
 	Connection SqlConnectionConfig `yaml:"connection"` // How to connect to the sqlite database
 	Log        Log                 `yaml:"log"`        // How to log
@@ -46,22 +47,25 @@ type Config struct {
 type ConfigErrorVariant string
 
 const (
-	ConfigErrorNoHomeDir             ConfigErrorVariant = "no-home-dir"
-	ConfigErrorFileNotFound          ConfigErrorVariant = "file-not-found"
-	ConfigErrorConfigDirDoesNotExist ConfigErrorVariant = "config-dir-does-not-exist"
-	ConfigErrorReadFile              ConfigErrorVariant = "read-file"
-	ConfigErrorUnmarshal             ConfigErrorVariant = "unmarshal"
+	ConfigErrorNoHomeDir             ConfigErrorVariant = "no-home-dir"               // User home directory not found
+	ConfigErrorFileNotFound          ConfigErrorVariant = "file-not-found"            // Config file not found
+	ConfigErrorConfigDirDoesNotExist ConfigErrorVariant = "config-dir-does-not-exist" // Config directory does not exist
+	ConfigErrorReadFile              ConfigErrorVariant = "read-file"                 // Failed to read config file
+	ConfigErrorUnmarshal             ConfigErrorVariant = "unmarshal"                 // Failed to unmarshal config
 )
 
+// ConfigError is an error that occurs when loading the configuration
 type ConfigError struct {
-	Variant ConfigErrorVariant
-	Err     error
+	Variant ConfigErrorVariant // The type of error
+	Err     error              // The error that occurred
 }
 
+// CanBootstrap returns true if the error can be resolved by bootstrapping the configuration
 func (e ConfigError) CanBootstrap() bool {
 	return e.Variant == ConfigErrorFileNotFound || e.Variant == ConfigErrorConfigDirDoesNotExist
 }
 
+// Error returns the error message
 func (e ConfigError) Error() string {
 	return fmt.Sprintf("Failed to load config file: %v", e.Err)
 }
@@ -101,14 +105,7 @@ func GetConfig() (*Config, *ConfigError) {
 	return &config, nil
 }
 
-func setDefaults() {
-	viper.SetDefault("connection.mode", ConnectionModeInMemory)
-	viper.SetDefault("connection.path", "")
-	viper.SetDefault("log.level", LogLevelInfo)
-	viper.SetDefault("log.mode", LogModePretty)
-	viper.SetDefault("log.path", DefaultLogPath)
-}
-
+// Bootstrap creates the initial configuration file if it does not exist
 func Bootstrap() *Config {
 	var home, err = os.UserHomeDir()
 	assert.Nil(err, "Failed to get user home directory, cannot load/create config")
@@ -149,3 +146,12 @@ func Bootstrap() *Config {
 	}
 	return conf
 }
+
+func setDefaults() {
+	viper.SetDefault("connection.mode", ConnectionModeInMemory)
+	viper.SetDefault("connection.path", "")
+	viper.SetDefault("log.level", LogLevelInfo)
+	viper.SetDefault("log.mode", LogModePretty)
+	viper.SetDefault("log.path", DefaultLogPath)
+}
+

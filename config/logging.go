@@ -9,7 +9,7 @@ import (
 	"github.com/rs/zerolog/pkgerrors"
 )
 
-type LogLevel string
+type LogLevel string // log level
 
 const (
 	LogLevelTrace LogLevel = "trace"
@@ -21,11 +21,11 @@ const (
 
 const DefaultLogPath = "/tmp/taskninja.log"
 
-type LogMode string
+type LogMode string // e.g JSON
 
 const (
-	LogModePretty LogMode = "pretty"
-	LogModeJson   LogMode = "json"
+	LogModePretty LogMode = "pretty" // pretty print with colours to term
+	LogModeJson   LogMode = "json"  // json output
 )
 
 type Log struct {
@@ -34,6 +34,7 @@ type Log struct {
 	Path  string `yaml:"path"`  // log path
 }
 
+// InitLogger initializes the logger, sets up the handlers, levels, etc.
 func (c *Config) InitLogger() {
 	switch LogMode(c.Log.Mode) {
 	case LogModePretty:

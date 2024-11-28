@@ -28,18 +28,6 @@ type Runner struct {
 	store       *db.Store
 }
 
-func normalizeArgs(args []string) string {
-	var sb = strings.Builder{}
-	for i, arg := range args {
-		if i == 0 {
-			continue
-		}
-		sb.WriteString(" ")
-		sb.WriteString(arg)
-	}
-	return sb.String()
-}
-
 func NewRunner(args []string) *Runner {
 	return &Runner{
 		bus:         bus.NewBus(),
@@ -105,4 +93,16 @@ func (r *Runner) loadConfigOrFail() {
 		conf = config.Bootstrap()
 	}
 	r.config = conf
+}
+
+func normalizeArgs(args []string) string {
+	var sb = strings.Builder{}
+	for i, arg := range args {
+		if i == 0 {
+			continue
+		}
+		sb.WriteString(" ")
+		sb.WriteString(arg)
+	}
+	return sb.String()
 }

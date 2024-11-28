@@ -11,17 +11,20 @@ type Bus struct {
 	subscribers []events.Subscriber
 }
 
+// NewBus creates a new event bus, don't forget to subscribe
 func NewBus() *Bus {
 	return &Bus{
 		subscribers: make([]events.Subscriber, 0),
 	}
 }
 
+// Subscribe to the event bus so that you can handle events
 func (b *Bus) Subscribe(s events.Subscriber) {
 	assert.NotNil(s, "subscriber is nil")
 	b.subscribers = append(b.subscribers, s)
 }
 
+// Publish an event to all subscribers
 func (b *Bus) Publish(e *events.Event) {
 	assert.NotNil(e, "event is nil")
 	assert.True(b.HasSubscribers(), "no subscribers")
@@ -31,6 +34,7 @@ func (b *Bus) Publish(e *events.Event) {
 	}
 }
 
+// HasSubscribers returns true if there are subscribers
 func (b *Bus) HasSubscribers() bool {
 	return len(b.subscribers) > 0
 }

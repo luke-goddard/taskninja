@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"sync"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/luke-goddard/taskninja/assert"
@@ -14,11 +13,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// Store is a wrapper around the database connection
 type Store struct {
-	Con      *sqlx.DB
-	writeMut sync.Mutex
+	Con      *sqlx.DB // The database connection
 }
 
+// NewInMemoryStore creates a new in-memory store, useful for testing
 func NewInMemoryStore() *Store {
 	var con, err = sqlx.Connect("sqlite3", ":memory:")
 	assert.Nil(err, "failed to connect to in-memory database")
@@ -28,6 +28,7 @@ func NewInMemoryStore() *Store {
 	return store
 }
 
+// NewStore creates a new store with the given configuration
 func NewStore(conf *config.SqlConnectionConfig) (*Store, error) {
 	var dsn = conf.DSN()
 	log.Debug().Str("dsn", dsn).Msg("connecting to database")
@@ -44,6 +45,7 @@ func NewStore(conf *config.SqlConnectionConfig) (*Store, error) {
 	return store, nil
 }
 
+// Close the database connection
 func (store *Store) Close() {
 	assert.True(store.IsConnected(), "store is not connected")
 	var err = store.Con.Close()
@@ -52,10 +54,13 @@ func (store *Store) Close() {
 	}
 }
 
+// IsConnected returns true if the store is connected to the database
 func (store *Store) IsConnected() bool {
 	return store.Con != nil
 }
 
+// BackupDatabase copies the SQLite database file from input to output.
+// This will overwrite any previous backups
 func BackupDatabase(input, output string) error {
 
 	if _, err := os.Stat(input); errors.Is(err, os.ErrNotExist) {

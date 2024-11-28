@@ -38,6 +38,8 @@ make install
 | `L` | Set Priority to LOW|
 | `N` | Set Priority to NONE|
 | `Shift+D` | Delete a task |
+| `g` | Go to the top row|
+| `G` | Go to the bottom row|
 
 ## Configuration
 

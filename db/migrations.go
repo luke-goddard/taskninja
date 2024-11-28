@@ -21,6 +21,11 @@ var Migrations = []string{
 	"PRAGMA foreign_keys = ON",
 }
 
+// RunMigrations runs all migrations that have not been run.
+// The PRAGMA user_version is used to determine the current schema version.
+// If the schema version is less than the migration index, the migration is run.
+// If the schema version is greater than the migration index,
+// the migration is skipped.
 func (store *Store) RunMigrations() error {
 	var version = store.SchemaVersion()
 	for i, migration := range Migrations {
@@ -36,6 +41,8 @@ func (store *Store) RunMigrations() error {
 	return nil
 }
 
+// SchemaVersion returns the current schema version.
+// The schema version is stored in the PRAGMA user_version.
 func (store *Store) SchemaVersion() int {
 	var row, err = store.Con.Query("PRAGMA user_version")
 	assert.Nil(err, "failed to get schema version")
