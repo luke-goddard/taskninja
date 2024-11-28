@@ -5,7 +5,6 @@ import (
 	"github.com/luke-goddard/taskninja/bus"
 	"github.com/luke-goddard/taskninja/events"
 	"github.com/luke-goddard/taskninja/services"
-	"github.com/rs/zerolog/log"
 )
 
 type EventHandler struct {
@@ -28,7 +27,6 @@ func (handler *EventHandler) Notify(e *events.Event) {
 }
 
 func (handler *EventHandler) handle(e *events.Event) []*events.Event {
-	log.Debug().Interface("event", e).Msg("handling event")
 	switch e.Type {
 	case events.EventRunProgram:
 		return handler.runProgram(events.DecodeRunProgramEvent(e))

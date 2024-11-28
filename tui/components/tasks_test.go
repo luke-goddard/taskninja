@@ -162,6 +162,13 @@ var _ = Describe("Task Table", func() {
 			Expect(sub.HasEventOfType(events.EventSetPriority)).To(BeTrue())
 			Expect(sub.events[len(sub.events)-1].Data.(*events.SetPriority).Priority).To(Equal(db.TaskPriorityNone))
 		})
+		It("Pressing '/' should start the search", func() {
+			table, _ = table.Update(events.NewTableFuzzySearch("VeryUnique"))
+			bus_.Publish(events.NewListTasksEvent())
+			bus_.Publish(events.NewRunProgramEvent(`add "VeryUnique"`)) // <- this is the first row
+			Expect(table.Table.Rows()).To(HaveLen(1))
+			Expect(table.GetCurrentRow().Title()).To(Equal("VeryUnique"))
+		})
 		It("Should have a zero urgency", func() {
 			var row = table.GetCurrentRow()
 			Expect(row.Urgency()).To(Equal(0.0))

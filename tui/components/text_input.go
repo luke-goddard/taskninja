@@ -14,6 +14,14 @@ import (
 
 const RINGBUFFER_SIZE = 30
 
+type InputMode int
+
+const (
+	InputModeNone InputMode = iota
+	InputModeCmd
+	InputModeSearch
+)
+
 type TextInput struct {
 	dimensions *utils.TerminalDimensions
 	txtInput   textinput.Model
@@ -21,6 +29,7 @@ type TextInput struct {
 	bus        *bus.Bus
 	err        *error
 	history    *InputHistoryRingBuffer
+	inputMode  InputMode
 }
 
 func (t *TextInput) Enable() {
@@ -56,6 +65,7 @@ func NewTextInput(dimensions *utils.TerminalDimensions, bus *bus.Bus) *TextInput
 		enabled:    false,
 		bus:        bus,
 		history:    NewInputHistoryRingBuffer(),
+		inputMode:  InputModeNone,
 	}
 }
 
@@ -69,9 +79,10 @@ func (t *TextInput) Update(msg tea.Msg) (*TextInput, tea.Cmd) {
 		case tea.KeyEnter:
 			t.ClearErr()
 			if t.Enabled() {
+				t.inputMode = InputModeNone
 				t.Disable()
 				t.txtInput.Blur()
-				t.submitProgram()
+				t.handleSubmit()
 			}
 			return t, cmd
 		case tea.KeyEscape:
@@ -94,10 +105,20 @@ func (t *TextInput) Update(msg tea.Msg) (*TextInput, tea.Cmd) {
 		switch msg.String() {
 		case "a":
 			if !enabled {
+				t.inputMode = InputModeCmd
 				t.ClearErr()
 				t.Enable()
 				t.txtInput.Focus()
 				t.txtInput.SetValue("add \"")
+				return t, cmd
+			}
+		case "/":
+			if !enabled {
+				t.inputMode = InputModeSearch
+				t.ClearErr()
+				t.Enable()
+				t.txtInput.Focus()
+				t.txtInput.SetValue("")
 				return t, cmd
 			}
 		}
@@ -113,9 +134,18 @@ func (t *TextInput) Update(msg tea.Msg) (*TextInput, tea.Cmd) {
 		}
 	}
 
-	if enabled {
-		t.txtInput, cmd = t.txtInput.Update(msg)
+	// check if tea.KeyMsg is a valid message
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		if enabled {
+			t.txtInput, cmd = t.txtInput.Update(msg)
+			if t.inputMode == InputModeSearch {
+			log.Info().Interface("msg", msg).Msg("TextInput Update")
+				t.submitSearch()
+			}
+		}
 	}
+
 	return t, cmd
 }
 
@@ -125,6 +155,18 @@ func (t *TextInput) View() string {
 	}
 	if !t.enabled {
 		return ""
+	}
+	if t.inputMode == InputModeCmd {
+		return fmt.Sprintf(
+			"Enter a command:\n\n%s\n",
+			t.txtInput.View(),
+		) + "\n"
+	}
+	if t.inputMode == InputModeSearch {
+		return fmt.Sprintf(
+			"Search:\n\n%s\n",
+			t.txtInput.View(),
+		) + "\n"
 	}
 	return fmt.Sprintf(
 		"Enter a comamand:\n\n%s\n",
@@ -136,6 +178,22 @@ func (t *TextInput) Init() tea.Cmd {
 	return textinput.Blink
 }
 
+func (t *TextInput) handleSubmit() {
+	switch t.inputMode {
+	case InputModeNone:
+		return
+	case InputModeCmd:
+		t.submitProgram()
+		t.txtInput.SetValue("")
+	case InputModeSearch:
+		t.submitSearch()
+		t.txtInput.SetValue("")
+	default:
+		log.Error().Str("inputMode", fmt.Sprintf("%d", t.inputMode)).Msg("Unknown input mode")
+		assert.Fail("Unknown input mode")
+	}
+}
+
 func (t *TextInput) submitProgram() {
 	log.Info().Str("program", t.txtInput.Value()).Msg("Submitting program")
 	t.err = nil
@@ -145,19 +203,27 @@ func (t *TextInput) submitProgram() {
 	t.txtInput.SetValue("")
 }
 
+func (t *TextInput) submitSearch() {
+	log.Info().Str("search", t.txtInput.Value()).Msg("Submitting search")
+	t.err = nil
+	var search = t.txtInput.Value()
+	t.bus.Publish(events.NewTableFuzzySearch(search))
+	t.bus.Publish(events.NewListTasksEvent())
+}
+
 func (t *TextInput) ClearErr() {
 	t.err = nil
 }
 
 type InputHistoryRingBuffer struct {
-	history [RINGBUFFER_SIZE]string
-	lookupIndex   int
+	history     [RINGBUFFER_SIZE]string
+	lookupIndex int
 	insertIndex int
 }
 
 func NewInputHistoryRingBuffer() *InputHistoryRingBuffer {
 	return &InputHistoryRingBuffer{
-		history: [RINGBUFFER_SIZE]string{},
+		history:     [RINGBUFFER_SIZE]string{},
 		lookupIndex: 0,
 		insertIndex: 0,
 	}

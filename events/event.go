@@ -7,6 +7,7 @@ const (
 	EventRunProgram       EventType = "RunProgram"
 	EventListTasks        EventType = "ListTasks"
 	EventCompleteTaskById EventType = "CompleteTaskByID"
+	EventTableFuzzySearch EventType = "TableFuzzySearch"
 	EventDeleteTaskById   EventType = "DeleteTaskByID"
 	EventStartTaskById    EventType = "StartTask"
 	EventStopTaskById    EventType = "StopTask"

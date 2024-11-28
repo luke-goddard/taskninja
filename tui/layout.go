@@ -10,6 +10,7 @@ import (
 	"github.com/luke-goddard/taskninja/events"
 	"github.com/luke-goddard/taskninja/tui/components"
 	"github.com/luke-goddard/taskninja/tui/utils"
+	"github.com/rs/zerolog/log"
 )
 
 var baseStyle = lipgloss.
@@ -37,7 +38,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 		}
+	case *events.Event:
+		log.Info().Interface("event", msg).Msg("Received event")
+		var newTable, _ = m.table.Update(msg)
+		m.table = newTable
+
+		var newTabs, _ = m.tabs.Update(msg)
+		m.tabs = newTabs
 	}
+
 	if m.input.Disabled() {
 		var newTable, _ = m.table.Update(msg)
 		m.table = newTable

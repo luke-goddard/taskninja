@@ -5,6 +5,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/lithammer/fuzzysearch/fuzzy"
+	"github.com/rs/zerolog/log"
+
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -29,11 +32,13 @@ const (
 )
 
 type TaskTable struct {
-	Table      table.Model
-	baseStyle  lipgloss.Style
-	dimensions *utils.TerminalDimensions
-	theme      *utils.Theme
-	bus        *bus.Bus
+	Table                 table.Model
+	baseStyle             lipgloss.Style
+	dimensions            *utils.TerminalDimensions
+	theme                 *utils.Theme
+	bus                   *bus.Bus
+	fuzzyFilter           string
+	TaskIdsMatchingFilter []int64
 }
 
 type TaskRow table.Row
@@ -83,10 +88,12 @@ func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions
 
 	tbl.SetStyles(style)
 	return &TaskTable{
-		Table:     tbl,
-		baseStyle: baseStyle,
-		bus:       bus,
-		theme:     theme,
+		Table:                 tbl,
+		baseStyle:             baseStyle,
+		bus:                   bus,
+		theme:                 theme,
+		fuzzyFilter:           "",
+		TaskIdsMatchingFilter: []int64{},
 	}
 }
 
@@ -137,6 +144,11 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 		case events.EventListTaskResponse:
 			m.handleListTasksResponse(events.DecodeListTasksResponseEvent(msg))
 			return m, cmd
+		case events.EventTableFuzzySearch:
+			m.handleFuzzySearchResponse(events.DecodeTableFuzzySearch(msg))
+			return m, cmd
+		default:
+			log.Info().Interface("msg", msg).Msg("Unhandled event")
 		}
 	}
 	return m, cmd
@@ -164,7 +176,15 @@ func (m *TaskTable) GetRowAtPos(pos int) TaskRow {
 
 func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
 	var rows = []table.Row{}
+	var ids = []int64{}
+
 	for _, task := range e.Tasks {
+		if m.fuzzyFilter != "" {
+			if !fuzzy.MatchFold(m.fuzzyFilter, task.Title) {
+				continue
+			}
+		}
+		ids = append(ids, task.ID)
 		var columns = []string{}
 		var started = ""
 		var id = fmt.Sprintf("%d", task.ID)
@@ -183,7 +203,14 @@ func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
 
 		rows = append(rows, columns)
 	}
+	m.TaskIdsMatchingFilter = ids
 	m.Table.SetRows(rows)
+}
+
+func (m *TaskTable) handleFuzzySearchResponse(e *events.TableFuzzySearch) {
+	m.fuzzyFilter = e.Match
+	m.Table.SetCursor(0)
+	log.Info().Str("filter", m.fuzzyFilter).Msg("Fuzzy filter")
 }
 
 func (m TaskTable) View() string {
