@@ -59,7 +59,7 @@ func parseExpression(parser *Parser, bp BindingPower) ast.Expression {
 		return left
 	}
 
-		log.Info().Msgf("Current: %s", parser.current().String())
+	log.Info().Msgf("Current: %s", parser.current().String())
 	for BindingPowerTable[parser.current().Type] > bp {
 		log.Info().Msgf("Current: %s", parser.current().String())
 		var tokenKind = parser.current().Type

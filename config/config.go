@@ -154,4 +154,3 @@ func setDefaults() {
 	viper.SetDefault("log.mode", LogModePretty)
 	viper.SetDefault("log.path", DefaultLogPath)
 }
-

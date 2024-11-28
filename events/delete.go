@@ -17,6 +17,7 @@ func NewCompleteEvent(id int64) *Event {
 // DELETE BY ID
 // ============================================================================
 type DeleteTaskById struct{ Id int64 }
+
 func DecodeDeleteTaskByIdEvent(e *Event) *DeleteTaskById { return e.Data.(*DeleteTaskById) }
 
 func NewDeleteTaskByIdEvent(id int64) *Event {

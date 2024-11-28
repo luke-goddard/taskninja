@@ -11,7 +11,7 @@ import (
 
 // Used to disable asserts panicing
 var TaskNinjaSkipAssert = "TASK_NINJA_SKIP_ASSERTS" // #nosec G101
-var TotalPanics = 0 // Total number of panics
+var TotalPanics = 0                                 // Total number of panics
 
 // True causes a panic if the truth is false
 func True(truth bool, msg string, data ...any) {

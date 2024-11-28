@@ -6,6 +6,7 @@ import "github.com/luke-goddard/taskninja/db"
 // LIST
 // ============================================================================
 type ListTasks struct{}
+
 func DecodeListTasksEvent(e *Event) *ListTasks { return e.Data.(*ListTasks) }
 func NewListTasksEvent() *Event {
 	return &Event{
@@ -14,11 +15,11 @@ func NewListTasksEvent() *Event {
 	}
 }
 
-
 // ============================================================================
 // LIST RESPONSE
 // ============================================================================
-type ListTasksResponse struct { Tasks []db.TaskDetailed }
+type ListTasksResponse struct{ Tasks []db.TaskDetailed }
+
 func DecodeListTasksResponseEvent(e *Event) *ListTasksResponse { return e.Data.(*ListTasksResponse) }
 func NewListTasksResponse(tasks []db.TaskDetailed) *Event {
 	return &Event{
@@ -26,4 +27,3 @@ func NewListTasksResponse(tasks []db.TaskDetailed) *Event {
 		Data: &ListTasksResponse{Tasks: tasks},
 	}
 }
-

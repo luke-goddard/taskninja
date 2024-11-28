@@ -10,11 +10,11 @@ const (
 	EventTableFuzzySearch EventType = "TableFuzzySearch"
 	EventDeleteTaskById   EventType = "DeleteTaskByID"
 	EventStartTaskById    EventType = "StartTask"
-	EventStopTaskById    EventType = "StopTask"
+	EventStopTaskById     EventType = "StopTask"
 	EventListTaskResponse EventType = "ListTaskResponse"
 	EventIncreasePriority EventType = "IncreaseTaskPriority"
 	EventDecreasePriority EventType = "DecreaseTaskPriority"
-	EventSetPriority EventType = "SetTaskPriority"
+	EventSetPriority      EventType = "SetTaskPriority"
 )
 
 type Event struct {

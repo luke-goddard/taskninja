@@ -140,7 +140,7 @@ func (t *TextInput) Update(msg tea.Msg) (*TextInput, tea.Cmd) {
 		if enabled {
 			t.txtInput, cmd = t.txtInput.Update(msg)
 			if t.inputMode == InputModeSearch {
-			log.Info().Interface("msg", msg).Msg("TextInput Update")
+				log.Info().Interface("msg", msg).Msg("TextInput Update")
 				t.submitSearch()
 			}
 		}

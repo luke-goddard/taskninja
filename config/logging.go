@@ -25,7 +25,7 @@ type LogMode string // e.g JSON
 
 const (
 	LogModePretty LogMode = "pretty" // pretty print with colours to term
-	LogModeJson   LogMode = "json"  // json output
+	LogModeJson   LogMode = "json"   // json output
 )
 
 type Log struct {

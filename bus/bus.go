@@ -3,7 +3,6 @@ package bus
 import (
 	"github.com/luke-goddard/taskninja/assert"
 	"github.com/luke-goddard/taskninja/events"
-
 )
 
 // FANOUT pubsub event bus

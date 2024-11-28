@@ -15,7 +15,7 @@ import (
 
 // Store is a wrapper around the database connection
 type Store struct {
-	Con      *sqlx.DB // The database connection
+	Con *sqlx.DB // The database connection
 }
 
 // NewInMemoryStore creates a new in-memory store, useful for testing
