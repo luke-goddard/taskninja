@@ -54,7 +54,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	var newInput *components.TextInput
-	newInput, cmd = m.input.Update(msg)
+	newInput, _ = m.input.Update(msg)
 	m.input = newInput
 
 	var newDoughnut *components.Doughnut

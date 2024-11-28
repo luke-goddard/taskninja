@@ -50,7 +50,7 @@ func (r *Runner) Run() {
 	err = db.BackupDatabase(r.config.Connection.Path, r.config.Connection.BackupPath)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to backup database")
-		log.Error().Msg("Halting program to prevent accidential data loss")
+		log.Error().Msg("Halting program to prevent accidental data loss")
 		return
 	}
 

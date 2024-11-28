@@ -71,7 +71,7 @@ const (
 	URGENCY_PRIORITY_HIGH_COEFFICIENT   UrgencyCoefficient = 4.0  // P:High
 	URGENCY_PRIORITY_MEDIUM_COEFFICIENT UrgencyCoefficient = 2.0  // P:Med
 	URGENCY_PRIORITY_LOW_COEFFICIENT    UrgencyCoefficient = 1.0  // P:Low
-	URGENCY_PRIORITY_NONE_COEFFICENT    UrgencyCoefficient = 0.0  // P:None
+	URGENCY_PRIORITY_NONE_COEFFICIENT    UrgencyCoefficient = 0.0  // P:None
 	URGENCY_DUE_COEFFICIENT             UrgencyCoefficient = 12.0 // Due:now
 	URGENCY_BLOCKING_COEFFICIENT        UrgencyCoefficient = 8.0  // Task Dependencies
 	URGENCY_ACTIVE_COEFFICIENT          UrgencyCoefficient = 20.0 // Task is started
@@ -269,7 +269,7 @@ func (task *TaskDetailed) urgencyPriority() float64 {
 	case TaskPriorityLow:
 		return float64(URGENCY_PRIORITY_LOW_COEFFICIENT)
 	default:
-		return float64(URGENCY_PRIORITY_NONE_COEFFICENT)
+		return float64(URGENCY_PRIORITY_NONE_COEFFICIENT)
 	}
 }
 
