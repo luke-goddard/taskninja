@@ -169,6 +169,10 @@ func (task *TaskDetailed) IsStarted() bool {
 }
 
 func (task *TaskDetailed) UrgencyStr() string {
+	var urgency = task.Urgency()
+	if urgency > 10.0 {
+		return fmt.Sprintf("%.1f", task.Urgency())
+	}
 	return fmt.Sprintf("%.2f", task.Urgency())
 }
 
@@ -189,6 +193,21 @@ func (task *TaskDetailed) Urgency() float64 {
 		task.urgencyComputed = task.urgency()
 	}
 	return task.urgencyComputed
+}
+
+func (task *TaskDetailed) UrgencyColourAnsiBackground() string {
+	var urgency = task.Urgency()
+	if urgency > 10.0 {
+		return "1" // RED
+	}
+	if urgency > 1.0 {
+		return "4" // ORANGE
+	}
+	return "232" // BLACK
+}
+
+func (task *TaskDetailed) UrgencyColourAnsiForeground() string {
+	return "255" // WHITE
 }
 
 func (task *TaskDetailed) urgency() float64 {

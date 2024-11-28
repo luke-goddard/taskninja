@@ -22,13 +22,13 @@ type TableRowIndex int
 
 const (
 	TableColumnID int = iota
-	TableColumnUrgency
 	TableColumnStarted
 	TableColumnName
 	TableColumnAge
 	TableColumnPriority
 	TableColumnProject
 	TableColumnTags
+	TableColumnUrgency
 )
 
 type TaskTable struct {
@@ -39,6 +39,7 @@ type TaskTable struct {
 	bus                   *bus.Bus
 	fuzzyFilter           string
 	TaskIdsMatchingFilter []int64
+	tableStyle            table.Styles
 }
 
 type TaskRow table.Row
@@ -56,13 +57,13 @@ func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions
 	assert.NotNil(theme, "theme is nil")
 	var columns = []table.Column{
 		{Title: "ID", Width: dimensions.Width.PercentOrMin(0.05, 4)},
-		{Title: "Urgency", Width: dimensions.Width.PercentOrMin(0.08, 4)},
-		{Title: "Started", Width: dimensions.Width.PercentOrMin(0.08, 4)},
+		{Title: "Started", Width: dimensions.Width.PercentOrMin(0.1, 4)},
 		{Title: "Name", Width: dimensions.Width.PercentOrMin(0.43, 10)},
 		{Title: "Age", Width: dimensions.Width.PercentOrMin(0.05, 4)},
 		{Title: "Priority", Width: dimensions.Width.PercentOrMin(0.06, 10)},
-		{Title: "Project", Width: dimensions.Width.PercentOrMin(0.134, 10)},
+		{Title: "Project", Width: dimensions.Width.PercentOrMin(0.124, 10)},
 		{Title: "Tags", Width: dimensions.Width.PercentOrMin(0.08, 5)},
+		{Title: "Urgency", Width: dimensions.Width.PercentOrMin(0.09, 5)},
 	}
 
 	var rows = []table.Row{}
@@ -94,6 +95,7 @@ func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions
 		theme:                 theme,
 		fuzzyFilter:           "",
 		TaskIdsMatchingFilter: []int64{},
+		tableStyle:            style,
 	}
 }
 
@@ -177,6 +179,7 @@ func (m *TaskTable) GetRowAtPos(pos int) TaskRow {
 func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
 	var rows = []table.Row{}
 	var ids = []int64{}
+	var index = 0
 
 	for _, task := range e.Tasks {
 		if m.fuzzyFilter != "" {
@@ -192,15 +195,25 @@ func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
 			started = task.PrettyCumTime()
 			id = fmt.Sprintf("%s-⏰", id)
 		}
+
+		var urgency = task.UrgencyStr()
+		var urgencyStyle = lipgloss.
+			NewStyle().
+			Background(lipgloss.Color(task.UrgencyColourAnsiBackground())).
+			Foreground(lipgloss.Color(task.UrgencyColourAnsiForeground()))
+
+		urgency = urgencyStyle.Render(urgency)
+
 		columns = append(columns, id)                       // ID
-		columns = append(columns, task.UrgencyStr())        // URGENCY
 		columns = append(columns, started)                  // STARTED
 		columns = append(columns, task.Title)               // NAME
 		columns = append(columns, task.AgeStr())            // AGE
 		columns = append(columns, task.PriorityStr())       // PRIORITY
 		columns = append(columns, task.ProjectNames.String) // PROJECT
 		columns = append(columns, "")                       // TAGS
+		columns = append(columns, urgency)                  // URGENCY
 
+		index++
 		rows = append(rows, columns)
 	}
 	m.TaskIdsMatchingFilter = ids
