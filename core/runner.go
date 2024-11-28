@@ -30,8 +30,8 @@ type Runner struct {
 
 func NewRunner(args []string) *Runner {
 	return &Runner{
-		bus:         bus.NewBus(),
-		args:        normalizeArgs(args),
+		bus:  bus.NewBus(),
+		args: normalizeArgs(args),
 	}
 }
 

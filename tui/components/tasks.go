@@ -150,7 +150,6 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 			m.handleFuzzySearchResponse(events.DecodeTableFuzzySearch(msg))
 			return m, cmd
 		default:
-			log.Info().Interface("msg", msg).Msg("Unhandled event")
 		}
 	}
 	return m, cmd

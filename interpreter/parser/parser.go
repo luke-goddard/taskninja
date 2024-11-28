@@ -50,7 +50,7 @@ func NewParser(manager *manager.ErrorManager) *Parser {
 		position:         0,
 		hasCheckedExists: false,
 		errors:           manager,
-		endStatement: false,
+		endStatement:     false,
 	}
 }
 

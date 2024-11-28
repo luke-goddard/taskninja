@@ -69,7 +69,7 @@ func parseExpression(parser *Parser, bp BindingPower) ast.Expression {
 	if left == nil || parser.hasNoTokens() {
 		return left
 	}
-	for BindingPowerTable[parser.current().Type] > bp && parser.endStatement == false{
+	for BindingPowerTable[parser.current().Type] > bp && parser.endStatement == false {
 		var tokenKind = parser.current().Type
 		var ledHandler, exists = LedTable[tokenKind]
 		if !exists {
