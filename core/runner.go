@@ -32,13 +32,11 @@ func NewRunner(args []string) *Runner {
 	return &Runner{
 		bus:         bus.NewBus(),
 		args:        normalizeArgs(args),
-		interpreter: interpreter.NewInterpreter(),
 	}
 }
 
 func (r *Runner) Run() {
 	assert.NotNil(r.bus, "Bus is nil")
-	assert.NotNil(r.interpreter, "Interpreter is nil")
 	assert.NotNil(r.args, "Args is nil")
 
 	var err error
@@ -63,6 +61,7 @@ func (r *Runner) Run() {
 	assert.True(store.IsConnected(), "Store is not connected")
 
 	r.store = store
+	r.interpreter = interpreter.NewInterpreter(r.store)
 	r.service = services.NewServiceHandler(r.interpreter, r.store)
 	r.handler = handler.NewEventHandler(r.service, r.bus)
 	r.bus.Subscribe(r.handler)

@@ -4,13 +4,14 @@ package interpreter
 import (
 	"fmt"
 
+	"github.com/jmoiron/sqlx"
+	"github.com/luke-goddard/taskninja/db"
 	"github.com/luke-goddard/taskninja/interpreter/ast"
 	"github.com/luke-goddard/taskninja/interpreter/lex"
 	"github.com/luke-goddard/taskninja/interpreter/manager"
 	"github.com/luke-goddard/taskninja/interpreter/parser"
 	"github.com/luke-goddard/taskninja/interpreter/semantic"
 	"github.com/luke-goddard/taskninja/interpreter/token"
-	"github.com/rs/zerolog/log"
 )
 
 type Interpreter struct {
@@ -23,13 +24,13 @@ type Interpreter struct {
 	lastCmd    *ast.Command
 }
 
-func NewInterpreter() *Interpreter {
+func NewInterpreter(store *db.Store) *Interpreter {
 	var manager = manager.NewErrorManager()
 	return &Interpreter{
 		lexer:      lex.NewLexer(manager),
 		parser:     parser.NewParser(manager),
 		semantic:   semantic.NewAnalyzer(manager),
-		transpiler: ast.NewTranspiler(),
+		transpiler: ast.NewTranspiler(store),
 		errs:       manager,
 	}
 }
@@ -73,7 +74,7 @@ func (interpreter *Interpreter) GetLastCmd() *ast.Command {
 	return interpreter.lastCmd
 }
 
-func (interpreter *Interpreter) Execute(input string) (ast.SqlStatement, ast.SqlArgs, error) {
+func (interpreter *Interpreter) Execute(input string, tx *sqlx.Tx) (ast.SqlStatement, ast.SqlArgs, error) {
 	interpreter.input = input
 	interpreter.lastCmd = nil
 
@@ -107,16 +108,14 @@ func (interpreter *Interpreter) Execute(input string) (ast.SqlStatement, ast.Sql
 	}
 
 	var tranErrors []ast.TranspileError
-	sql, args, tranErrors = interpreter.transpiler.Reset().Transpile(cmd)
+	sql, args, tranErrors = interpreter.transpiler.Reset().Transpile(cmd, tx)
 	if len(tranErrors) > 0 {
+		tx.Rollback()
 		var err = fmt.Errorf("failed to transpile input: %v", tranErrors)
 		return "", nil, err
 	}
 
-	log.Info().
-		Str("sql", string(sql)).
-		Interface("args", args).
-		Msg("transpiled sql statement")
+	tx.Commit()
 
 	interpreter.lastCmd = cmd
 	return sql, args, nil

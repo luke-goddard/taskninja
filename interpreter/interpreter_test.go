@@ -1,8 +1,11 @@
 package interpreter
 
 import (
+	"context"
+	"database/sql"
 	"testing"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/luke-goddard/taskninja/db"
 	"github.com/luke-goddard/taskninja/interpreter/ast"
 	. "github.com/onsi/ginkgo/v2"
@@ -17,12 +20,22 @@ func TestServices(t *testing.T) {
 	RunSpecs(t, "Interpreter Suite")
 }
 
-var _ = Describe("Transpiler should transpile", func() {
-	var interpreter = NewInterpreter()
+var _ = Describe("Transpiler should transpile add commands", func() {
+	var interpreter *Interpreter
+	var store *db.Store
+	var tx *sqlx.Tx
+	var err error
+
+	BeforeEach(func() {
+		store = db.NewInMemoryStore()
+		interpreter = NewInterpreter(store)
+		tx, err = store.Con.BeginTxx(context.TODO(), &sql.TxOptions{ReadOnly: false})
+		Expect(err).To(BeNil())
+	})
 
 	DescribeTable("good",
 		func(input string, expectedSql string, expectedArgs interface{}) {
-			sql, args, err := interpreter.Execute(input)
+			sql, args, err := interpreter.Execute(input, tx)
 			Expect(err).To(BeNil())
 			Expect(string(sql)).To(Equal(expectedSql))
 			Expect(args).To(Equal(expectedArgs))
@@ -105,15 +118,17 @@ var _ = Describe("Transpiler should transpile", func() {
 			`INSERT INTO tasks (title, priority) VALUES (?, ?)`,
 			ast.SqlArgs{"cook", db.TaskPriorityNone},
 		),
+		Entry(
+			`add "cook" project:Home priority:L`,
+			`add "cook" project:Home priority:L`,
+			`INSERT INTO tasks (title, priority) VALUES (?, ?)`,
+			ast.SqlArgs{"cook", db.TaskPriorityLow},
+		),
 	)
-})
-
-var _ = Describe("Transpiler should fail", func() {
-	var interpreter = NewInterpreter()
 
 	DescribeTable("bad",
 		func(input string, expectedErr string) {
-			_, _, err := interpreter.Execute(input)
+			_, _, err := interpreter.Execute(input, tx)
 			Expect(err).NotTo(BeNil())
 			Expect(err.Error()).To(Equal(expectedErr))
 		},
@@ -128,4 +143,75 @@ var _ = Describe("Transpiler should fail", func() {
 			`(Fatal) Syntax: Expected token type String, got Number: Number(1)`,
 		),
 	)
+
+	Describe("When adding a task with a project", func() {
+		BeforeEach(func() {
+			_, _, err := interpreter.Execute(`add "cook" project:Home`, tx)
+			Expect(err).To(BeNil())
+		})
+		It("should should add a new task", func() {
+			var tasks, err = store.ListTasks(context.Background())
+			Expect(err).To(BeNil())
+			Expect(tasks).To(HaveLen(1))
+			Expect(tasks[0].Title).To(Equal("cook"))
+			Expect(tasks[0].ProjectNames.Value()).To(Equal("home"))
+		})
+	})
+
+	Describe("When adding a task with a project and priority", func() {
+		BeforeEach(func() {
+			_, _, err := interpreter.Execute(`add "cook" project:Home priority:High`, tx)
+			Expect(err).To(BeNil())
+		})
+		It("should should add a new task", func() {
+			var tasks, err = store.ListTasks(context.Background())
+			Expect(err).To(BeNil())
+			Expect(tasks).To(HaveLen(1))
+			Expect(tasks[0].Title).To(Equal("cook"))
+			Expect(tasks[0].ProjectNames.Value()).To(Equal("home"))
+			Expect(tasks[0].Priority).To(Equal(db.TaskPriorityHigh))
+		})
+	})
+
+	Describe("When adding a task with multiple projects", func() {
+		BeforeEach(func() {
+			_, _, err := interpreter.Execute(`add "cook" project:Home project:Work`, tx)
+			Expect(err).To(BeNil())
+		})
+		It("should should add a new task", func() {
+			var tasks, err = store.ListTasks(context.Background())
+			Expect(err).To(BeNil())
+			Expect(tasks).To(HaveLen(1))
+			Expect(tasks[0].Title).To(Equal("cook"))
+			Expect(tasks[0].ProjectNames.Value()).To(Equal("home,work"))
+		})
+	})
+
+	Describe("When adding a task with multiple projects of the same project", func() {
+		BeforeEach(func() {
+			_, _, err := interpreter.Execute(`add "cook" project:Home project:home`, tx)
+			Expect(err).To(BeNil())
+		})
+		It("should should add a new task", func() {
+			var tasks, err = store.ListTasks(context.Background())
+			Expect(err).To(BeNil())
+			Expect(tasks).To(HaveLen(1))
+			Expect(tasks[0].Title).To(Equal("cook"))
+			Expect(tasks[0].ProjectNames.Value()).To(Equal("home"))
+		})
+	})
+
+	Describe("When adding a task with a project in uppercase", func() {
+		BeforeEach(func() {
+			_, _, err := interpreter.Execute(`add "cook" project:HOME`, tx)
+			Expect(err).To(BeNil())
+		})
+		It("should should add a new task but with a lowercase project", func() {
+			var tasks, err = store.ListTasks(context.Background())
+			Expect(err).To(BeNil())
+			Expect(tasks).To(HaveLen(1))
+			Expect(tasks[0].Title).To(Equal("cook"))
+			Expect(tasks[0].ProjectNames.Value()).To(Equal("home"))
+		})
+	})
 })

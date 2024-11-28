@@ -31,9 +31,19 @@ func parsePrimaryExpression(parser *Parser) ast.Expression {
 			return nil
 		}
 		parser.consume()
+		if parser.hasNoTokens() {
+			parser.errors.EmitParse("Expected more tokens", parser.current())
+		}
+		if !parser.expectCurrent(token.String) && !parser.expectCurrent(token.Number) {
+			parser.errors.EmitParse("Expected string/number value", parser.current())
+		}
+		parser.endStatement = true
 		return &ast.Key{
-			Key:  key,
-			Expr: parseExpression(parser, BP_PRIMARY),
+			Key: key,
+			Expr: &ast.Literal{
+				Kind:  ast.LiteralKindString,
+				Value: parser.consume().Value,
+			},
 		}
 	}
 	var current = parser.current()
@@ -45,6 +55,7 @@ func parseExpression(parser *Parser, bp BindingPower) ast.Expression {
 	if parser.hasNoTokens() {
 		return nil
 	}
+	log.Info().Interface("current", parser.current()).Int("bp", int(bp)).Msg("parseExpression")
 	var tokenKind = parser.current().Type
 	var nudHandler, exists = NudTable[tokenKind]
 	if !exists {
@@ -58,10 +69,7 @@ func parseExpression(parser *Parser, bp BindingPower) ast.Expression {
 	if left == nil || parser.hasNoTokens() {
 		return left
 	}
-
-	log.Info().Msgf("Current: %s", parser.current().String())
-	for BindingPowerTable[parser.current().Type] > bp {
-		log.Info().Msgf("Current: %s", parser.current().String())
+	for BindingPowerTable[parser.current().Type] > bp && parser.endStatement == false{
 		var tokenKind = parser.current().Type
 		var ledHandler, exists = LedTable[tokenKind]
 		if !exists {
@@ -78,6 +86,7 @@ func parseExpression(parser *Parser, bp BindingPower) ast.Expression {
 			return left
 		}
 	}
+	parser.endStatement = false
 	return left
 }
 

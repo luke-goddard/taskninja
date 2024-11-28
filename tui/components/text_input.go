@@ -79,10 +79,10 @@ func (t *TextInput) Update(msg tea.Msg) (*TextInput, tea.Cmd) {
 		case tea.KeyEnter:
 			t.ClearErr()
 			if t.Enabled() {
-				t.inputMode = InputModeNone
 				t.Disable()
 				t.txtInput.Blur()
 				t.handleSubmit()
+				t.inputMode = InputModeNone
 			}
 			return t, cmd
 		case tea.KeyEscape:
@@ -179,6 +179,7 @@ func (t *TextInput) Init() tea.Cmd {
 }
 
 func (t *TextInput) handleSubmit() {
+	log.Info().Str("inputMode", fmt.Sprintf("%d", t.inputMode)).Msg("Submitting input")
 	switch t.inputMode {
 	case InputModeNone:
 		return

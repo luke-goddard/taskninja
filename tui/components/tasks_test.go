@@ -53,7 +53,7 @@ func TestTasksTable(t *testing.T) {
 
 func newTestHandler() *services.ServiceHandler {
 	var store = db.NewInMemoryStore()
-	var interpreter = interpreter.NewInterpreter()
+	var interpreter = interpreter.NewInterpreter(store)
 	return services.NewServiceHandler(interpreter, store)
 }
 

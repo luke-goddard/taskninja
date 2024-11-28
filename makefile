@@ -3,6 +3,10 @@
 test:
 	ginkgo watch --fail-fast ./...
 
+# Test once
+test-once:
+	ginkgo --fail-fast ./...
+
 # Build and run the development build
 run:
 	go run cmd/taskninja.go

@@ -20,7 +20,7 @@ func TestServices(t *testing.T) {
 
 func newTestHandler() *services.ServiceHandler {
 	var store = db.NewInMemoryStore()
-	var interpreter = interpreter.NewInterpreter()
+	var interpreter = interpreter.NewInterpreter(store)
 	return services.NewServiceHandler(interpreter, store)
 }
 
@@ -116,6 +116,25 @@ var _ = Describe("Delete Task", func() {
 			Expect(err).To(BeNil())
 			Expect(times).To(BeEmpty())
 			Expect(len(times)).To(Equal(0))
+		})
+	})
+	Context("When the task has a project", func() {
+		BeforeEach(func() {
+			services = newTestHandler()
+			services.RunProgram("add test project:home")
+		})
+		It("should delete a task project link", func() {
+			var tasks, err = services.ListTasks()
+			Expect(err).To(BeNil())
+			Expect(tasks).To(HaveLen(1))
+			Expect(tasks[0].ProjectNames.Value()).To(Equal("home"))
+			Expect(services.Store.ListProjects()).To(HaveLen(1))
+			Expect(services.Store.ProjectTasksList()).To(HaveLen(1))
+
+			services.DeleteTaskById(tasks[0].ID)
+			tasks, err = services.ListTasks()
+			Expect(err).To(BeNil())
+			Expect(services.Store.ProjectTasksList()).To(HaveLen(0))
 		})
 	})
 })

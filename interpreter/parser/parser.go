@@ -41,6 +41,7 @@ type Parser struct {
 	position         int
 	hasCheckedExists bool // Token, not column/table
 	errors           *manager.ErrorManager
+	endStatement     bool
 }
 
 func NewParser(manager *manager.ErrorManager) *Parser {
@@ -49,6 +50,7 @@ func NewParser(manager *manager.ErrorManager) *Parser {
 		position:         0,
 		hasCheckedExists: false,
 		errors:           manager,
+		endStatement: false,
 	}
 }
 

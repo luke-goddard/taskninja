@@ -5,6 +5,7 @@ import (
 
 	"github.com/luke-goddard/taskninja/interpreter/ast"
 	"github.com/luke-goddard/taskninja/interpreter/token"
+	"github.com/rs/zerolog/log"
 )
 
 func parseCommand(parser *Parser) *ast.Command {
@@ -135,5 +136,6 @@ func parseStatment(parser *Parser) ast.Statement {
 		parser.errors.EmitParse("Expected a statement", parser.current())
 		return nil
 	}
+	log.Info().Interface("statement", statement).Msg("parseStatment")
 	return statement
 }
