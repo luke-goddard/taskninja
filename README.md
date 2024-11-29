@@ -40,6 +40,7 @@ make install
 | `Shift+D` | Delete a task |
 | `g` | Go to the top row|
 | `G` | Go to the bottom row|
+| `/` | Fuzzy search |
 
 ## Configuration
 
