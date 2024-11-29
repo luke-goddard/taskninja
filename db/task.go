@@ -110,6 +110,7 @@ type TaskDetailed struct {
 	CumulativeTime  sql.NullString `json:"cumulativeTime" db:"cumulativeTime"`   // Total time spent on task throughout multiple sessions
 	Inprogress      bool           `json:"inprogress" db:"inprogress"`           // If the task is inprogress
 	Dependencies    sql.NullString `json:"dependencies" db:"dependencies"`       // Comma serperated list of Dependencies
+	Blocked         bool           `json:"blocked" db:"blocked"`                 // If the current task has unmet Dependencies
 	urgencyComputed float64
 }
 
@@ -217,11 +218,11 @@ func (task *TaskDetailed) urgency() float64 {
 		task.urgencyScheduled() +
 		task.urgencyDue() +
 		task.urgencyAge() +
+		task.urgencyBlocked() +
 		task.urgencyPriority()
 
 	// TODO add these when we have them
 	// task.urgencyWaiting() +
-	// task.urgencyBlocked() +
 	// task.urgencyBlocking() +
 	// task.urgencyTags() +
 	// task.urgencyAnnotations()
@@ -272,6 +273,13 @@ func (task *TaskDetailed) urgencyPriority() float64 {
 	default:
 		return float64(URGENCY_PRIORITY_NONE_COEFFICIENT)
 	}
+}
+
+func (task *TaskDetailed) urgencyBlocked() float64 {
+	if URGENCY_BLOCKING_COEFFICIENT < EPSILION || !task.Blocked {
+		return 0
+	}
+	return float64(URGENCY_BLOCKED_COEFFICIENT)
 }
 
 //	Past                  Present                              Future
@@ -339,7 +347,11 @@ func (store *Store) ListTasks(ctx context.Context) ([]TaskDetailed, error) {
 				(julianday(current_timestamp) - julianday(taskTime.startTimeUtc)) * 24 * 60 * 60
 			    ELSE taskTime.totalTime
 			END
-		) AS cumulativeTime
+		) AS cumulativeTime,
+	    	CASE
+			WHEN COUNT(taskDependencies.dependsOnId) > 0 THEN 1
+			ELSE 0
+	    	END AS blocked
 	FROM tasks
 	LEFT JOIN taskProjects ON taskProjects.taskId = tasks.id
 	LEFT JOIN projects ON projects.id = taskProjects.projectId

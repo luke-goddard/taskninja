@@ -186,6 +186,19 @@ var _ = Describe("Listing tasks", func() {
 		Expect(tasks[1].Priority).To(Equal(db.TaskPriorityMedium))
 		Expect(tasks[2].Priority).To(Equal(db.TaskPriorityLow))
 	})
+	It("shoudld show dependencies", func() {
+		services.RunProgram("depends 1 on 2")
+		tasks, err = services.ListTasks()
+		Expect(err).To(BeNil())
+		Expect(tasks[2].Dependencies.String).To(HaveLen(1))
+	})
+	It("should show if the task is blocked", func() {
+		services.RunProgram("depends 1 on 2")
+		tasks, err = services.ListTasks()
+		Expect(err).To(BeNil())
+		Expect(tasks[2].Blocked).To(BeTrue())
+		Expect(tasks[1].Blocked).To(BeFalse())
+	})
 })
 
 // ============================================================================
