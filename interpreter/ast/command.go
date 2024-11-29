@@ -12,6 +12,7 @@ const (
 	CommandKindAdd     CommandKind = iota // e.g add "buy dog"
 	CommandKindDepends                    // e.g depends 1 on 2
 	CommandKindList                       // e.g list +HOME
+	CommandKindNext                       // e.g list +HOME
 )
 
 // Command represents a command in the AST.
@@ -39,6 +40,8 @@ func (c *CommandKind) String() string {
 		return "list"
 	case CommandKindDepends:
 		return "depends"
+	case CommandKindNext:
+		return "next"
 	default:
 		return "unknown"
 	}

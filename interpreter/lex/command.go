@@ -12,6 +12,7 @@ type Command string
 const (
 	CommandAdd     Command = "add"     // Add a new task
 	CommandDepends Command = "depends" // Add a dependency
+	CommandNext    Command = "next"    // Mark this task as the next task to be executed
 	// CommandAll    Command = "all"    // List all tasks
 	// CommandDelete Command = "delete" // Delete a task
 	// CommandDone   Command = "done"   // Mark a task as done
@@ -34,7 +35,8 @@ func lexCommand(l *Lexer) StateFn {
 	var lexeme = l.current()
 
 	if lexeme == string(CommandAdd) ||
-		lexeme == string(CommandDepends) {
+		lexeme == string(CommandDepends) ||
+		lexeme == string(CommandNext) {
 		if !l.seenCommand {
 			l.seenCommand = true
 			l.emit(token.Command)

@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -24,6 +25,11 @@ func parseCommand(parser *Parser) *ast.Command {
 		return parseDependsCommand(parser)
 	}
 
+	if parser.current().Type == token.Command &&
+		strings.ToLower(parser.current().Value) == "next" {
+		return parseNextCommand(parser)
+	}
+
 	// if parser.current().Type == token.Command &&
 	// 	strings.ToLower(parser.current().Value) == "list" {
 	// 	return parseListCommand(parser)
@@ -31,6 +37,36 @@ func parseCommand(parser *Parser) *ast.Command {
 
 	parser.errors.EmitParse("Unknown command", parser.current())
 	return nil
+}
+
+func parseNextCommand(parser *Parser) *ast.Command {
+	var taskIdInt64 int64
+	var err error
+	parser.consume()
+
+	if parser.hasNoTokens() {
+		parser.errors.EmitParse("Expected a taskId to the next command", &token.Token{})
+		return nil
+	}
+	if !parser.expectCurrent(token.Number) {
+		return nil
+	}
+	var taskId = parser.consume().Value
+	taskIdInt64, err = strconv.ParseInt(taskId, 10, 64)
+	if err != nil {
+		parser.errors.EmitParse(
+			fmt.Sprintf("Failed to parse task id: %s", err),
+			parser.current(),
+		)
+		return nil
+	}
+	return &ast.Command{
+		Kind: ast.CommandKindNext,
+		Param: &ast.Param{
+			Kind:  ast.ParamTypeTaskId,
+			Value: taskIdInt64,
+		},
+	}
 }
 
 func parseDependsCommand(parser *Parser) *ast.Command {
