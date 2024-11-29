@@ -111,6 +111,7 @@ type TaskDetailed struct {
 	Inprogress      bool           `json:"inprogress" db:"inprogress"`           // If the task is inprogress
 	Dependencies    sql.NullString `json:"dependencies" db:"dependencies"`       // Comma serperated list of Dependencies
 	Blocked         bool           `json:"blocked" db:"blocked"`                 // If the current task has unmet Dependencies
+	Blocking        int            `json:"blocking" db:"blocking"`               // The total number of tasks that this task is blocking
 	urgencyComputed float64
 }
 
@@ -219,11 +220,11 @@ func (task *TaskDetailed) urgency() float64 {
 		task.urgencyDue() +
 		task.urgencyAge() +
 		task.urgencyBlocked() +
+		task.urgencyBlocking() +
 		task.urgencyPriority()
 
 	// TODO add these when we have them
 	// task.urgencyWaiting() +
-	// task.urgencyBlocking() +
 	// task.urgencyTags() +
 	// task.urgencyAnnotations()
 }
@@ -276,10 +277,17 @@ func (task *TaskDetailed) urgencyPriority() float64 {
 }
 
 func (task *TaskDetailed) urgencyBlocked() float64 {
-	if URGENCY_BLOCKING_COEFFICIENT < EPSILION || !task.Blocked {
+	if URGENCY_BLOCKED_COEFFICIENT < EPSILION || !task.Blocked {
 		return 0
 	}
 	return float64(URGENCY_BLOCKED_COEFFICIENT)
+}
+
+func (task *TaskDetailed) urgencyBlocking() float64 {
+	if URGENCY_BLOCKING_COEFFICIENT < EPSILION || task.Blocking == 0 {
+		return 0
+	}
+	return float64(URGENCY_BLOCKING_COEFFICIENT)
 }
 
 //	Past                  Present                              Future
@@ -331,6 +339,9 @@ func (store *Store) ListTasks(ctx context.Context) ([]TaskDetailed, error) {
 		GROUP_CONCAT(projects.title ORDER BY projects.title ASC) AS projectNames,
 		GROUP_CONCAT(taskDependencies.dependsOnId) AS dependencies,
 		MIN(taskTime.startTimeUtc) AS firstStartedUtc,
+
+		-- INPROGRESS
+		-- ======================================================================
 		CASE
 			WHEN SUM(
 				CASE
@@ -341,6 +352,10 @@ func (store *Store) ListTasks(ctx context.Context) ([]TaskDetailed, error) {
 					END) > 0 THEN 1
 			ELSE 0
 		END AS inprogress,
+
+
+		-- CumulativeTime
+		-- ======================================================================
 		SUM(
 			CASE
 			    WHEN taskTime.endTimeUtc IS NULL THEN
@@ -348,15 +363,28 @@ func (store *Store) ListTasks(ctx context.Context) ([]TaskDetailed, error) {
 			    ELSE taskTime.totalTime
 			END
 		) AS cumulativeTime,
+
+		-- BLOCKED
+		-- ======================================================================
 	    	CASE
 			WHEN COUNT(taskDependencies.dependsOnId) > 0 THEN 1
 			ELSE 0
-	    	END AS blocked
+	    	END AS blocked,
+
+		-- BLOCKING
+		-- ======================================================================
+		CASE
+			WHEN COUNT(taskDependencies.dependsOnId) > 0 THEN 1
+			ELSE 0
+		END AS blocked,
+		COUNT(blockingTasks.taskId) AS blocking
+
 	FROM tasks
 	LEFT JOIN taskProjects ON taskProjects.taskId = tasks.id
 	LEFT JOIN projects ON projects.id = taskProjects.projectId
 	LEFT JOIN taskTime ON taskTime.taskId = tasks.id
 	LEFT JOIN taskDependencies ON taskDependencies.taskId = tasks.id
+	LEFT JOIN taskDependencies AS blockingTasks ON blockingTasks.dependsOnId = tasks.id
 	WHERE
 		tasks.state != 2 -- COMPLETED
 	GROUP BY tasks.id;

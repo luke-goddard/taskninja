@@ -70,6 +70,26 @@ var _ = Describe("Completing an incomplete task", func() {
 			Expect(time.EndTimeUtc.Valid).To(BeTrue())
 		})
 	})
+	Context("When the task is blocking another task", func() {
+		BeforeEach(func() {
+			services.RunProgram("add hello")
+			services.RunProgram("depends 1 on 2")
+		})
+		It("Should delete the task dependency", func() {
+			var deps []db.TaskDependency
+			deps, err = services.GetDependenciesForServices(1)
+			Expect(err).To(BeNil())
+			Expect(deps).To(HaveLen(1))
+
+			var _, err = services.CompleteTaskById(2)
+			Expect(err).To(BeNil())
+
+
+			deps, err = services.GetDependenciesForServices(1)
+			Expect(err).To(BeNil())
+			Expect(deps).To(HaveLen(0))
+		})
+	})
 })
 
 // ============================================================================
@@ -170,34 +190,50 @@ var _ = Describe("Listing tasks", func() {
 	var services *services.ServiceHandler
 	var tasks []db.TaskDetailed
 	var err error
+
+	var getById = func(id int64) *db.TaskDetailed {
+		for _, task := range tasks {
+			if task.ID == id {
+				return &task
+			}
+		}
+		return nil
+
+	}
+
 	BeforeEach(func() {
 		services = newTestHandler()
 		_, _ = services.CreateTask(&db.Task{Title: "title", Priority: db.TaskPriorityHigh})
 		_, _ = services.CreateTask(&db.Task{Title: "title", Priority: db.TaskPriorityLow})
-		_, _ = services.CreateTask(&db.Task{Title: "title", Priority: db.TaskPriorityMedium})
 		tasks, err = services.ListTasks()
 	})
 	It("should list tasks", func() {
 		Expect(err).To(BeNil())
-		Expect(tasks).To(HaveLen(3))
+		Expect(tasks).To(HaveLen(2))
 	})
 	It("should sort tasks by urgency", func() {
 		Expect(tasks[0].Priority).To(Equal(db.TaskPriorityHigh))
-		Expect(tasks[1].Priority).To(Equal(db.TaskPriorityMedium))
-		Expect(tasks[2].Priority).To(Equal(db.TaskPriorityLow))
+		Expect(tasks[1].Priority).To(Equal(db.TaskPriorityLow))
 	})
 	It("shoudld show dependencies", func() {
 		services.RunProgram("depends 1 on 2")
 		tasks, err = services.ListTasks()
 		Expect(err).To(BeNil())
-		Expect(tasks[2].Dependencies.String).To(HaveLen(1))
+		Expect(getById(1).Dependencies.String).To(Equal("2"))
 	})
 	It("should show if the task is blocked", func() {
 		services.RunProgram("depends 1 on 2")
 		tasks, err = services.ListTasks()
 		Expect(err).To(BeNil())
-		Expect(tasks[2].Blocked).To(BeTrue())
-		Expect(tasks[1].Blocked).To(BeFalse())
+		Expect(getById(1).Blocked).To(BeTrue())
+		Expect(getById(2).Blocked).To(BeFalse())
+	})
+	It("should show how many tasks as blocking", func() {
+		services.RunProgram("depends 1 on 2")
+		tasks, err = services.ListTasks()
+		Expect(err).To(BeNil())
+		Expect(getById(1).Blocking).To(Equal(0))
+		Expect(getById(2).Blocking).To(Equal(1))
 	})
 })
 

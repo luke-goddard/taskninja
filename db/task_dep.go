@@ -22,10 +22,26 @@ type TaskDependency struct {
 	DependsOnID int64 `db:"dependsOnId"`
 }
 
-func (store *Store) TaskDependsOnTx(tx *sqlx.Tx, taskId int64, dependsOnId int64) (error) {
+func (store *Store) TaskDependsOnTx(tx *sqlx.Tx, taskId int64, dependsOnId int64) error {
 	var _, err = tx.Exec(`INSERT INTO taskDependencies (taskId, dependsOnId) VALUES (?, ?)`, taskId, dependsOnId)
 	if err != nil {
-		return  fmt.Errorf("Failed to insert task dependency: %w", err)
+		return fmt.Errorf("Failed to insert task dependency: %w", err)
 	}
 	return nil
+}
+
+func (store *Store) GetDependenciesForTask(taskId int64) ([]TaskDependency, error) {
+	var deps []TaskDependency
+	err := store.Con.Select(&deps, `SELECT * FROM taskDependencies WHERE taskId = ?`, taskId)
+	return deps, err
+}
+
+func (store *Store) DeleteDependenciesForCompletedTask(completedTaskId int64) error {
+	_, err := store.Con.Exec(`DELETE FROM taskDependencies WHERE taskId = ? OR dependsOnId = ?`, completedTaskId, completedTaskId)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return nil
+		}
+	}
+	return err
 }

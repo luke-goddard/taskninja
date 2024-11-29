@@ -15,5 +15,10 @@ func (handler *ServiceHandler) CompleteTaskById(taskId int64) (bool, error) {
 			return false, fmt.Errorf("Error stopping task time: %v", err)
 		}
 	}
+	// TODO: Convert to transaction
+	err = handler.Store.DeleteDependenciesForCompletedTask(taskId)
+	if err != nil {
+		return false, fmt.Errorf("Error deleting dependencies for completed task: %v", err)
+	}
 	return handler.Store.CompleteTaskById(taskId)
 }
