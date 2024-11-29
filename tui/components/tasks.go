@@ -28,6 +28,7 @@ const (
 	TableColumnPriority
 	TableColumnProject
 	TableColumnTags
+	TableColumnDependencies
 	TableColumnUrgency
 )
 
@@ -56,14 +57,15 @@ func NewTaskTable(baseStyle lipgloss.Style, dimensions *utils.TerminalDimensions
 	assert.NotNil(dimensions, "dimensions is nil")
 	assert.NotNil(theme, "theme is nil")
 	var columns = []table.Column{
-		{Title: "ID", Width: dimensions.Width.PercentOrMin(0.05, 4)},
-		{Title: "Started", Width: dimensions.Width.PercentOrMin(0.1, 4)},
-		{Title: "Name", Width: dimensions.Width.PercentOrMin(0.43, 10)},
-		{Title: "Age", Width: dimensions.Width.PercentOrMin(0.05, 4)},
-		{Title: "Priority", Width: dimensions.Width.PercentOrMin(0.06, 10)},
-		{Title: "Project", Width: dimensions.Width.PercentOrMin(0.124, 10)},
-		{Title: "Tags", Width: dimensions.Width.PercentOrMin(0.08, 5)},
-		{Title: "Urgency", Width: dimensions.Width.PercentOrMin(0.09, 5)},
+		{Title: "ID", Width: dimensions.Width.PercentOrMin(0.05, 0)},
+		{Title: "Started", Width: dimensions.Width.PercentOrMin(0.1, 0)},
+		{Title: "Name", Width: dimensions.Width.PercentOrMin(0.33, 0)},
+		{Title: "Age", Width: dimensions.Width.PercentOrMin(0.05, 0)},
+		{Title: "Priority", Width: dimensions.Width.PercentOrMin(0.06, 0)},
+		{Title: "Project", Width: dimensions.Width.PercentOrMin(0.06, 0)},
+		{Title: "Tags", Width: dimensions.Width.PercentOrMin(0.08, 0)},
+		{Title: "Deps", Width: dimensions.Width.PercentOrMin(0.06, 0)},
+		{Title: "Urgency", Width: dimensions.Width.PercentOrMin(0.21, 0)},
 	}
 
 	var rows = []table.Row{}
@@ -215,6 +217,7 @@ func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
 		columns = append(columns, priority)                 // PRIORITY
 		columns = append(columns, task.ProjectNames.String) // PROJECT
 		columns = append(columns, "")                       // TAGS
+		columns = append(columns, task.Dependencies.String) // DEPENDENCIES
 		columns = append(columns, urgency)                  // URGENCY
 
 		index++

@@ -29,6 +29,5 @@ func (handler *ServiceHandler) RunProgram(program string) (*ast.Command, error) 
 	}
 	var lastCmd = handler.Interprete.GetLastCmd()
 	assert.NotNil(lastCmd, "last command is nil")
-
 	return lastCmd, err
 }
