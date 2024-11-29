@@ -12,6 +12,8 @@ func (a *Analyzer) VisitCommand(cmd *ast.Command) *Analyzer {
 		return a.VisitAddCommand(cmd)
 	case ast.CommandKindList:
 		return a.VisitListCommand(cmd)
+	case ast.CommandKindDepends:
+		return a.VisitDependsCommand(cmd)
 	}
 	return a.EmitError(fmt.Sprintf("Unknown command kind: %d", cmd.Kind), cmd)
 }
@@ -25,7 +27,8 @@ func (a *Analyzer) VisitAddCommand(cmd *ast.Command) *Analyzer {
 		return a.EmitError("Add command requires a description", cmd.Param)
 	}
 
-	if len(cmd.Param.Value) == 0 {
+	var description = cmd.Param.Value.(string)
+	if len(description) == 0 {
 		return a.EmitError("Description cannot be empty", cmd.Param)
 	}
 
@@ -35,6 +38,20 @@ func (a *Analyzer) VisitAddCommand(cmd *ast.Command) *Analyzer {
 func (a *Analyzer) VisitListCommand(cmd *ast.Command) *Analyzer {
 	if cmd.Param != nil {
 		return nil
+	}
+	return a
+}
+
+func (a *Analyzer) VisitDependsCommand(cmd *ast.Command) *Analyzer {
+	var param = cmd.Param.Value.(ast.ParamDependency)
+	if param.TaskId < 0 {
+		return a.EmitError("Task ID cannot be negative", cmd.Param)
+	}
+	if param.DependsOnId < 0 {
+		return a.EmitError("DependsOn ID cannot be negative", cmd.Param)
+	}
+	if param.TaskId == param.DependsOnId {
+		return a.EmitError("Task ID and DependsOn ID cannot be the same", cmd.Param)
 	}
 	return a
 }

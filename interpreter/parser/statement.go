@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/luke-goddard/taskninja/interpreter/ast"
@@ -19,12 +20,79 @@ func parseCommand(parser *Parser) *ast.Command {
 	}
 
 	if parser.current().Type == token.Command &&
-		strings.ToLower(parser.current().Value) == "list" {
-		return parseListCommand(parser)
+		strings.ToLower(parser.current().Value) == "depends" {
+		return parseDependsCommand(parser)
 	}
+
+	// if parser.current().Type == token.Command &&
+	// 	strings.ToLower(parser.current().Value) == "list" {
+	// 	return parseListCommand(parser)
+	// }
 
 	parser.errors.EmitParse("Unknown command", parser.current())
 	return nil
+}
+
+func parseDependsCommand(parser *Parser) *ast.Command {
+	// dutty
+	var taskIdInt64, dependsOnIdInt64 int64
+	var err error
+
+	parser.consume()
+	if parser.hasNoTokens() {
+		parser.errors.EmitParse("Expected a param e.g depends 1 on 2", &token.Token{})
+		return nil
+	}
+	if !parser.expectCurrent(token.Number) {
+		return nil
+	}
+	var taskId = parser.consume().Value
+
+	taskIdInt64, err = strconv.ParseInt(taskId, 10, 64)
+	if err != nil {
+		parser.errors.EmitParse("Failed to parse task Id", parser.current())
+		return nil
+	}
+	if parser.hasNoTokens() {
+		parser.errors.EmitParse("Expected more tokens after taskID", &token.Token{})
+		return nil
+	}
+	if !parser.expectOneOf(token.String, token.Number) {
+		parser.errors.EmitParse("Expected a token with value string('ON') or int(taskId)", parser.current())
+		return nil
+	}
+	if parser.current().Type == token.String {
+		if strings.ToLower(parser.current().Value) != "on" {
+			parser.errors.EmitParse("Expected token value to be 'on'", parser.current())
+			return nil
+		}
+		parser.consume()
+		if parser.hasNoTokens() {
+			parser.errors.EmitParse("Expected a number after string('ON')", &token.Token{})
+			return nil
+		}
+	}
+	if !parser.expectCurrent(token.Number) {
+		parser.errors.EmitParse("Expected a number e.g depends 1 on 2", parser.current())
+		return nil
+	}
+	var dependsOnId = parser.consume().Value
+	dependsOnIdInt64, err = strconv.ParseInt(dependsOnId, 10, 64)
+	if err != nil {
+		parser.errors.EmitParse("Failed to parse dependsOnId", parser.current())
+		return nil
+	}
+	return &ast.Command{
+		Kind: ast.CommandKindDepends,
+		Param: &ast.Param{
+			Kind: ast.ParamTypeDependency,
+			Value: ast.ParamDependency{
+				TaskId:      taskIdInt64,
+				DependsOnId: dependsOnIdInt64,
+			},
+		},
+	}
+
 }
 
 func parseAddCommand(parser *Parser) *ast.Command {

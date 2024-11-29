@@ -92,12 +92,16 @@ func (transpiler *Transpiler) Transpile(
 ) (SqlStatement, SqlArgs, []TranspileError) {
 	transpiler.tx = tx
 	switch command.Kind {
-	case CommandKindList:
-		return transpiler.transpileCommandList(command)
 	case CommandKindAdd:
 		return transpiler.transpileCommandAdd(command)
+	// case CommandKindList:
+	// 	return transpiler.transpileCommandList(command)
+	case CommandKindDepends:
+		return "", nil, transpiler.transpileCommandDepends(command)
+	default:
+		transpiler.AddError(fmt.Errorf("Unknown command kind: %s", command.Kind.String()), command)
+		return "", nil, transpiler.errors
 	}
-	return "", nil, transpiler.errors
 }
 
 func (transpiler *Transpiler) transpileCommandList(command *Command) (SqlStatement, SqlArgs, []TranspileError) {
@@ -132,4 +136,14 @@ func (transpiler *Transpiler) transpileCommandAdd(command *Command) (SqlStatemen
 		}
 	}
 	return SqlStatement(sql), SqlArgs(args), transpiler.errors
+}
+
+func (tran *Transpiler) transpileCommandDepends(command *Command) []TranspileError {
+	var param = command.Param.Value.(ParamDependency)
+	var err = tran.store.TaskDependsOnTx(tran.tx, param.TaskId, param.DependsOnId)
+	if err != nil {
+		tran.AddError(fmt.Errorf("Failed to insert task dependency: %w", err), command)
+		return tran.errors
+	}
+	return tran.errors
 }

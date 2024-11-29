@@ -13,20 +13,20 @@ var _ = Describe("Tabs", func() {
 	BeforeEach(func() {
 		tabs = NewTabs()
 	})
-	It("should have 4 tabs", func() {
-		Expect(len(tabs.Tabs)).To(Equal(4))
+	It("should have 8 tabs", func() {
+		Expect(len(tabs.Tabs)).To(Equal(8))
 	})
 	It("should have the first tab as 'Tasks'", func() {
-		Expect(tabs.Tabs[0]).To(Equal("Tasks"))
+		Expect(tabs.Tabs[0]).To(Equal("Tasks (1)"))
 	})
 	It("should have the second tab as 'Projects'", func() {
-		Expect(tabs.Tabs[1]).To(Equal("Projects"))
+		Expect(tabs.Tabs[1]).To(Equal("Projects (2)"))
 	})
 	It("should have the third tab as 'Tags'", func() {
-		Expect(tabs.Tabs[2]).To(Equal("Tags"))
+		Expect(tabs.Tabs[2]).To(Equal("Tags (3)"))
 	})
-	It("should have the fourth tab as 'Settings'", func() {
-		Expect(tabs.Tabs[3]).To(Equal("Settings"))
+	It("should have the fourth tab as 'People'", func() {
+		Expect(tabs.Tabs[3]).To(Equal("People (4)"))
 	})
 	It("should have the first tab as active", func() {
 		Expect(tabs.ActiveTab).To(Equal(0))
@@ -78,13 +78,13 @@ var _ = Describe("Tabs", func() {
 
 	Describe("When the active tab is the last tab", func() {
 		BeforeEach(func() {
-			tabs.ActiveTab = 3
+			tabs.ActiveTab = 7
 		})
 
 		It("It should not change tabs when moving right", func() {
-			Expect(tabs.ActiveTab).To(Equal(3))
+			Expect(tabs.ActiveTab).To(Equal(7))
 			tabs, _ = tabs.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'l'}})
-			Expect(tabs.ActiveTab).To(Equal(3))
+			Expect(tabs.ActiveTab).To(Equal(7))
 		})
 	})
 

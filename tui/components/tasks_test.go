@@ -169,10 +169,6 @@ var _ = Describe("Task Table", func() {
 			Expect(table.Table.Rows()).To(HaveLen(1))
 			Expect(table.GetCurrentRow().Title()).To(Equal("VeryUnique"))
 		})
-		It("Should have a zero urgency", func() {
-			var row = table.GetCurrentRow()
-			Expect(row.Urgency()).To(Equal(0.0))
-		})
 	})
 
 	Describe("When table has no rows", func() {
@@ -200,11 +196,6 @@ var _ = Describe("Task Table", func() {
 			Expect(row.Started()).To(BeTrue())
 			Expect(row[TableColumnID]).To(Equal("1-⏰"))
 		})
-		It("should have a none zero urgency", func() {
-			Expect(table.Table.Rows()).To(HaveLen(1))
-			var row = table.GetCurrentRow()
-			Expect(row.Urgency()).To(Equal(20.0))
-		})
 	})
 
 	Describe("When a task has a priority", func() {
@@ -230,7 +221,7 @@ var _ = Describe("Task Table", func() {
 		})
 		It("should show the task as none priority", func() {
 			var row = table.GetRowAtPos(3)
-			Expect(row.PriorityStr()).To(Equal("None"))
+			Expect(row.PriorityStr()).To(Equal("❌"))
 		})
 	})
 })

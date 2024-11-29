@@ -293,17 +293,6 @@ func (r TaskRow) UrgencyStr() string {
 	return r[TableColumnUrgency]
 }
 
-func (r TaskRow) Urgency() float64 {
-	assert.NotNil(r, "r is nil")
-	if len(r) == 0 {
-		return 0
-	}
-	var urgencyStr = r.UrgencyStr()
-	var urgency, err = strconv.ParseFloat(urgencyStr, 64)
-	assert.Nil(err, "failed to convert urgency to float")
-	return urgency
-}
-
 func (r TaskRow) PriorityStr() string {
 	assert.NotNil(r, "r is nil")
 	if len(r) == 0 {

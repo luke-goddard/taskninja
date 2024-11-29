@@ -215,3 +215,36 @@ var _ = Describe("Transpiler should transpile add commands", func() {
 		})
 	})
 })
+
+var _ = Describe("Should be able to add dependencies commands", func() {
+
+	var interpreter *Interpreter
+	var store *db.Store
+	var tx *sqlx.Tx
+	var tasks []db.TaskDetailed
+
+	BeforeEach(func() {
+		store = db.NewInMemoryStore()
+		interpreter = NewInterpreter(store)
+
+		// https://www.youtube.com/watch?v=o7NyNnwrm70
+		interpreter.Execute(`add "get the money"`, store.MustCreateTxTodo())
+		interpreter.Execute(`add "get the power"`, store.MustCreateTxTodo())
+		tx = store.MustCreateTxTodo()
+		tasks, _ = store.ListTasks(context.Background())
+	})
+
+	It("should add a dependency", func() {
+		_, _, err := interpreter.Execute(`depends 1 on 2`, tx)
+		Expect(err).To(BeNil())
+
+		tasks, err = store.ListTasks(context.Background())
+		Expect(err).To(BeNil())
+		Expect(tasks).To(HaveLen(2))
+		for _, task := range tasks {
+			if task.ID == 1 {
+				Expect(task.Dependencies.Value()).To(Equal("2"))
+			}
+		}
+	})
+})

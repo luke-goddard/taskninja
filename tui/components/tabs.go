@@ -34,10 +34,14 @@ func NewTabs() *Tabs {
 	return &Tabs{
 		ActiveTab: 0,
 		Tabs: []string{
-			"Tasks",
-			"Projects",
-			"Tags",
-			"Settings",
+			"Tasks (1)",
+			"Projects (2)",
+			"Tags (3)",
+			"People (4)",
+			"Context (5)",
+			"Study (6)",
+			"Notes (7)",
+			"Settings (8)",
 		},
 	}
 }

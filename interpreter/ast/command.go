@@ -9,8 +9,9 @@ import (
 type CommandKind int
 
 const (
-	CommandKindAdd  CommandKind = iota // e.g add "buy dog"
-	CommandKindList CommandKind = iota // e.g list +HOME
+	CommandKindAdd     CommandKind = iota // e.g add "buy dog"
+	CommandKindDepends                    // e.g depends 1 on 2
+	CommandKindList                       // e.g list +HOME
 )
 
 // Command represents a command in the AST.
@@ -36,6 +37,8 @@ func (c *CommandKind) String() string {
 		return "add"
 	case CommandKindList:
 		return "list"
+	case CommandKindDepends:
+		return "depends"
 	default:
 		return "unknown"
 	}

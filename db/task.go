@@ -71,7 +71,7 @@ const (
 	URGENCY_PRIORITY_HIGH_COEFFICIENT   UrgencyCoefficient = 4.0  // P:High
 	URGENCY_PRIORITY_MEDIUM_COEFFICIENT UrgencyCoefficient = 2.0  // P:Med
 	URGENCY_PRIORITY_LOW_COEFFICIENT    UrgencyCoefficient = 1.0  // P:Low
-	URGENCY_PRIORITY_NONE_COEFFICIENT    UrgencyCoefficient = 0.0  // P:None
+	URGENCY_PRIORITY_NONE_COEFFICIENT   UrgencyCoefficient = 0.0  // P:None
 	URGENCY_DUE_COEFFICIENT             UrgencyCoefficient = 12.0 // Due:now
 	URGENCY_BLOCKING_COEFFICIENT        UrgencyCoefficient = 8.0  // Task Dependencies
 	URGENCY_ACTIVE_COEFFICIENT          UrgencyCoefficient = 20.0 // Task is started
@@ -109,6 +109,7 @@ type TaskDetailed struct {
 	FirstStartedUtc sql.NullString `json:"firstStartedUtc" db:"firstStartedUtc"` // When the task was first started (if it ever was)
 	CumulativeTime  sql.NullString `json:"cumulativeTime" db:"cumulativeTime"`   // Total time spent on task throughout multiple sessions
 	Inprogress      bool           `json:"inprogress" db:"inprogress"`           // If the task is inprogress
+	Dependencies    sql.NullString `json:"dependencies" db:"dependencies"`       // Comma serperated list of Dependencies
 	urgencyComputed float64
 }
 
@@ -320,6 +321,7 @@ func (store *Store) ListTasks(ctx context.Context) ([]TaskDetailed, error) {
 		tasks.*,
 		COUNT(taskProjects.projectId) AS projectCount,
 		GROUP_CONCAT(projects.title ORDER BY projects.title ASC) AS projectNames,
+		GROUP_CONCAT(taskDependencies.dependsOnId) AS dependencies,
 		MIN(taskTime.startTimeUtc) AS firstStartedUtc,
 		CASE
 			WHEN SUM(
@@ -342,6 +344,7 @@ func (store *Store) ListTasks(ctx context.Context) ([]TaskDetailed, error) {
 	LEFT JOIN taskProjects ON taskProjects.taskId = tasks.id
 	LEFT JOIN projects ON projects.id = taskProjects.projectId
 	LEFT JOIN taskTime ON taskTime.taskId = tasks.id
+	LEFT JOIN taskDependencies ON taskDependencies.taskId = tasks.id
 	WHERE
 		tasks.state != 2 -- COMPLETED
 	GROUP BY tasks.id;

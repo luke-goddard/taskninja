@@ -96,3 +96,9 @@ func BackupDatabase(input, output string) error {
 	_, err = io.Copy(bk, source)
 	return err
 }
+
+func (store *Store) MustCreateTxTodo() *sqlx.Tx {
+	tx, err := store.Con.Beginx()
+	assert.Nil(err, "failed to start transaction")
+	return tx
+}

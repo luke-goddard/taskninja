@@ -115,7 +115,10 @@ func (interpreter *Interpreter) Execute(input string, tx *sqlx.Tx) (ast.SqlState
 		return "", nil, err
 	}
 
-	tx.Commit()
+	var err = tx.Commit()
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to commit transaction: %v", err)
+	}
 
 	interpreter.lastCmd = cmd
 	return sql, args, nil
