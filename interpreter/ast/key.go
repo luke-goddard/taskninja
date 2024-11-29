@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/huandu/go-sqlbuilder"
@@ -36,6 +37,8 @@ func (key *Key) EvalInsert(transpiler *Transpiler) interface{} {
 		return key.Expr.EvalInsert(transpiler)
 	case "proj", "project":
 		return key.handleProjectKey(transpiler)
+	case "deps", "dends", "dependencies":
+		return key.handleDependencies(transpiler)
 	default:
 		transpiler.AddError(fmt.Errorf("Unknown key: %s", key.Key), key)
 		return nil
@@ -77,4 +80,38 @@ func (key *Key) handleProjectKey(transpiler *Transpiler) interface{} {
 
 	return nil
 
+}
+
+func (key *Key) handleDependencies(trans *Transpiler) interface{} {
+	if key.Expr.Type() != NodeTypeLiteral {
+		trans.AddError(fmt.Errorf("Expected literal value for dependencies"), key)
+		return nil
+	}
+	var lit = key.Expr.(*Literal)
+	if lit.Kind != LiteralKindNumber {
+		trans.AddError(fmt.Errorf("Expected the dependency value to be a TaskID"), key)
+		return nil
+	}
+
+	var depOnTaskId = lit.Value
+	var depOnTaskIdInt64, err = strconv.ParseInt(depOnTaskId, 10, 64)
+	if err != nil {
+		trans.AddError(fmt.Errorf("Failed to parse taskId as Int64"), key)
+		return nil
+	}
+	var exists = trans.store.TaskIdExistsAndNotCompleted(trans.tx, depOnTaskIdInt64)
+	if !exists {
+		trans.AddError(fmt.Errorf("Task dependency does not exist"), key)
+	}
+
+	trans.addCallback(func(tx *sqlx.Tx, taskId int64) error {
+		var err = trans.store.TaskDependsOnTx(tx, taskId, depOnTaskIdInt64)
+		if err != nil {
+			trans.AddError(fmt.Errorf("Failed to insert task dependency: %w", err), key)
+			return err
+		}
+		return err
+	})
+
+	return nil
 }

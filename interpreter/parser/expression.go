@@ -3,9 +3,9 @@ package parser
 import (
 	"fmt"
 
+	"github.com/luke-goddard/taskninja/assert"
 	"github.com/luke-goddard/taskninja/interpreter/ast"
 	"github.com/luke-goddard/taskninja/interpreter/token"
-	"github.com/rs/zerolog/log"
 )
 
 func parsePrimaryExpression(parser *Parser) ast.Expression {
@@ -34,17 +34,31 @@ func parsePrimaryExpression(parser *Parser) ast.Expression {
 		if parser.hasNoTokens() {
 			parser.errors.EmitParse("Expected more tokens", parser.current())
 		}
-		if !parser.expectCurrent(token.String) && !parser.expectCurrent(token.Number) {
+		if !parser.expectOneOf(token.String, token.Number) {
 			parser.errors.EmitParse("Expected string/number value", parser.current())
 		}
 		parser.endStatement = true
-		return &ast.Key{
-			Key: key,
-			Expr: &ast.Literal{
-				Kind:  ast.LiteralKindString,
-				Value: parser.consume().Value,
-			},
+		switch parser.current().Type {
+		case token.Number:
+			return &ast.Key{
+				Key: key,
+				Expr: &ast.Literal{
+					Kind:  ast.LiteralKindNumber,
+					Value: parser.consume().Value,
+				},
+			}
+		case token.String:
+			return &ast.Key{
+				Key: key,
+				Expr: &ast.Literal{
+					Kind:  ast.LiteralKindString,
+					Value: parser.consume().Value,
+				},
+			}
+		default:
+			assert.Fail("Expected string or number")
 		}
+
 	}
 	var current = parser.current()
 	var err = fmt.Errorf("Unknown primary expression: %s", current.String())
@@ -55,7 +69,6 @@ func parseExpression(parser *Parser, bp BindingPower) ast.Expression {
 	if parser.hasNoTokens() {
 		return nil
 	}
-	log.Info().Interface("current", parser.current()).Int("bp", int(bp)).Msg("parseExpression")
 	var tokenKind = parser.current().Type
 	var nudHandler, exists = NudTable[tokenKind]
 	if !exists {

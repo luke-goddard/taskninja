@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/luke-goddard/taskninja/assert"
 	"github.com/rs/zerolog/log"
 )
@@ -559,4 +560,25 @@ func (store *Store) GetTaskById(ctx context.Context, taskId int64) (*Task, error
 		return nil, err
 	}
 	return task, err
+}
+
+func (store *Store) TaskIdExistsAndNotCompleted(tx *sqlx.Tx, taskId int64) bool {
+	var sql = `SELECT EXISTS(
+	    SELECT 1
+	    FROM tasks
+	    WHERE id = ? AND state != 0
+	) AS matched;`
+	var row = tx.QueryRow(sql, taskId)
+	var matched int64
+	var err = row.Scan(&matched)
+	return err == nil
+}
+
+func (store *Store) FilterByTaskId(taskId int64, tasks []TaskDetailed) *TaskDetailed {
+	for _, task := range tasks {
+		if task.ID == taskId {
+			return &task
+		}
+	}
+	return nil
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/huandu/go-sqlbuilder"
 	"github.com/jmoiron/sqlx"
 	"github.com/luke-goddard/taskninja/db"
+	"github.com/rs/zerolog/log"
 )
 
 type SqlStatement string
@@ -119,7 +120,11 @@ func (transpiler *Transpiler) transpileCommandAdd(command *Command) (SqlStatemen
 	command.EvalInsert(transpiler)
 	transpiler.Inserter.Cols(transpiler.cols...)
 	transpiler.Inserter.Values(transpiler.values...)
+	if len(transpiler.errors) != 0 {
+		return "", nil, transpiler.errors
+	}
 	var sql, args = transpiler.Inserter.Build()
+	log.Info().Str("sql", sql).Interface("args", args).Msg("Transpiler produced")
 	var res, err = transpiler.tx.Exec(sql, args...)
 	var taskId int64
 	if err != nil {

@@ -39,3 +39,5 @@ func (handler *ServiceHandler) GetTaskById(taskId int64) (*db.Task, error) {
 	defer cancle()
 	return handler.Store.GetTaskById(ctx, taskId)
 }
+
+

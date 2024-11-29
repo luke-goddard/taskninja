@@ -214,6 +214,35 @@ var _ = Describe("Transpiler should transpile add commands", func() {
 			Expect(tasks[0].ProjectNames.Value()).To(Equal("home"))
 		})
 	})
+
+	Describe("When adding a task with a dependency that exists", func() {
+		BeforeEach(func() {
+			var _, _, err = interpreter.Execute(`add "1"`, tx)
+			Expect(err).To(BeNil())
+
+			tx, err = store.Con.BeginTxx(context.TODO(), &sql.TxOptions{ReadOnly: false})
+			Expect(err).To(BeNil())
+
+			_, _, err = interpreter.Execute(`add "2" deps:1`, tx)
+			Expect(err).To(BeNil())
+		})
+
+		It("should add a dependency", func() {
+			var tasks, err = store.ListTasks(context.Background())
+			Expect(err).To(BeNil())
+			Expect(tasks).To(HaveLen(2))
+			tasks, _ = store.ListTasks(context.Background())
+			var t2 = store.FilterByTaskId(2, tasks)
+			Expect(t2.Dependencies.Value()).To(Equal("1"))
+		})
+	})
+
+	Describe("When adding a task with a dependency that is it's self", func() {
+		It("should error", func() {
+			var _, _, err = interpreter.Execute(`add "1" deps:4`, tx)
+			Expect(err).NotTo(BeNil())
+		})
+	})
 })
 
 var _ = Describe("Should be able to add dependencies commands", func() {
