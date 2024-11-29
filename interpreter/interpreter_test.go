@@ -247,4 +247,31 @@ var _ = Describe("Should be able to add dependencies commands", func() {
 			}
 		}
 	})
+
+	It("should add a dependency", func() {
+		_, _, err := interpreter.Execute(`depends 1 2`, tx)
+		Expect(err).To(BeNil())
+
+		tasks, err = store.ListTasks(context.Background())
+		Expect(err).To(BeNil())
+		Expect(tasks).To(HaveLen(2))
+		for _, task := range tasks {
+			if task.ID == 1 {
+				Expect(task.Dependencies.Value()).To(Equal("2"))
+			}
+		}
+	})
+
+	It("should not allow a cyclical dependency", func() {
+		_, _, err := interpreter.Execute(`depends 1 1`, tx)
+		Expect(err).NotTo(BeNil())
+	})
+	It("should not allow a negative taskId", func() {
+		_, _, err := interpreter.Execute(`depends -1 1`, tx)
+		Expect(err).NotTo(BeNil())
+	})
+	It("should not allow a negative dependencyId", func() {
+		_, _, err := interpreter.Execute(`depends 1 -1`, tx)
+		Expect(err).NotTo(BeNil())
+	})
 })
