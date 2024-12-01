@@ -109,6 +109,8 @@ type TaskDetailed struct {
 
 	ProjectCount    int            `json:"projectCount" db:"projectCount"`       // The number of projects the task is associated with
 	ProjectNames    sql.NullString `json:"projectNames" db:"projectNames"`       // The names of projects the task is associated joined using commas
+	TagCount        int            `json:"tagCount" db:"tagCount"`               // The number of tags the task is associated with
+	TagNames        sql.NullString `json:"tagNames" db:"tagNames"`               // The names of tags the task is associated joined using commas
 	FirstStartedUtc sql.NullString `json:"firstStartedUtc" db:"firstStartedUtc"` // When the task was first started (if it ever was)
 	CumulativeTime  sql.NullString `json:"cumulativeTime" db:"cumulativeTime"`   // Total time spent on task throughout multiple sessions
 	Inprogress      bool           `json:"inprogress" db:"inprogress"`           // If the task is inprogress
@@ -383,6 +385,12 @@ func (store *Store) ListTasks(ctx context.Context) ([]TaskDetailed, error) {
 			WHEN COUNT(taskDependencies.dependsOnId) > 0 THEN 1
 			ELSE 0
 		END AS blocked,
+
+		-- TagNames
+		-- ======================================================================
+		GROUP_CONCAT(tags.name ORDER BY tags.name ASC) AS tagNames,
+		COUNT(taskTags.tagId) AS tagCount,
+
 		COUNT(blockingTasks.taskId) AS blocking
 
 	FROM tasks
@@ -391,6 +399,8 @@ func (store *Store) ListTasks(ctx context.Context) ([]TaskDetailed, error) {
 	LEFT JOIN taskTime ON taskTime.taskId = tasks.id
 	LEFT JOIN taskDependencies ON taskDependencies.taskId = tasks.id
 	LEFT JOIN taskDependencies AS blockingTasks ON blockingTasks.dependsOnId = tasks.id
+	LEFT JOIN taskTags ON taskTags.taskId = tasks.id
+	LEFT JOIN tags ON tags.id = taskTags.tagId
 	WHERE
 		tasks.state != 2 -- COMPLETED
 	GROUP BY tasks.id;

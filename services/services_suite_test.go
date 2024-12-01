@@ -640,4 +640,17 @@ var _ = Describe("Creating a task tag", func() {
 		Expect(err).ToNot(BeNil())
 		Expect(tagId2).To(BeZero())
 	})
+
+	It("should be able to link a task to the tag", func() {
+		var tid, err = services.CreateTask(&db.Task{Title: "Example"})
+		Expect(err).To(BeNil())
+		err = services.TagLinkTask(tagId, tid.ID)
+		Expect(err).To(BeNil())
+
+		var tasks, err2 = services.ListTasks()
+		Expect(err2).To(BeNil())
+		Expect(tasks).To(HaveLen(1))
+		Expect(tasks[0].TagCount).To(Equal(1))
+		Expect(tasks[0].TagNames.Value()).To(Equal("ExampleTag"))
+	})
 })

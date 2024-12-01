@@ -19,3 +19,10 @@ func (handler *ServiceHandler) TagList() ([]db.Tag, error) {
 	defer cancle()
 	return handler.Store.TagList(ctx)
 }
+
+// Used to link a task to a tag
+func (handler *ServiceHandler) TagLinkTask(tagId, taskId int64) error {
+	var ctx, cancle = context.WithDeadline(context.Background(), handler.timeout())
+	defer cancle()
+	return handler.Store.TagLinkTaskCtx(ctx, tagId, taskId)
+}
