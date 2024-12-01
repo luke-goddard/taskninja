@@ -207,6 +207,9 @@ func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {
 		if task.Priority == db.TaskPriorityNone {
 			priority = "❌"
 		}
+		if task.Next {
+			priority += " ⭐"
+		}
 
 		urgency = urgencyStyle.Render(urgency)
 
