@@ -2,8 +2,9 @@ package services
 
 import "context"
 
-func (handler *ServiceHandler) CreateNewTag(id int64) error {
+// CreateTag will create a new tag in the database (this should not exist)
+func (handler *ServiceHandler) CreateNewTag(name string) (int64, error) {
 	var ctx, cancle = context.WithDeadline(context.Background(), handler.timeout())
 	defer cancle()
-	return handler.Store.CreateTagTx(ctx, id)
+	return handler.Store.CreateTagCtx(ctx, name)
 }

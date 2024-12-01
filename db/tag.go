@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -36,8 +37,8 @@ func (store *Store) CreateTagTx(name string, tx *sqlx.Tx) (int64, error) {
 }
 
 // CreateTag will create a new tag in the database (this should not exist)
-func (store *Store) CreateTag(name string) (int64, error) {
-	var res, err = store.Con.Exec("INSERT INTO tags (name) VALUES (?)", name)
+func (store *Store) CreateTagCtx(ctx context.Context, name string) (int64, error) {
+	var res, err = store.Con.ExecContext(ctx, "INSERT INTO tags (name) VALUES (?)", name)
 	if err != nil {
 		return 0, fmt.Errorf("Failed to create a new tag: %w", err)
 	}
