@@ -141,6 +141,8 @@ func (m *TaskTable) Update(msg tea.Msg) (*TaskTable, tea.Cmd) {
 			m.bus.Publish(events.NewSetPriorityEvent(id, db.TaskPriorityLow))
 		case "N":
 			m.bus.Publish(events.NewSetPriorityEvent(id, db.TaskPriorityNone))
+		case "n":
+			m.markNextTaskAsNext()
 		}
 		m.Table, cmd = m.Table.Update(msg)
 	case *events.Event:
@@ -175,6 +177,13 @@ func (m *TaskTable) GetCurrentRow() TaskRow {
 func (m *TaskTable) GetRowAtPos(pos int) TaskRow {
 	var selectedRow = m.Table.Rows()[pos]
 	return TaskRow(selectedRow)
+}
+
+func (m *TaskTable) markNextTaskAsNext() {
+	var selectedRow = m.Table.SelectedRow()
+	var id = TaskRow(selectedRow).ID()
+	var cmd = fmt.Sprintf("next %d", id)
+	m.bus.Publish(events.NewRunProgramEvent(cmd))
 }
 
 func (m *TaskTable) handleListTasksResponse(e *events.ListTasksResponse) {

@@ -41,11 +41,6 @@ var _ = Describe("Tabs", func() {
 		tabs, _ = tabs.Update(tea.KeyMsg{Type: tea.KeyRight})
 		Expect(tabs.ActiveTab).To(Equal(1))
 	})
-	It("should move RIGHT when pressing 'n'", func() {
-		Expect(tabs.ActiveTab).To(Equal(0))
-		tabs, _ = tabs.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'n'}})
-		Expect(tabs.ActiveTab).To(Equal(1))
-	})
 	It("should move RIGHT when pressing 'tab'", func() {
 		Expect(tabs.ActiveTab).To(Equal(0))
 		tabs, _ = tabs.Update(tea.KeyMsg{Type: tea.KeyTab})

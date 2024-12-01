@@ -83,7 +83,7 @@ func (m Tabs) Update(msg tea.Msg) (*Tabs, tea.Cmd) {
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return &m, tea.Quit
-		case "right", "l", "n", "tab":
+		case "right", "l", "tab":
 			m.ActiveTab = min(m.ActiveTab+1, len(m.Tabs)-1)
 			return &m, nil
 		case "left", "h", "p", "shift+tab":

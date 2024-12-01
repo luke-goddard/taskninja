@@ -26,6 +26,7 @@ make install
 | --- | ------ |
 | `q` | Quit |
 | `a` | Add a new task |
+| `n` | Mark a task as NEXT |
 | `d` | Complete a task |
 | `e` | Edit a task |
 | `f` | Filter tasks |
