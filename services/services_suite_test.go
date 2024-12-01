@@ -84,7 +84,6 @@ var _ = Describe("Completing an incomplete task", func() {
 			var _, err = services.CompleteTaskById(2)
 			Expect(err).To(BeNil())
 
-
 			deps, err = services.GetDependenciesForServices(1)
 			Expect(err).To(BeNil())
 			Expect(deps).To(HaveLen(0))
@@ -611,5 +610,35 @@ var _ = Describe("Getting task times", func() {
 			Expect(err).To(BeNil())
 			Expect(times).To(HaveLen(2))
 		})
+	})
+})
+
+// ============================================================================
+// TASK TAG - CREATE
+// ============================================================================
+
+var _ = Describe("Creating a task tag", func() {
+	var services *services.ServiceHandler
+	var tagId int64
+	var err error
+	BeforeEach(func() {
+		services = newTestHandler()
+		tagId, err = services.TagCreate("ExampleTag")
+		Expect(err).To(BeNil())
+	})
+	It("should create a tag", func() {
+		Expect(tagId).ToNot(BeZero())
+		var tags, err = services.TagList()
+		Expect(err).To(BeNil())
+		Expect(tags).To(HaveLen(1))
+		Expect(tags[0].Name).To(Equal("ExampleTag"))
+
+	})
+
+	It("should not create a duplicate tag", func() {
+		var tagId2 int64
+		tagId2, err = services.TagCreate("ExampleTag")
+		Expect(err).ToNot(BeNil())
+		Expect(tagId2).To(BeZero())
 	})
 })
