@@ -31,5 +31,5 @@ func (t *Tag) EvalSelect(builder *sqlbuilder.SelectBuilder, addError AddError) i
 }
 
 func (t *Tag) EvalInsert(transpiler *Transpiler) interface{} {
-	panic("implement me")
+	panic("HEHEH")
 }

@@ -243,6 +243,13 @@ var _ = Describe("Transpiler should transpile add commands", func() {
 			Expect(err).NotTo(BeNil())
 		})
 	})
+
+	Describe("When adding a task with a tag that does not exist", func() {
+		It("should add the tag", func() {
+			var _, _, err = interpreter.Execute(`add "test" +WORK`, tx)
+			Expect(err).NotTo(BeNil())
+		})
+	})
 })
 
 var _ = Describe("Should be able to add dependencies commands", func() {
