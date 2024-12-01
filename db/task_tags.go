@@ -9,16 +9,18 @@ import (
 
 const M002_TaskTagsSchema = `
 CREATE TABLE IF NOT EXISTS taskTags (
-	taskID INTEGER NOT NULL,
-	tagID INTEGER NOT NULL,
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	UNIQUE (taskID, tagID),
-	PRIMARY KEY (taskID, tagID)
+	PRIMARY KEY(taskID, tagID),
+	FOREIGN KEY(taskID) REFERENCES tasks(id) ON DELETE CASCADE,
+	FOREIGN KEY(tagID) REFERENCES tags(id) ON DELETE CASCADE
 );
--- PRAGMA user_version = 2;
+PRAGMA user_version = 2;
 `
 
 // Used to link tasks and tags together
 type TaskTag struct {
+	ID     int `json:"id" db:"id"`         // Unique identifier of the task-tag link
 	TaskID int `json:"taskID" db:"taskID"` // ID of the task
 	TagID  int `json:"tagID" db:"tagID"`   // ID of the tag
 }

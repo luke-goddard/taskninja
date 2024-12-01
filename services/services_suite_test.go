@@ -641,16 +641,32 @@ var _ = Describe("Creating a task tag", func() {
 		Expect(tagId2).To(BeZero())
 	})
 
-	It("should be able to link a task to the tag", func() {
-		var tid, err = services.CreateTask(&db.Task{Title: "Example"})
-		Expect(err).To(BeNil())
-		err = services.TagLinkTask(tagId, tid.ID)
+	It("should be able to link a task to the tag and unlink it", func() {
+		// Create
+		var task, err = services.CreateTask(&db.Task{Title: "Example"})
 		Expect(err).To(BeNil())
 
+		// Link
+		err = services.TagLinkTask(tagId, task.ID)
+		Expect(err).To(BeNil())
+
+		// Check Link
 		var tasks, err2 = services.ListTasks()
 		Expect(err2).To(BeNil())
 		Expect(tasks).To(HaveLen(1))
 		Expect(tasks[0].TagCount).To(Equal(1))
 		Expect(tasks[0].TagNames.Value()).To(Equal("ExampleTag"))
+
+		// Unlink
+		err = services.Store.TagUnlinkTask(task.ID, tagId)
+		Expect(err).To(BeNil())
+
+		// Check unlink
+		tasks, err2 = services.ListTasks()
+		Expect(err2).To(BeNil())
+		Expect(tasks).To(HaveLen(1))
+		Expect(tasks[0].TagCount).To(Equal(0))
+		Expect(tasks[0].TagNames.Valid).To(Equal(false))
+
 	})
 })
