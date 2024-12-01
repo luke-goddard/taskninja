@@ -304,3 +304,34 @@ var _ = Describe("Should be able to add dependencies commands", func() {
 		Expect(err).NotTo(BeNil())
 	})
 })
+
+var _ = Describe("When executing the next command", func() {
+
+	var interpreter *Interpreter
+	var store *db.Store
+
+	BeforeEach(func() {
+		store = db.NewInMemoryStore()
+		interpreter = NewInterpreter(store)
+		interpreter.Execute(`add "one"`, store.MustCreateTxTodo())
+	})
+
+	It("new task should not be marked as next", func() {
+		var tasks, _ = store.ListTasks(context.Background())
+		Expect(tasks).To(HaveLen(1))
+
+		var task = tasks[0]
+		Expect(task.Next).To(Equal(false))
+	})
+
+	It("should mark the task as next", func() {
+		var _, _, err = interpreter.Execute(`next 1`, store.MustCreateTxTodo())
+		Expect(err).To(BeNil())
+
+		var tasks, _ = store.ListTasks(context.Background())
+		Expect(tasks).To(HaveLen(1))
+
+		var task = tasks[0]
+		Expect(task.Next).To(Equal(true))
+	})
+})

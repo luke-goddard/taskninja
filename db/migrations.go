@@ -19,6 +19,7 @@ var Migrations = []string{
 	M008_TimeTrackingSchema,
 	M009_TaskSchema,
 	M010_TaskDependenciesSchema,
+	M011_TaskSchema,
 	"PRAGMA foreign_keys = ON",
 }
 

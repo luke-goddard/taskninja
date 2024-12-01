@@ -99,6 +99,8 @@ func (transpiler *Transpiler) Transpile(
 	// 	return transpiler.transpileCommandList(command)
 	case CommandKindDepends:
 		return "", nil, transpiler.transpileCommandDepends(command)
+	case CommandKindNext:
+		return "", nil, transpiler.transpileCommandNext(command)
 	default:
 		transpiler.AddError(fmt.Errorf("Unknown command kind: %s", command.Kind.String()), command)
 		return "", nil, transpiler.errors
@@ -151,4 +153,19 @@ func (tran *Transpiler) transpileCommandDepends(command *Command) []TranspileErr
 		return tran.errors
 	}
 	return tran.errors
+}
+
+func (tran *Transpiler) transpileCommandNext(command *Command) []TranspileError {
+	var taskId = command.Param.Value.(int64)
+	if taskId < 0 {
+		tran.AddError(fmt.Errorf("TaskId must be greater than zero"), command)
+		return tran.errors
+	}
+	var err = tran.store.TaskMarkAsNextTx(tran.tx, taskId)
+	if err != nil {
+		tran.AddError(fmt.Errorf("Failed to mark task as next: %w", err), command)
+		return tran.errors
+	}
+	return tran.errors
+
 }

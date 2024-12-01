@@ -47,6 +47,11 @@ ALTER TABLE tasks DROP COLUMN startedAtUtc;
 PRAGMA user_version = 9;
 `
 
+const M011_TaskSchema = `
+ALTER TABLE tasks ADD COLUMN next INTEGER NOT NULL DEFAULT 0 CHECK (next >= 0 AND next <= 1);
+PRAGMA user_version = 11;
+`
+
 type TaskPriority int // Task priority levels
 
 const (
@@ -99,6 +104,7 @@ type Task struct {
 	Due          sql.NullString `json:"due" db:"dueUtc"`                  // Optional Due Date
 	UpdatedAtUtc sql.NullString `json:"updatedAtUtc" db:"updatedAtUtc"`   // Optional UpdatedAtUtc
 	CompletedUtc sql.NullString `json:"completedUtc" db:"completedAtUtc"` // Set once the task is marked as complete
+	Next         bool           `json:"next" db:"next"`                   // If the tasks is flaged as next to be started on
 }
 
 // TaskDetailed represents a task with additional information from other tables
@@ -581,4 +587,10 @@ func (store *Store) FilterByTaskId(taskId int64, tasks []TaskDetailed) *TaskDeta
 		}
 	}
 	return nil
+}
+
+func (store *Store) TaskMarkAsNextTx(tx *sqlx.Tx, taskId int64) error {
+	var sql = `UPDATE tasks SET next = 1 WHERE id = ?`
+	_, err := tx.Exec(sql, taskId)
+	return err
 }

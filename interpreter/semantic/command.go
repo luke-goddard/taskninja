@@ -14,6 +14,8 @@ func (a *Analyzer) VisitCommand(cmd *ast.Command) *Analyzer {
 		return a.VisitListCommand(cmd)
 	case ast.CommandKindDepends:
 		return a.VisitDependsCommand(cmd)
+	case ast.CommandKindNext:
+		return a.VisitNextCommand(cmd)
 	}
 	return a.EmitError(fmt.Sprintf("Unknown command kind: %d", cmd.Kind), cmd)
 }
@@ -52,6 +54,14 @@ func (a *Analyzer) VisitDependsCommand(cmd *ast.Command) *Analyzer {
 	}
 	if param.TaskId == param.DependsOnId {
 		return a.EmitError("Task ID and DependsOn ID cannot be the same", cmd.Param)
+	}
+	return a
+}
+
+func (a *Analyzer) VisitNextCommand(cmd *ast.Command) *Analyzer {
+	var tid = cmd.Param.Value.(int64)
+	if tid <= 0 {
+		return a.EmitError("Task ID cannot be zero or negative", cmd.Param)
 	}
 	return a
 }
