@@ -100,6 +100,11 @@ var _ = Describe("Task Table", func() {
 			var row = table.GetCurrentRow()
 			Expect(row.Title()).To(Equal("T1"))
 		})
+		It("Pressing n should mark the task as next", func() {
+			table.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'n'}})
+			var row = table.GetCurrentRow()
+			Expect(row.PriorityStr()).To(Equal("❌ ⭐"))
+		})
 		It("Pressing j should move selected row down", func() {
 			table.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'j'}})
 			var row = table.GetCurrentRow()
