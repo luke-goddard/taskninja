@@ -228,6 +228,7 @@ func (task *TaskDetailed) urgency() float64 {
 		task.urgencyAge() +
 		task.urgencyBlocked() +
 		task.urgencyBlocking() +
+		task.urgencyMarkedAsNext() +
 		task.urgencyPriority()
 
 	// TODO add these when we have them
@@ -268,6 +269,13 @@ func (task *TaskDetailed) urgencyAge() float64 {
 		return 1.0
 	}
 	return 1.0 * ageDays / URGENCY_MAX_AGES.Hours() / 24
+}
+
+func (task *TaskDetailed) urgencyMarkedAsNext() float64 {
+	if URGENCY_NEXT_TAG_COEFFICIENT < EPSILION || !task.Next {
+		return 0
+	}
+	return float64(URGENCY_NEXT_TAG_COEFFICIENT)
 }
 
 func (task *TaskDetailed) urgencyPriority() float64 {
