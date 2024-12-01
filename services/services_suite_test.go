@@ -616,7 +616,6 @@ var _ = Describe("Getting task times", func() {
 // ============================================================================
 // TASK TAG - CREATE
 // ============================================================================
-
 var _ = Describe("Creating a task tag", func() {
 	var services *services.ServiceHandler
 	var tagId int64

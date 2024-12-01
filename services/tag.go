@@ -13,6 +13,7 @@ func (handler *ServiceHandler) TagCreate(name string) (int64, error) {
 	return handler.Store.TagCreate(ctx, name)
 }
 
+// Used to list all of the tags
 func (handler *ServiceHandler) TagList() ([]db.Tag, error) {
 	var ctx, cancle = context.WithDeadline(context.Background(), handler.timeout())
 	defer cancle()

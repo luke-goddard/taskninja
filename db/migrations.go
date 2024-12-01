@@ -21,6 +21,7 @@ var Migrations = []string{
 	M010_TaskDependenciesSchema,
 	M011_TaskSchema,
 	"PRAGMA foreign_keys = ON",
+	M002_TaskTagsSchema,
 }
 
 // RunMigrations runs all migrations that have not been run.
