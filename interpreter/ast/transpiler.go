@@ -161,7 +161,7 @@ func (tran *Transpiler) transpileCommandNext(command *Command) []TranspileError 
 		tran.AddError(fmt.Errorf("TaskId must be greater than zero"), command)
 		return tran.errors
 	}
-	var err = tran.store.TaskMarkAsNextTx(tran.tx, taskId)
+	var err = tran.store.TaskToggleNextTx(tran.tx, taskId)
 	if err != nil {
 		tran.AddError(fmt.Errorf("Failed to mark task as next: %w", err), command)
 		return tran.errors

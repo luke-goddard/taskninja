@@ -589,8 +589,8 @@ func (store *Store) FilterByTaskId(taskId int64, tasks []TaskDetailed) *TaskDeta
 	return nil
 }
 
-func (store *Store) TaskMarkAsNextTx(tx *sqlx.Tx, taskId int64) error {
-	var sql = `UPDATE tasks SET next = 1 WHERE id = ?`
+func (store *Store) TaskToggleNextTx(tx *sqlx.Tx, taskId int64) error {
+	var sql = `UPDATE tasks SET next = case when next = 0 then 1 else 0 end WHERE id = ?`
 	_, err := tx.Exec(sql, taskId)
 	return err
 }
