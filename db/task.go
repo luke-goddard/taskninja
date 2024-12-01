@@ -82,12 +82,8 @@ const (
 	URGENCY_BLOCKING_COEFFICIENT        UrgencyCoefficient = 8.0  // Task Dependencies
 	URGENCY_ACTIVE_COEFFICIENT          UrgencyCoefficient = 20.0 // Task is started
 	URGENCY_SCHEDULED_COEFFICIENT       UrgencyCoefficient = 5.0  // Task is scheduled
-	URGENCY_AGE_COEFFICIENT             UrgencyCoefficient = 2.0  // Task age
-	URGENCY_ANNOTATIONS_COEFFICIENT     UrgencyCoefficient = 1.0  // Task has annotations
-	URGENCY_TAGS_COEFFICIENT            UrgencyCoefficient = 1.0  // Task has tags
 	URGENCY_PROJECT_COEFFICIENT         UrgencyCoefficient = 1.0  // Task has project
 	URGENCY_BLOCKED_COEFFICIENT         UrgencyCoefficient = -5.0 // Task is blocked
-	URGENCY_WAITING_COEFFICIENT         UrgencyCoefficient = -3.0 // Task is waiting
 )
 
 const EPSILION = 0.000001
@@ -230,11 +226,6 @@ func (task *TaskDetailed) urgency() float64 {
 		task.urgencyBlocking() +
 		task.urgencyMarkedAsNext() +
 		task.urgencyPriority()
-
-	// TODO add these when we have them
-	// task.urgencyWaiting() +
-	// task.urgencyTags() +
-	// task.urgencyAnnotations()
 }
 
 func (task *TaskDetailed) urgencyProject() float64 {
