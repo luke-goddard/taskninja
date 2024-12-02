@@ -9,7 +9,6 @@ import (
 
 const M002_TaskTagsSchema = `
 CREATE TABLE IF NOT EXISTS taskTags (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	taskID INTEGER NOT NULL,
 	tagID INTEGER NOT NULL,
 	UNIQUE (taskID, tagID),
