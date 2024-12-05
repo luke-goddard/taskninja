@@ -159,6 +159,7 @@ func (task *Task) PrettyAge(duration time.Duration) string {
 	return strings.TrimSuffix(pretty, "0s")
 }
 
+// AgeTime returns the time since the task was created
 func (task *Task) AgeTime() time.Duration {
 	var createdAt, err = time.Parse(SQLITE_TIME_FORMAT, task.CreatedUtc)
 	if err != nil {
@@ -168,14 +169,17 @@ func (task *Task) AgeTime() time.Duration {
 	return time.Since(createdAt)
 }
 
+// AgeStr returns the pretty version of the time since the task was created
 func (task *Task) AgeStr() string {
 	return task.PrettyAge(task.AgeTime())
 }
 
+// IsStarted returns true if the task is in progress
 func (task *TaskDetailed) IsStarted() bool {
 	return task.Inprogress
 }
 
+// UrgencyStr returns the string version of the Urgency Float
 func (task *TaskDetailed) UrgencyStr() string {
 	var urgency = task.Urgency()
 	if urgency > 10.0 {
@@ -184,6 +188,7 @@ func (task *TaskDetailed) UrgencyStr() string {
 	return fmt.Sprintf("%.2f", task.Urgency())
 }
 
+// PrettyCumTime returns the pretty version of the CumulativeTime
 func (task *TaskDetailed) PrettyCumTime() string {
 	if !task.CumulativeTime.Valid {
 		return ""
@@ -196,6 +201,7 @@ func (task *TaskDetailed) PrettyCumTime() string {
 	return task.PrettyAge(duration)
 }
 
+// Urgency returns the urgency of the task based on the task's properties (will be cached)
 func (task *TaskDetailed) Urgency() float64 {
 	if task.urgencyComputed == 0.0 {
 		task.urgencyComputed = task.urgency()
@@ -203,6 +209,7 @@ func (task *TaskDetailed) Urgency() float64 {
 	return task.urgencyComputed
 }
 
+// UrgencyColourAnsiBackground returns the ANSI background colour for the task urgency
 func (task *TaskDetailed) UrgencyColourAnsiBackground() string {
 	var urgency = task.Urgency()
 	if urgency > 10.0 {
@@ -214,6 +221,7 @@ func (task *TaskDetailed) UrgencyColourAnsiBackground() string {
 	return "232" // BLACK
 }
 
+// UrgencyColourAnsiForeground returns the ANSI foreground colour for the task urgency
 func (task *TaskDetailed) UrgencyColourAnsiForeground() string {
 	return "255" // WHITE
 }
@@ -329,6 +337,7 @@ func (task *TaskDetailed) urgencyDue() float64 {
 	}
 }
 
+// CountTasks returns the total number of tasks in the database
 func (store *Store) CountTasks(ctx context.Context) (int64, error) {
 	var sql = `SELECT COUNT(*) FROM tasks`
 	var count int64
@@ -339,6 +348,8 @@ func (store *Store) CountTasks(ctx context.Context) (int64, error) {
 	}
 	return count, nil
 }
+
+// ListTasks returns a list of all tasks in the database
 func (store *Store) ListTasks(ctx context.Context) ([]TaskDetailed, error) {
 	var sql = `
 	SELECT
@@ -413,6 +424,7 @@ func (store *Store) ListTasks(ctx context.Context) ([]TaskDetailed, error) {
 	return tasks, nil
 }
 
+// DeleteTaskById deletes a task by its ID
 func (store *Store) DeleteTaskById(ctx context.Context, id int64) (bool, error) {
 	var err error
 	var res sql.Result
@@ -428,6 +440,7 @@ func (store *Store) DeleteTaskById(ctx context.Context, id int64) (bool, error) 
 	return rowsAffected > 0, nil
 }
 
+// CreateTask creates a new task in the database
 func (store *Store) CreateTask(ctx context.Context, task *Task) (*Task, error) {
 	var sql = `
 	INSERT INTO tasks
@@ -455,6 +468,7 @@ func (store *Store) CreateTask(ctx context.Context, task *Task) (*Task, error) {
 	return newTask, nil
 }
 
+// CompleteTaskById marks a task as completed by its ID
 func (store *Store) CompleteTaskById(taskId int64) (bool, error) {
 	var sql = `
 	UPDATE tasks
@@ -482,6 +496,7 @@ func (store *Store) CompleteTaskById(taskId int64) (bool, error) {
 	return affected > 0, nil
 }
 
+// IncreasePriority increases the priority of a task by its ID (if possible)
 func (store *Store) IncreasePriority(ctx context.Context, id int64) (bool, error) {
 	var sql = `
 	UPDATE tasks
@@ -506,6 +521,7 @@ func (store *Store) IncreasePriority(ctx context.Context, id int64) (bool, error
 	return affected == 1, err
 }
 
+// DecreasePriority decreases the priority of a task by its ID (if possible)
 func (store *Store) DecreasePriority(ctx context.Context, id int64) (bool, error) {
 	var sql = `
 	UPDATE tasks
@@ -530,6 +546,7 @@ func (store *Store) DecreasePriority(ctx context.Context, id int64) (bool, error
 	return affected == 1, err
 }
 
+// SetPriority sets the priority of a task by its ID
 func (store *Store) SetPriority(ctx context.Context, id int64, priority TaskPriority) (bool, error) {
 	var sql = `UPDATE tasks SET priority = ? WHERE id = ?`
 	var res, err = store.Con.ExecContext(ctx, sql, priority, id)
@@ -543,6 +560,7 @@ func (store *Store) SetPriority(ctx context.Context, id int64, priority TaskPrio
 	return affected == 1, err
 }
 
+// GetTaskByIdOrPanic returns a task by its ID or panics (ONLY FOR TESTING)
 func (store *Store) GetTaskByIdOrPanic(id int64) *Task {
 	var sql = `SELECT * FROM tasks WHERE id = ?`
 	var task = &Task{}
@@ -553,20 +571,29 @@ func (store *Store) GetTaskByIdOrPanic(id int64) *Task {
 	return task
 }
 
+// SetTaskStateToCompleted marks a task as completed by its ID
 func (store *Store) SetTaskStateToStarted(taskId int64) error {
 	return store.SetTaskState(taskId, TaskStateStarted)
 }
 
+// SetTaskStateToIncomplete marks a task as incomplete by its ID
 func (store *Store) SetTaskStateToIncomplete(taskId int64) error {
 	return store.SetTaskState(taskId, TaskStateIncomplete)
 }
 
+// SetTaskStateToCompleted marks a task as completed by its ID
+func (store *Store) SetTaskStateToCompleted(taskId int64) error {
+	return store.SetTaskState(taskId, TaskStateCompleted)
+}
+
+// SetTaskState sets the state of a task by its ID
 func (store *Store) SetTaskState(taskId int64, state TaskState) error {
 	var sql = `UPDATE tasks SET state = ? WHERE id = ?; `
 	_, err := store.Con.Exec(sql, state, taskId)
 	return err
 }
 
+// GetTaskById returns a task by its ID
 func (store *Store) GetTaskById(ctx context.Context, taskId int64) (*Task, error) {
 	var sql = `SELECT * FROM tasks WHERE id = ?`
 	var task = &Task{}
@@ -577,6 +604,7 @@ func (store *Store) GetTaskById(ctx context.Context, taskId int64) (*Task, error
 	return task, err
 }
 
+// TaskIdExistsAndNotCompleted returns true if a task exists and is not completed
 func (store *Store) TaskIdExistsAndNotCompleted(tx *sqlx.Tx, taskId int64) bool {
 	var sql = `SELECT EXISTS(
 	    SELECT 1
@@ -589,6 +617,7 @@ func (store *Store) TaskIdExistsAndNotCompleted(tx *sqlx.Tx, taskId int64) bool 
 	return err == nil
 }
 
+// FilterByTaskId returns a task by its ID
 func (store *Store) FilterByTaskId(taskId int64, tasks []TaskDetailed) *TaskDetailed {
 	for _, task := range tasks {
 		if task.ID == taskId {
@@ -598,6 +627,7 @@ func (store *Store) FilterByTaskId(taskId int64, tasks []TaskDetailed) *TaskDeta
 	return nil
 }
 
+// TaskToggleNext toggles the next flag of a task by its ID
 func (store *Store) TaskToggleNextTx(tx *sqlx.Tx, taskId int64) error {
 	var sql = `UPDATE tasks SET next = case when next = 0 then 1 else 0 end WHERE id = ?`
 	_, err := tx.Exec(sql, taskId)

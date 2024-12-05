@@ -18,10 +18,11 @@ PRAGMA user_version = 10;
 `
 
 type TaskDependency struct {
-	TaskID      int64 `db:"taskId"`
-	DependsOnID int64 `db:"dependsOnId"`
+	TaskID      int64 `db:"taskId"` // Unique identifier of the task
+	DependsOnID int64 `db:"dependsOnId"` // Unique identifier of the task that this task depends on
 }
 
+// TaskDependsOn creates a dependency between two tasks
 func (store *Store) TaskDependsOnTx(tx *sqlx.Tx, taskId int64, dependsOnId int64) error {
 	var _, err = tx.Exec(`INSERT INTO taskDependencies (taskId, dependsOnId) VALUES (?, ?)`, taskId, dependsOnId)
 	if err != nil {
@@ -30,12 +31,14 @@ func (store *Store) TaskDependsOnTx(tx *sqlx.Tx, taskId int64, dependsOnId int64
 	return nil
 }
 
+// GetDependenciesForTask returns all the dependencies for a task
 func (store *Store) GetDependenciesForTask(taskId int64) ([]TaskDependency, error) {
 	var deps []TaskDependency
 	err := store.Con.Select(&deps, `SELECT * FROM taskDependencies WHERE taskId = ?`, taskId)
 	return deps, err
 }
 
+// DeleteDependenciesForTask deletes all dependencies for a task
 func (store *Store) DeleteDependenciesForCompletedTask(completedTaskId int64) error {
 	_, err := store.Con.Exec(`DELETE FROM taskDependencies WHERE taskId = ? OR dependsOnId = ?`, completedTaskId, completedTaskId)
 	if err != nil {
