@@ -7,6 +7,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// Migrations contains all the migrations that need to be run.
+// Each migration is a SQL statement. The migrations are run in order.
 var Migrations = []string{
 	M000_TaskSchema,
 	M001_TagSchema,

@@ -16,11 +16,13 @@ CREATE TABLE IF NOT EXISTS projects (
 PRAGMA user_version = 6;
 `
 
+// A project may be assigned to a task, and that project may be multiple words.
 type Project struct {
-	ID    int64  `db:"id"`
-	Title string `db:"title"`
+	ID    int64  `db:"id"`    // Unique identifier
+	Title string `db:"title"` // Project title
 }
 
+// ProjectGetIDByNameOrCreate will get the project ID by name or create it if it does not exist.
 func (s *Store) ProjectGetIDByNameOrCreateTx(tx *sqlx.Tx, title string) (int64, error) {
 	var id int64
 	var err = tx.Get(&id, `SELECT id FROM projects WHERE title = ?`, title)
@@ -37,6 +39,7 @@ func (s *Store) ProjectGetIDByNameOrCreateTx(tx *sqlx.Tx, title string) (int64, 
 	return id, err
 }
 
+// ListProjects returns a list of all projects.
 func (s *Store) ListProjects() ([]Project, error) {
 	var projects []Project
 	err := s.Con.Select(&projects, `SELECT * FROM projects`)
