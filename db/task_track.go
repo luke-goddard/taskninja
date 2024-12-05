@@ -18,14 +18,16 @@ CREATE TABLE IF NOT EXISTS taskTime (
 PRAGMA user_version = 8;
 `
 
+// TaskTime represents the time tracking for a task
 type TaskTime struct {
-	Id           int64          `db:"id"`
-	TaskId       int64          `db:"taskId"`
-	StartTimeUtc string         `db:"startTimeUtc"`
-	EndTimeUtc   sql.NullString `db:"endTimeUtc"`
-	TotalTime    sql.NullString `db:"totalTime"`
+	Id           int64          `db:"id"`           // Unique identifier
+	TaskId       int64          `db:"taskId"`       // Unique identifier of the task
+	StartTimeUtc string         `db:"startTimeUtc"` // Start time in UTC
+	EndTimeUtc   sql.NullString `db:"endTimeUtc"`   // End time in UTC
+	TotalTime    sql.NullString `db:"totalTime"`    // Total time in seconds
 }
 
+// StartTrackingTaskTime will start tracking time for a task
 func (store *Store) StartTrackingTaskTime(ctx context.Context, taskId int64) error {
 	// 1. Set the task state to started
 	// 2. If there are no times for the task, insert a new time
@@ -56,6 +58,7 @@ func (store *Store) StartTrackingTaskTime(ctx context.Context, taskId int64) err
 	return tx.Commit()
 }
 
+// StopTrackingTaskTime will stop tracking time for a task
 func (store *Store) StopTrackingTaskTime(ctx context.Context, id int64) error {
 	var sql = `UPDATE tasks SET state = 0 WHERE id = ?;`
 	var tx, err = store.Con.Beginx()
@@ -85,6 +88,7 @@ func (store *Store) StopTrackingTaskTime(ctx context.Context, id int64) error {
 	return tx.Commit()
 }
 
+// GetTaskTimes will get all the times for a task
 func (store *Store) GetTaskTimes(ctx context.Context, taskId int64) ([]TaskTime, error) {
 	var sql = `SELECT * FROM taskTime WHERE taskId = ?;`
 	var rows, err = store.Con.QueryxContext(ctx, sql, taskId)
@@ -103,6 +107,7 @@ func (store *Store) GetTaskTimes(ctx context.Context, taskId int64) ([]TaskTime,
 	return taskTimes, nil
 }
 
+// GetCumTime will get the cumulative time for a task
 func (store *Store) GetCumTime(ctx context.Context, taskId int64) (int64, error) {
 	var sql = `
 	SELECT
