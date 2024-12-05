@@ -9,11 +9,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type SqlStatement string
-type SqlArgs []interface{}
+type SqlStatement string   // SqlStatement is a SQL statement.
+type SqlArgs []interface{} // SqlArgs is a list of arguments for a SQL statement.
 
+// TranspileError represents an error that occurred during transpilation.
 type TranspileError struct {
-	Message error
+	Message error // The error message
 	Node    Node
 }
 
@@ -21,20 +22,23 @@ type TranspilerContext struct {
 	isPriorityKey bool
 }
 
+// TranspileCallback is a function that is called after the transpiler has executed a SQL statement.
+// This is useful for executing additional SQL statements that are not part of the main transpilation process.
 type TranspileCallback func(tx *sqlx.Tx, taskId int64) error
 
 type Transpiler struct {
-	errors    []TranspileError
-	values    []interface{}
-	cols      []string
-	Selecter  *sqlbuilder.SelectBuilder
-	Inserter  *sqlbuilder.InsertBuilder
-	ctx       *TranspilerContext
-	tx        *sqlx.Tx
-	store     *db.Store
-	callbacks []TranspileCallback // When multiple transactions are needed
+	errors    []TranspileError          // A list of errors that occurred during transpilation
+	values    []interface{}             // A list of values that are used in the SQL statement
+	cols      []string                  // A list of columns that are used in the SQL statement
+	Selecter  *sqlbuilder.SelectBuilder // A select builder
+	Inserter  *sqlbuilder.InsertBuilder // An insert builder
+	ctx       *TranspilerContext        // The transpiler context, carries information between transpilation steps
+	tx        *sqlx.Tx                  // The SQL transaction
+	store     *db.Store                 // The database store
+	callbacks []TranspileCallback       // When multiple transactions are needed
 }
 
+// NewTranspiler creates a new transpiler with the given store.
 func NewTranspiler(store *db.Store) *Transpiler {
 	return &Transpiler{
 		errors:    make([]TranspileError, 0),
@@ -46,14 +50,17 @@ func NewTranspiler(store *db.Store) *Transpiler {
 	}
 }
 
+// AddValue adds a value to the transpilers SQL args.
 func (transpiler *Transpiler) AddValue(value interface{}) {
 	transpiler.values = append(transpiler.values, value)
 }
 
+// AddCol adds a column to the transpilers SQL statement.
 func (transpiler *Transpiler) AddCol(col string) {
 	transpiler.cols = append(transpiler.cols, col)
 }
 
+// AddError adds an error to the transpiler.
 func (transpiler *Transpiler) AddError(message error, node Node) {
 	transpiler.errors = append(transpiler.errors, TranspileError{
 		Message: message,
@@ -61,6 +68,7 @@ func (transpiler *Transpiler) AddError(message error, node Node) {
 	})
 }
 
+// Reset resets the transpiler to it's original state, ready for the next command.
 func (transpiler *Transpiler) Reset() *Transpiler {
 	transpiler.errors = make([]TranspileError, 0)
 	transpiler.values = make([]interface{}, 0)
@@ -87,6 +95,7 @@ func (transpiler *Transpiler) setContext(ctx TranspilerContext) {
 	transpiler.ctx = &ctx
 }
 
+// Transpile transpiles a command to a SQL statement.
 func (transpiler *Transpiler) Transpile(
 	command *Command,
 	tx *sqlx.Tx,

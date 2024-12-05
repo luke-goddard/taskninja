@@ -21,6 +21,8 @@ type Param struct {
 	NodePosition
 }
 
+// ParamDependency represents a dependency parameter in the AST.
+// Some command require dependencies like `task 1 depends 2`
 type ParamDependency struct {
 	TaskId      int64
 	DependsOnId int64
