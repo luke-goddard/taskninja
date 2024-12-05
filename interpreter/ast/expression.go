@@ -125,8 +125,8 @@ const (
 // Example (string): "buy dog"
 // Example (number): 5
 type Literal struct {
-	Value string
-	Kind  LiteralKind
+	Value string      // e.g "buy dog"
+	Kind  LiteralKind // e.g String/Number
 	NodePosition
 }
 
@@ -184,6 +184,7 @@ func (lit *Literal) EvalInsert(transpiler *Transpiler) interface{} {
 	return nil
 }
 
+// ToPriorityInt converts the literal to a priority integer.
 func (lit *Literal) ToPriorityInt() (db.TaskPriority, error) {
 	switch strings.ToLower(lit.Value) {
 	case "none", "n":
@@ -247,5 +248,5 @@ func (l *LogicalExpression) EvalSelect(builder *sqlbuilder.SelectBuilder, addErr
 }
 
 func (logical *LogicalExpression) EvalInsert(transpiler *Transpiler) interface{} {
-	panic("implement me")
+	panic("implement me") // TODO
 }
