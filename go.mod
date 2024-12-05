@@ -7,7 +7,7 @@ require (
 	github.com/charmbracelet/bubbletea v1.2.4
 	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/gdamore/tcell v1.4.0
-	github.com/huandu/go-sqlbuilder v1.33.0
+	github.com/huandu/go-sqlbuilder v1.33.1
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lithammer/fuzzysearch v1.1.8
 	github.com/mattn/go-sqlite3 v1.14.24
