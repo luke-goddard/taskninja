@@ -19,15 +19,16 @@ import (
 
 // This is going to be the main entry point for the application
 type Runner struct {
-	bus         *bus.Bus
-	service     *services.ServiceHandler
-	handler     *handler.EventHandler
-	args        string
-	config      *config.Config
-	interpreter *interpreter.Interpreter
-	store       *db.Store
+	bus         *bus.Bus // event bus
+	service     *services.ServiceHandler // service handler
+	handler     *handler.EventHandler // event handler
+	args        string // command line arguments
+	config      *config.Config // configuration
+	interpreter *interpreter.Interpreter // interpreter
+	store       *db.Store // database store
 }
 
+// NewRunner will create a new runner
 func NewRunner(args []string) *Runner {
 	return &Runner{
 		bus:  bus.NewBus(),
@@ -35,6 +36,7 @@ func NewRunner(args []string) *Runner {
 	}
 }
 
+// Run the application
 func (r *Runner) Run() {
 	assert.NotNil(r.bus, "Bus is nil")
 	assert.NotNil(r.args, "Args is nil")
