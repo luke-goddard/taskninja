@@ -42,6 +42,7 @@ type Node interface {
 	Transpile
 }
 
+// Transpile represents a node that can be transpiled to SQL.
 type Transpile interface {
 	EvalSelect(*sqlbuilder.SelectBuilder, AddError) interface{}
 	EvalInsert(*Transpiler) interface{}
