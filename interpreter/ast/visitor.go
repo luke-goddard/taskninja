@@ -3,9 +3,10 @@ package ast
 import "github.com/luke-goddard/taskninja/assert"
 
 type Visitor interface {
-	Visit(node Node) Visitor
+	Visit(node Node) Visitor // Visit returns the visitor to use for the children of the node.
 }
 
+// Walk traverses an AST in depth-first order: It starts by calling v.Visit(node); node must not be nil.
 func Walk(v Visitor, node Node) {
 	v.Visit(node)
 	switch n := node.(type) {
@@ -36,6 +37,7 @@ func Walk(v Visitor, node Node) {
 
 }
 
+// WalkList traverses a list of nodes in depth-first order: It starts by calling v.Visit(node) for each node in the list.
 func WalkList(v Visitor, nodes []Node) {
 	for _, node := range nodes {
 		Walk(v, node)
